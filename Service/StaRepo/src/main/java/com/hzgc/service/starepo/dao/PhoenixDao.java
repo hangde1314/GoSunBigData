@@ -497,7 +497,7 @@ public class PhoenixDao implements Serializable {
             log.warn("Start get object info, generate sql failed");
             return null;
         }
-        log.info("Start get object info, generate sql successfull");
+        log.info("Start get object info, generate sql successfully");
         log.info("Start get object info, SQL is : " + sqlAndArgs.getSql());
         log.info("Start get object info, SQL args is : " + sqlAndArgs.getArgs().toString());
         return jdbcTemplate.queryForRowSet(sqlAndArgs.getSql(), sqlAndArgs.getArgs().toArray());

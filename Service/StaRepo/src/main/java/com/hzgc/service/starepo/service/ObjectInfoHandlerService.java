@@ -83,21 +83,21 @@ public class ObjectInfoHandlerService {
      * 身份证唯一性判断
      *
      * @param objectInfo
-     * @return true:不存在,false:存在
+     * @return true:存在  false:不存在
      */
     public boolean isExists_idCode(ObjectInfoParam objectInfo) {
         if (!StringUtils.isBlank(objectInfo.getIdcard())) {
             List<String> idcards = phoenixDao.getAllObjectIdcard();
-            return !idcards.contains(objectInfo.getIdcard());
+            return idcards.contains(objectInfo.getIdcard());
         }
-        return true;
+        return false;
     }
 
     /**
      * 判断ObjectTypeKey是否存在
      *
      * @param objectInfo
-     * @return true:存在,false:不存在
+     * @return true:存在  false:不存在
      */
     public boolean isExists_objectTypeKey(ObjectInfoParam objectInfo) {
         List<String> objectTypeKeys = phoenixDao.getAllObjectTypeKeys();
@@ -550,7 +550,7 @@ public class ObjectInfoHandlerService {
                 // 布控时间
                 map.put("time", "时间");
                 if (null != personObject.getCreateTime()) {
-                    map.put("timeData", new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(personObject.getCreateTime()));
+                    map.put("timeData", personObject.getCreateTime());
                 } else {
                     map.put("timeData", "");
                 }

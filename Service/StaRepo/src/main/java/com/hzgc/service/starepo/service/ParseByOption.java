@@ -101,10 +101,13 @@ public class ParseByOption {
                 setValues.add(new String(featureString));
                 sql.append(") as sim from ")
                         .append(ObjectInfoTable.TABLE_NAME);
-                StringBuilder temp = sameWhereSql(param, setValues);
-                if (setValues.size() > 1) {
-                    sql.append(" where ").append(temp);
+                List<Object> whereParamList = new ArrayList<>();
+                String whereSql = sameWhereSql(param, whereParamList);
+                if (whereParamList.size() > 0) {
+                    sql.append(" where ").append(whereSql);
                 }
+                log.info("Where SQL :" + whereSql);
+                log.info("Where SQL param list :" + Arrays.toString(whereParamList.toArray()));
                 sql.append(")").append(" where sim >= ? ");
                 setValues.add(param.getSimilarity());
                 sql.append("order by ")
@@ -133,9 +136,14 @@ public class ParseByOption {
                             .append(", ?");
                     setValues.add(FaceFunction.floatArray2string(feature));
                     subSql.append(") as sim from ")
-                            .append(ObjectInfoTable.TABLE_NAME)
-                            .append(" where ")
-                            .append(sameWhereSql(param, setValues));
+                            .append(ObjectInfoTable.TABLE_NAME);
+                    List<Object> whereParamList = new ArrayList<>();
+                    String whereSql = sameWhereSql(param, whereParamList);
+                    if (whereParamList.size() > 0){
+                        subSql.append(" where ").append(whereSql);
+                    }
+                    log.info("Where SQL :" + whereSql);
+                    log.info("Where SQL param list :" + Arrays.toString(whereParamList.toArray()));
                     subSqls.add(subSql);
                 }
 
@@ -161,12 +169,25 @@ public class ParseByOption {
             sql.append(sameFieldNeedReturn())
                     .append(" from ")
                     .append(ObjectInfoTable.TABLE_NAME);
-            StringBuilder temp = sameWhereSql(param, setValues);
-            if (setValues.size() > 0) {
-                sql.append(" where ").append(temp);
+            List<Object> whereParamList = new ArrayList<>();
+            String whereSql = sameWhereSql(param, whereParamList);
+            log.info("Where SQL :" + whereSql);
+            log.info("Where SQL param list :" + Arrays.toString(whereParamList.toArray()));
+            if (whereParamList.size() > 0) {
+                sql.append(" where ").append(whereSql);
+            }
+            Integer followLevel = param.getFollowLevel();
+            boolean bb = false;
+            if (followLevel != 1  && followLevel != 2 ){
+                sql.append(" order by ").append(ObjectInfoTable.IMPORTANT).append(" desc");
+                bb = true;
             }
             if (params != null && params.size() > 1) {
-                sql.append(" order by ").append(sameSortSql(params, false));
+                if (bb){
+                    sql.append(sameSortSql(params, false));
+                }else {
+                    sql.append(" order by ").append(sameSortSql(params, false));
+                }
             }
         }
         // 进行分组
@@ -274,10 +295,10 @@ public class ParseByOption {
      * 封装共同的子where 查询
      *
      * @param param       传过来的搜索参数
-     * @param setArgsList 需要对sql 设置的值
+     * @param whereParamList 需要对sql设置的参数
      * @return 子where查询
      */
-    private StringBuilder sameWhereSql(GetObjectInfoParam param, List<Object> setArgsList) {
+    private String sameWhereSql(GetObjectInfoParam param, List<Object> whereParamList) {
         StringBuilder whereQuery = new StringBuilder();
         boolean isChanged = false;
 
@@ -286,6 +307,7 @@ public class ParseByOption {
         if (!StringUtils.isBlank(objectName)) {
             whereQuery.append(ObjectInfoTable.NAME)
                     .append(" like '%").append(objectName).append("%'");
+            whereParamList.add(objectName);
             isChanged = true;
         }
 
@@ -297,6 +319,7 @@ public class ParseByOption {
             }
             whereQuery.append(ObjectInfoTable.IDCARD)
                     .append(" like '%").append(idcard).append("%'");
+            whereParamList.add(idcard);
             isChanged = true;
         }
 
@@ -307,8 +330,8 @@ public class ParseByOption {
                 if (isChanged) {
                     whereQuery.append(" and ");
                 }
-                whereQuery.append(ObjectInfoTable.SEX).append(" = ?");
-                setArgsList.add(sex);
+                whereQuery.append(ObjectInfoTable.SEX).append(" = ").append(sex);
+                whereParamList.add(sex);
                 isChanged = true;
             }
         }
@@ -319,12 +342,12 @@ public class ParseByOption {
             if (pkeys.size() == 1) {
                 if (isChanged) {
                     whereQuery.append(" and ").append(ObjectInfoTable.PKEY)
-                            .append(" = ? ");
-                    setArgsList.add(pkeys.get(0));
+                            .append(" = '").append(pkeys.get(0)).append("'");
+                    whereParamList.add(pkeys.get(0));
                 } else {
                     whereQuery.append(ObjectInfoTable.PKEY)
-                            .append(" = ? ");
-                    setArgsList.add(pkeys.get(0));
+                            .append(" = '").append(pkeys.get(0)).append("'");
+                    whereParamList.add(pkeys.get(0));
                     isChanged = true;
                 }
             } else {
@@ -335,13 +358,13 @@ public class ParseByOption {
                 whereQuery.append(ObjectInfoTable.PKEY).append(" in (");
                 for (int i = 0; i < pkeys.size(); i++) {
                     if (count < pkeys.size() - 1) {
-                        whereQuery.append("?, ");
-                        setArgsList.add(pkeys.get(i));
+                        whereQuery.append("'").append(pkeys.get(i)).append("', ");
                         count++;
                     } else {
-                        whereQuery.append("?)");
-                        setArgsList.add(pkeys.get(i));
+                        whereQuery.append("'").append(pkeys.get(i)).append("')");
+
                     }
+                    whereParamList.add(pkeys.get(i));
                 }
                 isChanged = true;
             }
@@ -354,6 +377,7 @@ public class ParseByOption {
                 whereQuery.append(" and ");
             }
             whereQuery.append(ObjectInfoTable.CREATOR).append(" like '%").append(creator).append("%'");
+            whereParamList.add(creator);
             isChanged = true;
         }
 
@@ -364,6 +388,7 @@ public class ParseByOption {
                 whereQuery.append(" and ");
             }
             whereQuery.append(ObjectInfoTable.CPHONE).append(" like '%").append(creatorConractWay).append("%'");
+            whereParamList.add(creatorConractWay);
             isChanged = true;
         }
 
@@ -374,8 +399,8 @@ public class ParseByOption {
                 if (isChanged) {
                     whereQuery.append(" and ");
                 }
-                whereQuery.append(ObjectInfoTable.STATUS).append(" = ?");
-                setArgsList.add(status);
+                whereQuery.append(ObjectInfoTable.STATUS).append(" = ").append(status);
+                whereParamList.add(status);
                 isChanged = true;
             }
         }
@@ -387,15 +412,11 @@ public class ParseByOption {
                 if (isChanged) {
                     whereQuery.append(" and ");
                 }
-                whereQuery.append(ObjectInfoTable.IMPORTANT).append(" = ?");
-                setArgsList.add(followLevel);
-            } else {
-                whereQuery.append(" order by ").append(ObjectInfoTable.IMPORTANT).append(" desc");
+                whereQuery.append(ObjectInfoTable.IMPORTANT).append(" = ").append(followLevel);
+                whereParamList.add(followLevel);
             }
-        } else {
-            whereQuery.append(" order by ").append(ObjectInfoTable.IMPORTANT).append(" desc");
         }
-        return whereQuery;
+        return whereQuery.toString();
     }
 
     /**

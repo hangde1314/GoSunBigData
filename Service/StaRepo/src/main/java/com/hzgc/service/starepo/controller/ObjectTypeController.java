@@ -41,11 +41,17 @@ public class ObjectTypeController {
     public ResponseResult<Boolean> addObjectType(@RequestBody @ApiParam(value = "对象类型") ObjectTypeParam objectTypeParam) {
         if (objectTypeParam == null) {
             log.error("Start add object type, but param is null");
-            return ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT);
+            return ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT, "添加对象类型信息为空，请检查！");
         }
-        if (StringUtils.isBlank(objectTypeParam.getObjectTypeName())) {
+        String name = objectTypeParam.getObjectTypeName();
+        if (StringUtils.isBlank(name)) {
             log.error("Start add object type, but object type name is null");
-            return ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT);
+            return ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT,"添加对象类型名称为空，请检查！");
+        }
+        boolean isExists_objectTypeName = objectTypeService.isExists_objectTypeName(name);
+        if (isExists_objectTypeName){
+            log.error("Start add object type, but the object type name already exists");
+            return ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT,"添加对象类型名称已存在，请检查！");
         }
         log.info("Start add object type, param is:" + JSONUtil.toJson(objectTypeParam));
         boolean success = objectTypeService.addObjectType(objectTypeParam);
@@ -64,7 +70,7 @@ public class ObjectTypeController {
     public ResponseResult<Boolean> deleteObjectType(@RequestBody @ApiParam(value = "对象类型key列表") List<String> objectTypeKeyList) {
         if (!IsEmpty.listIsRight(objectTypeKeyList)) {
             log.error("Start delete object type list, but param is null");
-            return ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT);
+            return ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT, "删除列表为空，请检查!");
         }
         log.info("Start delete object type list, param is : " + objectTypeKeyList);
         boolean success = objectTypeService.deleteObjectType(objectTypeKeyList);
@@ -83,15 +89,25 @@ public class ObjectTypeController {
     public ResponseResult<Boolean> updateObjectType(@RequestBody @ApiParam(value = "对象类型") ObjectTypeParam objectTypeParam) {
         if (objectTypeParam == null) {
             log.error("Start update object type, but param is null");
-            return ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT);
+            return ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT, "修改对象类型信息为空，请检查！");
         }
-        if (StringUtils.isBlank(objectTypeParam.getObjectTypeKey())) {
+        String objectTypeKey = objectTypeParam.getObjectTypeKey();
+        if (StringUtils.isBlank(objectTypeKey)) {
             log.error("Start update object type, but object type key is null");
-            return ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT);
+            return ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT, "修改对象类型ID为空，请检查！");
         }
-        if (StringUtils.isBlank(objectTypeParam.getObjectTypeName())) {
+        String name = objectTypeParam.getObjectTypeName();
+        if (StringUtils.isBlank(name)) {
             log.error("Start update object type, but object type name is null");
-            return ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT);
+            return ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT, "修改对象类型名称为空，请检查！");
+        }
+        String name_DB = objectTypeService.getObjectTypeName(objectTypeKey);
+        if (!name.equals(name_DB)){
+            boolean isExists_objectTypeName = objectTypeService.isExists_objectTypeName(name);
+            if (isExists_objectTypeName){
+                log.error("Start update object type, but the object type name already exists");
+                return ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT,"修改对象类型名称已存在，请检查！");
+            }
         }
         log.info("Start update object type, param is : " + JSONUtil.toJson(objectTypeParam));
         boolean success = objectTypeService.updateObjectType(objectTypeParam);

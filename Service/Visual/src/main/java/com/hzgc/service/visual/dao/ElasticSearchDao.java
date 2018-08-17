@@ -25,21 +25,31 @@ public class ElasticSearchDao {
                             @Value("${es.cluster.port}") String esPort) {
         this.esClient = ElasticSearchHelper.getEsClient(clusterName, esHost, Integer.parseInt(esPort));
     }
-
-    public synchronized SearchResponse[] dynamicNumberService(List<String> ipcId) {
+    public synchronized SearchResponse[] dynamicNumberService(List<String> ipcIds) {
+        BoolQueryBuilder ipcIdBQ = QueryBuilders.boolQuery();
+        if (ipcIds != null && ipcIds.size() > 0) {
+            for (String ipcId : ipcIds) {
+                ipcIdBQ.should(QueryBuilders.matchPhraseQuery(DynamicTable.IPCID, ipcId).analyzer("standard"));
+            }
+        }
         String index = DynamicTable.DYNAMIC_INDEX;
         String type = DynamicTable.PERSON_INDEX_TYPE;
         SearchResponse[] responsesArray = new SearchResponse[2];
         // 统计所有抓拍总数
         SearchResponse responseV1 = esClient.prepareSearch(index).setTypes(type)
-                .setQuery(QueryBuilders.matchAllQuery()).setSize(1).get();
+                .setQuery(QueryBuilders.boolQuery()
+                        .must(ipcIdBQ))
+                .setSize(1)
+                .get();
 
         // 查询今天抓拍的数量
         SimpleDateFormat format = new SimpleDateFormat(EsSearchParam.TIMEFORMAT_YMDHMS);
         String endTime = format.format(System.currentTimeMillis());
-        SearchResponse responseV2 = esClient.prepareSearch(index).setQuery(QueryBuilders
-                .matchPhraseQuery(DynamicTable.DATE,
-                        endTime.substring(0, endTime.indexOf(" "))))
+        SearchResponse responseV2 = esClient.prepareSearch(index)
+                .setQuery(QueryBuilders.boolQuery()
+                        .must(ipcIdBQ)
+                        .must(QueryBuilders.matchPhraseQuery(
+                                DynamicTable.DATE, endTime.substring(0, endTime.indexOf(" ")))))
                 .setSize(1)
                 .get();
         responsesArray[0] = responseV1;

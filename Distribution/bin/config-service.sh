@@ -133,6 +133,12 @@ function distribute_service()
     sed -i "s#^kafka.bootstrap.servers=.*#kafka.bootstrap.servers=${kafkapro}#g" ${STAREPO_PRO_FILE}
 	sed -i "s#^kafka.bootstrap.servers=.*#kafka.bootstrap.servers=${kafka_arr[0]:9092}#g" ${STAREPO_START_FILE}
     echo "静态库application-pro文件配置完成......"
+	
+	
+	 #####################KAFKA_HOST#########################
+    #替换模块启动脚本中KAFKA_HOST：key=value(替换key字段的值value)
+    sed -i "s#^KAFKA_HOST=.*#KAFKA_HOST=${kafkapro}#g" ${STAREPO_START_FILE}
+    echo "start-starepo.sh脚本配置kafka完成......"
 
     #配置es.hosts:
     #从project-conf.properties中读取es所需配置IP

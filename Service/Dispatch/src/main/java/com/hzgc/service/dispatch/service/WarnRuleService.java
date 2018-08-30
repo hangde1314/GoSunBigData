@@ -87,7 +87,7 @@ public class WarnRuleService {
                     //数据库中的ipcid
                     String ipcId = device.getIpcId();
                     //查看是否存在这个设备,不存在就删除
-                    if (!mapDTO.containsKey(dataId)){
+                    if (!(mapDTO.get(dataId).getSerial().length() > 0) && !mapDTO.containsKey(dataId)){
                         delIpcs.add(ipcId);
                         iterator.remove();
                         log.info("Device is deleted , device id is : " + dataId);
@@ -96,15 +96,18 @@ public class WarnRuleService {
                         DeviceDTO deviceDTO = mapDTO.get(dataId);
                         //最新的ipcid
                         String serial = deviceDTO.getSerial();
+                        log.info("New serial is " + serial);
                        //查看设备ipcid是否更改,如果更改了就删除原来的ipcid
-                        if (null != serial && !serial.equals(ipcId)){
+                        if (null != serial && serial.length() <= 0 || !serial.equals(ipcId)){
                             log.info("IpcId happen change , changed ipcid is : " + ipcId);
-                            ipcids.add(serial);
+                            if (serial.length() > 0){
+                                ipcids.add(serial);
+                                //设置最新的ipcid
+                                device.setIpcId(serial);
+                            }
                             delIpcs.add(ipcId);
-                            //设置最新的ipcid
-                            device.setIpcId(serial);
                         }
-                        if (null == serial){
+                        if (null == serial || serial.length() <= 0){
                             iterator.remove();
                         }
                     }
@@ -129,7 +132,7 @@ public class WarnRuleService {
                         String dataid = device.getId();
                         if (s.equals(dataid)){
                             device.setName(name);
-                            log.info("Now acquire device name");
+                            log.info("Now acquire device name" + name);
                         }
                     }
                 }

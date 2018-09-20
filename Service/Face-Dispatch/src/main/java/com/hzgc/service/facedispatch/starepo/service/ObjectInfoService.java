@@ -1,7 +1,7 @@
 package com.hzgc.service.facedispatch.starepo.service;
 
 import com.hzgc.common.util.json.JacksonUtil;
-import com.hzgc.jniface.FaceJNI;
+import com.hzgc.jniface.FaceFunction;
 import com.hzgc.jniface.PictureData;
 import com.hzgc.service.facedispatch.starepo.dao.ObjectInfoMapper;
 import com.hzgc.service.facedispatch.starepo.dao.ObjectTypeMapper;
@@ -102,10 +102,10 @@ public class ObjectInfoService {
      * @return
      */
     public Integer addObjectInfo(ObjectInfo objectInfo) {
-        Integer i = objectInfoMapper.addObjectSelective(objectInfo);
+        int i = objectInfoMapper.addObjectSelective(objectInfo);
         //向告警中同步数据
         if (i == SUCCESS) {
-            float[] feature = FaceJNI.string2floatArray(objectInfo.getFeature());
+            float[] feature = FaceFunction.base64Str2floatFeature(objectInfo.getFeature());
             ObjectFeature objectFeature = new ObjectFeature();
             objectFeature.setId(objectInfo.getId());
             objectFeature.setTypeId(objectInfo.getTypeid());
@@ -114,7 +114,7 @@ public class ObjectInfoService {
             object.setFeature(feature);
             object.setPkey(objectInfo.getTypeid());
             object.setRowkey(objectInfo.getId());
-            if (feature != null && feature.length > 0) {
+            if (feature.length > 0) {
                 boolean boo = memoryCache.writeMemory(objectFeature);
                 if (boo) {
                     starepoKafkaProducer.sendKafkaMessage(
@@ -166,13 +166,13 @@ public class ObjectInfoService {
      * @return
      */
     public Integer updateObjectInfo(ObjectInfo objectInfo) {
-        Integer i = objectInfoMapper.updateObjectSelective(objectInfo);
+        int i = objectInfoMapper.updateObjectSelective(objectInfo);
         if (i == SUCCESS) {
-            float[] feature = FaceJNI.string2floatArray(objectInfo.getFeature());
+            float[] feature = FaceFunction.base64Str2floatFeature(objectInfo.getFeature());
             StarepoSendKafkaObject object = new StarepoSendKafkaObject();
             object.setPkey(objectInfo.getTypeid());
             object.setRowkey(objectInfo.getId());
-            if (feature != null && feature.length > 0) {
+            if (feature.length > 0) {
                 ObjectFeature objectFeature = new ObjectFeature();
                 objectFeature.setId(objectInfo.getId());
                 objectFeature.setTypeId(objectInfo.getTypeid());

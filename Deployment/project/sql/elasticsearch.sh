@@ -231,16 +231,16 @@ curl -XPUT 's100:9200/dynamiccar?pretty' -H 'Content-Type: application/json' -d'
          				"type": "date",
                         "format": "yyyy-MM-dd HH:mm:ss"
          			},
-         			"surl": {
+         			"sftpurl": {
          				"type": "keyword"
          			},
-         			"burl": {
+         			"sftpurl": {
          				"type": "keyword"
          			},
-         			"srelativepath": {
+         			"sabsolutepath": {
          				"type": "keyword"
          			},
-         			"brelativepath": {
+         			"babsolutepath": {
          				"type": "keyword"
          			},
          			"hostname": {

@@ -1,6 +1,6 @@
 package com.hzgc.service.facedispatch.starepo.service;
 
-import com.hzgc.jniface.FaceJNI;
+import com.hzgc.jniface.FaceFunction;
 import com.hzgc.service.facedispatch.starepo.dao.ObjectInfoMapper;
 import com.hzgc.service.facedispatch.starepo.model.ObjectFeature;
 import com.hzgc.service.facedispatch.starepo.model.ObjectInfo;
@@ -36,8 +36,8 @@ public class FaceFeatureMemoryCache {
             ObjectFeature feature = new ObjectFeature();
             feature.setId(info.getId());
             feature.setTypeId(info.getTypeid());
-            feature.setFeature(FaceJNI.string2floatArray(info.getFeature()));
-            feature.setBitfea(FaceJNI.string2floatArray(info.getBitfea()));
+            feature.setFeature(FaceFunction.base64Str2floatFeature(info.getFeature()));
+            feature.setBitfea(FaceFunction.base64Str2floatFeature(info.getBitfea()));
             ConcurrentHashMap<String, ObjectFeature> typeMap = memoryCache.get(info.getTypeid());
             if (typeMap == null) {
                 typeMap = new ConcurrentHashMap<>();

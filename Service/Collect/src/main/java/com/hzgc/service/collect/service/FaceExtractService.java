@@ -2,6 +2,7 @@ package com.hzgc.service.collect.service;
 
 import com.hzgc.common.util.basic.UuidUtil;
 import com.hzgc.jniface.FaceAttribute;
+import com.hzgc.jniface.FaceFunction;
 import com.hzgc.jniface.FaceJNI;
 import com.hzgc.jniface.PictureData;
 import com.hzgc.service.collect.util.FtpUtils;
@@ -37,7 +38,7 @@ public class FaceExtractService {
         PictureData pictureData = new PictureData();
         pictureData.setImageID(UuidUtil.getUuid());
         pictureData.setImageData(imageBytes);
-        FaceAttribute faceAttribute = FaceJNI.featureExtract(imageBytes);
+        FaceAttribute faceAttribute = FaceFunction.featureExtract(imageBytes);
         if (faceAttribute != null) {
             log.info("Face extract successful, image contains feature");
             pictureData.setFeature(faceAttribute);

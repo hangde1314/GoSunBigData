@@ -30,11 +30,10 @@ public class DaHuaParser_HFW5238M extends AbstractParser {
         String minute = path.split("/")[7];
         String second = path.split("/")[8].substring(0, 2);
 
-        StringBuilder time = new StringBuilder();
-        time = time.append(year).append("-").append(month).append("-").append(day).
-                append(" ").append(hour).append(":").append(minute).append(":").append(second);
         message.setIpcid(ipcID);
-        message.setTimeStamp(time.toString());
+        String time = year + "-" + month + "-" + day +
+                " " + hour + ":" + minute + ":" + second;
+        message.setTimeStamp(time);
         return message;
     }
 

@@ -2,10 +2,7 @@ package com.hzgc.cluster.peoman.worker.service;
 
 import com.hzgc.cluster.peoman.worker.dao.PictureMapper;
 import com.hzgc.cluster.peoman.worker.model.Picture;
-import com.hzgc.jniface.CompareResult;
-import com.hzgc.jniface.FaceAttribute;
-import com.hzgc.jniface.FaceFeatureInfo;
-import com.hzgc.jniface.FaceJNI;
+import com.hzgc.jniface.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -91,9 +88,9 @@ public class MemeoryCache {
                 Picture picture = pictureMapper.selectByPictureId(comparePicture.getId());
                 String floatFeatureStr = picture.getFeature();
                 if (floatFeatureStr != null && !"".equals(floatFeatureStr)) {
-                    float[] floatFeature = FaceJNI.string2floatArray(floatFeatureStr);
+                    float[] floatFeature = FaceFunction.base64Str2floatFeature(floatFeatureStr);
                     if (floatFeature.length == 512 && faceAttribute.getFeature().length == 512) {
-                        float sim = FaceJNI.featureCompare(floatFeature, faceAttribute.getFeature());
+                        float sim = FaceFunction.featureCompare(floatFeature, faceAttribute.getFeature());
                         if (sim >= this.floatThreshold) {
                             return comparePicture;
                         } else {

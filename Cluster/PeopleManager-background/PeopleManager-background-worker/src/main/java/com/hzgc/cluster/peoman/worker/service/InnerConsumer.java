@@ -2,6 +2,7 @@ package com.hzgc.cluster.peoman.worker.service;
 
 import com.hzgc.common.service.peoman.SyncPeopleManager;
 import com.hzgc.common.util.json.JacksonUtil;
+import com.hzgc.jniface.FaceFunction;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -11,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
-import sun.misc.BASE64Decoder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -78,6 +78,7 @@ public class InnerConsumer implements Runnable {
 
     /**
      * 添加人员
+     *
      * @param managerList 消息对象
      */
     private void addPerson(List<SyncPeopleManager> managerList) {
@@ -85,14 +86,9 @@ public class InnerConsumer implements Runnable {
         for (SyncPeopleManager message : managerList) {
             List<ComparePicture> comparePictureList = memeoryCache.getPeople(message.getPersonid());
             if (comparePictureList != null) {
-                BASE64Decoder base64Decoder = new BASE64Decoder();
                 ComparePicture comparePicture = new ComparePicture();
                 comparePicture.setPeopleId(message.getPersonid());
-                try {
-                    comparePicture.setBitFeature(base64Decoder.decodeBuffer(message.getBitFeature()));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                comparePicture.setBitFeature(FaceFunction.base64Str2BitFeature(message.getBitFeature()));
                 comparePicture.setId(message.getPictureId());
                 newComparePicture.add(comparePicture);
             }

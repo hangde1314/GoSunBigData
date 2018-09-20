@@ -160,7 +160,8 @@ public class STOR extends AbstractCommand {
                                 .setsIpcFtpUrl(parser.getFtpUrl_ip(fileName))
                                 .setbAbsolutePath(file.getFileAbsolutePa())
                                 .setHostname(CollectProperties.getHostname())
-                                .setParser(parser);
+                                .setParser(parser)
+                                .setbRelativePath(fileName);
                         LOG.info("Event = " + JacksonUtil.toJson(event));
                         context.getScheduler().putData(event);
                     }

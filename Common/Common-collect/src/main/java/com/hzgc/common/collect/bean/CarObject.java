@@ -12,7 +12,12 @@ public class CarObject implements Serializable {
     private String bFtpUrl;                // 大图ftp路径（带hostname的ftpurl）
     private String sAbsolutePath;        // 小图相对路径（不带ftp根跟路径）
     private String bAbsolutePath;    // 大图相对路径（不带ftp根跟路径）
+    private String sRelativePath;       //小图存储绝对路径(不带ftp根目录)
+    private String bRelativePath;       //大图存储绝对路径(不带ftp根目录)
     private String hostname;            // 图片保存主机:hostname
+    private String feature;             //float特征值
+    private String bitfeature;          //bit特征值
+    private String ip;
 
     public static CarObject builder() {
         return new CarObject();
@@ -87,6 +92,49 @@ public class CarObject implements Serializable {
 
     public CarObject setbAbsolutePath(String bAbsolutePath) {
         this.bAbsolutePath = bAbsolutePath;
+        return this;
+    }
+
+    public String getFeature() {
+        return feature;
+    }
+
+    public void setFeature(String feature) {
+        this.feature = feature;
+    }
+
+    public String getBitfeature() {
+        return bitfeature;
+    }
+
+    public void setBitfeature(String bitfeature) {
+        this.bitfeature = bitfeature;
+    }
+
+    public CarObject setIp(String ip) {
+        this.ip = ip;
+        return this;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public String getsRelativePath() {
+        return sRelativePath;
+    }
+
+    public CarObject setsRelativePath(String sRelativePath) {
+        this.sRelativePath = sRelativePath;
+        return this;
+    }
+
+    public String getbRelativePath() {
+        return bRelativePath;
+    }
+
+    public CarObject setbRelativePath(String bRelativePath) {
+        this.bRelativePath = bRelativePath;
         return this;
     }
 }

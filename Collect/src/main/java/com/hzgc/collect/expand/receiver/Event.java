@@ -10,6 +10,8 @@ public class Event {
     private String sIpcFtpUrl;   //带ip的小图ftpUrl)
     private String bAbsolutePath;     // 大图存储绝对路径(带ftp根目录)
     private String sAbsolutePath;     // 小图存储绝对路径(带ftp根目录)
+    private String sRelativePath;       //小图存储绝对路径(不带ftp根目录)
+    private String bRelativePath;       //大图存储绝对路径(不带ftp根目录)
     private String hostname;             // 图片保存主机:hostname
     private Parser parser;              //对应设备解析器
 
@@ -95,6 +97,24 @@ public class Event {
 
     public Event setsIpcFtpUrl(String sIpcFtpUrl) {
         this.sIpcFtpUrl = sIpcFtpUrl;
+        return this;
+    }
+
+    public String getsRelativePath() {
+        return sRelativePath;
+    }
+
+    public Event setsRelativePath(String sRelativePath) {
+        this.sRelativePath = sRelativePath;
+        return this;
+    }
+
+    public String getbRelativePath() {
+        return bRelativePath;
+    }
+
+    public Event setbRelativePath(String bRelativePath) {
+        this.bRelativePath = bRelativePath;
         return this;
     }
 }

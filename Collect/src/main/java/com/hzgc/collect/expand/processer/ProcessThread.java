@@ -54,8 +54,8 @@ public class ProcessThread implements Runnable {
                 BufferedImage image = ImageIO.read(new ByteArrayInputStream(bytes));
                 //取消分辨率判断
                 //if (image.getWidth() * image.getHeight() < 1920 * 1080) {
-                    //LOG.error("Camera error, This is a small picture, fileName: " + event.getbAbsolutePath());
-                    //continue;
+                //LOG.error("Camera error, This is a small picture, fileName: " + event.getbAbsolutePath());
+                //continue;
                 //}
                 List<String> ftpTypes = Arrays.asList(CollectProperties.getFtpType().split(","));
                 if (ftpTypes.contains("face")) {
@@ -81,7 +81,9 @@ public class ProcessThread implements Runnable {
                             boolean boo = ImageUtil.save(smallImagePath, smallImage.getPictureStream());
                             if (boo) {
                                 String smallFtpUrlPath = parser.ftpUrl_b2s(event.getbFtpUrl(), FACE, index);
-                                event.setsAbsolutePath(smallImagePath).setsFtpUrl(smallFtpUrlPath);
+                                event.setsAbsolutePath(smallImagePath)
+                                        .setsFtpUrl(smallFtpUrlPath)
+                                        .setsRelativePath(parser.ftpUrl_b2s(event.getbRelativePath(), FACE, index));
                                 this.sendKafka(event, smallImage.getFaceAttribute());
                                 this.sendRocketMQ(event, CollectProperties.getRocketmqFaceTopic());
                             }
@@ -112,7 +114,9 @@ public class ProcessThread implements Runnable {
                         boolean boo = ImageUtil.save(smallImagePath, person.getCar_data());
                         if (boo) {
                             String smallFtpUrlPath = parser.ftpUrl_b2s(event.getbFtpUrl(), PERSON, index);
-                            event.setsAbsolutePath(smallImagePath).setsFtpUrl(smallFtpUrlPath);
+                            event.setsAbsolutePath(smallImagePath)
+                                    .setsFtpUrl(smallFtpUrlPath)
+                                    .setsRelativePath(parser.path_b2s(event.getbRelativePath(), PERSON, index));
                             this.sendKafka(event, person);
                             this.sendRocketMQ(event, CollectProperties.getRocketmqPersonTopic());
                         }
@@ -129,8 +133,10 @@ public class ProcessThread implements Runnable {
                         String smallImagePath = parser.path_b2s(event.getbAbsolutePath(), CAR, index);
                         boolean boo = ImageUtil.save(smallImagePath, vehicle.getVehicle_data());
                         if (boo) {
-                            String smallFtpUrlPath = parser.ftpUrl_b2s(event.getbFtpUrl(), PERSON, index);
-                            event.setbAbsolutePath(smallImagePath).setsFtpUrl(smallFtpUrlPath);
+                            String smallFtpUrlPath = parser.ftpUrl_b2s(event.getbFtpUrl(), CAR, index);
+                            event.setbAbsolutePath(smallImagePath)
+                                    .setsFtpUrl(smallFtpUrlPath)
+                                    .setsRelativePath(parser.path_b2s(event.getbRelativePath(), CAR, index));
                             this.sendKafka(event, vehicle);
                             this.sendRocketMQ(event, CollectProperties.getRocketmqCarTopic());
                         }
@@ -154,7 +160,10 @@ public class ProcessThread implements Runnable {
                 .setbAbsolutePath(event.getbAbsolutePath())
                 .setsAbsolutePath(event.getsAbsolutePath())
                 .setHostname(event.getHostname())
-                .setId(faceId);
+                .setId(faceId)
+                .setIp(CollectProperties.getFtpIp())
+                .setsRelativePath(event.getsRelativePath())
+                .setbRelativePath(event.getbRelativePath());
         KafkaProducer.getInstance().sendKafkaMessage(
                 CollectProperties.getKafkaFaceObjectTopic(),
                 faceId,
@@ -173,7 +182,11 @@ public class ProcessThread implements Runnable {
                 .setbAbsolutePath(event.getbAbsolutePath())
                 .setsAbsolutePath(event.getsAbsolutePath())
                 .setbFtpUrl(event.getbFtpUrl())
-                .setsFtpUrl(event.getsFtpUrl());
+                .setsFtpUrl(event.getsFtpUrl())
+                .setIp(CollectProperties.getFtpIp())
+                .setsRelativePath(event.getsRelativePath())
+                .setbRelativePath(event.getbRelativePath());
+
         KafkaProducer.getInstance().sendKafkaMessage(
                 CollectProperties.getKafkaPersonObjectTopic(),
                 pesonId,
@@ -192,7 +205,10 @@ public class ProcessThread implements Runnable {
                 .setbAbsolutePath(event.getbAbsolutePath())
                 .setsAbsolutePath(event.getsAbsolutePath())
                 .setbFtpUrl(event.getbFtpUrl())
-                .setsFtpUrl(event.getsFtpUrl());
+                .setsFtpUrl(event.getsFtpUrl())
+                .setIp(CollectProperties.getFtpIp())
+                .setsRelativePath(event.getsRelativePath())
+                .setbRelativePath(event.getbRelativePath());
         KafkaProducer.getInstance().sendKafkaMessage(
                 CollectProperties.getKafkaCarObjectTopic(),
                 carId,

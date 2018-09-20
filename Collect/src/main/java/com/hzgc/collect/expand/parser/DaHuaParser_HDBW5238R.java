@@ -31,11 +31,10 @@ public class DaHuaParser_HDBW5238R extends AbstractParser {
         String minute = timeStr.substring(2, 4);
         String second = timeStr.substring(4, 6);
 
-        StringBuilder time = new StringBuilder();
-        time = time.append(year).append("-").append(month).append("-").append(day).
-                append(" ").append(hour).append(":").append(minute).append(":").append(second);
         message.setIpcid(ipcID);
-        message.setTimeStamp(time.toString());
+        String time = year + "-" + month + "-" + day +
+                " " + hour + ":" + minute + ":" + second;
+        message.setTimeStamp(time);
         return message;
     }
 
@@ -49,7 +48,7 @@ public class DaHuaParser_HDBW5238R extends AbstractParser {
     public String surlToBurl(String surl) {
         return surl.substring(0, surl.lastIndexOf("[") + 1)
                 + 0
-                + surl.substring(surl.lastIndexOf("[") + 2, surl.length());
+                + surl.substring(surl.lastIndexOf("[") + 2);
     }
 
     @Override
@@ -57,7 +56,7 @@ public class DaHuaParser_HDBW5238R extends AbstractParser {
         return burl.substring(0, burl.lastIndexOf("[") + 1)
                 + type
                 + index
-                + burl.substring(burl.lastIndexOf("[") + 2, burl.length());
+                + burl.substring(burl.lastIndexOf("[") + 2);
     }
 
     @Override
@@ -65,6 +64,6 @@ public class DaHuaParser_HDBW5238R extends AbstractParser {
         return burl.substring(0, burl.lastIndexOf("[") + 1)
                 + type
                 + index
-                + burl.substring(burl.lastIndexOf("[") + 2, burl.length());
+                + burl.substring(burl.lastIndexOf("[") + 2);
     }
 }

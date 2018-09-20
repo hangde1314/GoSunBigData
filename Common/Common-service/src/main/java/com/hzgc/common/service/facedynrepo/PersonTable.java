@@ -22,6 +22,12 @@ public class PersonTable implements Serializable {
     public static final String IPCID = "ipcid";
     //时间戳 数据格式 xxxx-xx-xx xx:xx:xx(年-月-日 时:分:秒)
     public static final String TIMESTAMP = "timestamp";
+    //主机名称hostname
+    public static final String HOSTNAME = "hostname";
+    //小图本地绝对路径
+    public static final String SABSOLUTEPATH = "sabsolutepath";
+    //大图本地绝对路径
+    public static final String BABSOLUTEPATH = "babsolutepath";
     //行人属性：年龄
     public static final String AGE = "age";
     //行人属性：怀抱婴儿
@@ -54,11 +60,5 @@ public class PersonTable implements Serializable {
     public static final String UPPERTYPE = "uppertype";
     //行人属性：车辆类型
     public static final String CARTYPE = "cartype";
-
-    public static final String HOSTNAME = "hostname";
-
-    public static final String SABSOLUTEPATH = "sabsolutepath";
-
-    public static final String BABSOLUTEPATH = "babsolutepath";
 
 }

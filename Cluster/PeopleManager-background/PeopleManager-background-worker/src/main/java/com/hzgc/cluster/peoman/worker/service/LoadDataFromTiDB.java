@@ -3,10 +3,10 @@ package com.hzgc.cluster.peoman.worker.service;
 import com.google.common.base.Stopwatch;
 import com.hzgc.cluster.peoman.worker.dao.PictureMapper;
 import com.hzgc.cluster.peoman.worker.model.Picture;
+import com.hzgc.jniface.FaceFunction;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import sun.misc.BASE64Decoder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,7 +34,6 @@ class LoadDataFromTiDB {
     }
 
     private void cacheToMemeory(List<Picture> pictures) {
-        BASE64Decoder base64Decoder = new BASE64Decoder();
         List<ComparePicture> comparePictureList = new ArrayList<>();
         for (Picture picture : pictures) {
             if (picture.getBitFeature() != null &&
@@ -42,11 +41,7 @@ class LoadDataFromTiDB {
                     picture.getPeopleId() != null) {
                 ComparePicture comparePicture = new ComparePicture();
                 comparePicture.setId(picture.getId());
-                try {
-                    comparePicture.setBitFeature(base64Decoder.decodeBuffer(picture.getBitFeature()));
-                } catch (IOException e) {
-                    log.error(e.getMessage());
-                }
+                comparePicture.setBitFeature(FaceFunction.base64Str2BitFeature(picture.getBitFeature()));
                 comparePicture.setPeopleId(picture.getPeopleId());
                 comparePictureList.add(comparePicture);
             }

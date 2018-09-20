@@ -1,6 +1,6 @@
 package com.hzgc.compare.worker.compare;
 
-import com.hzgc.compare.FaceObject;
+import com.hzgc.common.collect.bean.FaceObject;
 import com.hzgc.compare.Feature;
 import com.hzgc.compare.SearchResult;
 import javafx.util.Pair;

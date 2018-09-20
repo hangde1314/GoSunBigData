@@ -21,11 +21,10 @@ import java.io.IOException;
  */
 public class Worker {
     private static final Logger logger = LoggerFactory.getLogger(Worker.class);
-    private Config conf;
     private Comsumer comsumer;
     private MemoryManager memoryManager;
     private FileManager fileManager;
-    private HBaseClient hBaseClient;
+//    private HBaseClient hBaseClient;
 
 
     public void init(String workId, String port){
@@ -43,7 +42,7 @@ public class Worker {
         } else if(Config.SAVE_TO_HDFS == saveParam){
             fileManager = new HDFSFileManager();
         }
-        hBaseClient = new HBaseClient();
+//        hBaseClient = new HBaseClient();
         try {
             logger.info("Load data from file System.");
             if(Config.SAVE_TO_LOCAL == saveParam){
@@ -71,7 +70,7 @@ public class Worker {
 //        fileManager.checkFile();
         fileManager.checkTaskTodo();
 //        fileManager.checkFile();
-        hBaseClient.timeToWrite();
+//        hBaseClient.timeToWrite();
         Thread thread = new Thread(new RPCRegistry());
         thread.start();
         FaceJNI.init();

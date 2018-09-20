@@ -1,12 +1,12 @@
 package com.hzgc.compare.worker.compare.task;
 
+import com.hzgc.common.collect.bean.FaceObject;
 import com.hzgc.compare.CompareParam;
-import com.hzgc.compare.FaceObject;
 import com.hzgc.compare.Feature;
 import com.hzgc.compare.SearchResult;
 import com.hzgc.compare.worker.compare.Comparators;
 import com.hzgc.compare.worker.compare.ComparatorsImpl;
-import com.hzgc.compare.worker.persistence.HBaseClient;
+import com.hzgc.compare.worker.persistence.ElasticSearchClient;
 import javafx.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +48,8 @@ public class CompareNotSamePerson implements Runnable {
         if (resultCount <= 0 || resultCount > 50){
             resultCount = resultDefaultCount;
         }
-        HBaseClient client = new HBaseClient();
+//        HBaseClient client = new HBaseClient();
+        ElasticSearchClient client = new ElasticSearchClient();
         // 根据条件过滤
         Comparators comparators = new ComparatorsImpl();
         logger.info("To filter the records from memory.");
@@ -56,10 +57,11 @@ public class CompareNotSamePerson implements Runnable {
         if(dataFilterd.size() > hbaseReacMax){
             // 若过滤结果太大，则需要第一次对比
             logger.info("The result of filter is too bigger , to compare it first.");
-            List<String> Rowkeys = comparators.compareFirstNotSamePerson(features, hbaseReacMax, dataFilterd);
+            List<String> ids = comparators.compareFirstNotSamePerson(features, hbaseReacMax, dataFilterd);
             //根据对比结果从HBase读取数据
-            logger.info("Read records from HBase with result of first compared.");
-            List<FaceObject> objs = client.readFromHBase(Rowkeys);
+            logger.info("Read records from ES  with result of first compared.");
+//            List<FaceObject> objs = client.readFromHBase(Rowkeys);
+            List<FaceObject> objs = client.readFromEs(ids);
             logger.info("Compare records second.");
             Map<String, SearchResult> resultTemp = comparators.compareSecondNotSamePerson(features, sim, objs, param.getSort());
             logger.info("Take the top " + resultCount);
@@ -72,7 +74,8 @@ public class CompareNotSamePerson implements Runnable {
         } else {
             //若过滤结果比较小，则直接进行第二次对比
             logger.info("Read records from HBase with result of filter.");
-            List<FaceObject> objs = client.readFromHBase2(dataFilterd);
+//            List<FaceObject> objs = client.readFromHBase2(dataFilterd);
+            List<FaceObject> objs = client.readFromEs2(dataFilterd);
             logger.info("Compare records second directly.");
             Map<String, SearchResult> resultTemp = comparators.compareSecondNotSamePerson(features, sim, objs, param.getSort());
             logger.info("Take the top " + resultCount);

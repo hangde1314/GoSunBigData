@@ -1,5 +1,7 @@
 package com.hzgc.compare;
 
+import com.hzgc.common.collect.bean.FaceObject;
+
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;

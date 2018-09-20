@@ -1,6 +1,6 @@
 package com.hzgc.compare.worker.compare;
 
-import com.hzgc.compare.FaceObject;
+import com.hzgc.common.collect.bean.FaceObject;
 import com.hzgc.compare.Feature;
 import com.hzgc.compare.SearchResult;
 import com.hzgc.compare.worker.memory.cache.MemoryCacheImpl;
@@ -111,7 +111,7 @@ public class ComparatorsImpl implements Comparators{
         Set<String> set = new HashSet<>();
         index = 0;
         logger.info("The time insert dataes when first compare used is : " + (System.currentTimeMillis() - start));
-        ArrayList<CompareResult> array = FaceJNI.faceCompareBit(diku, queryList, num);
+        ArrayList<CompareResult> array = FaceJNI.faceCompareBit(diku, queryList, num * 3);
         for(CompareResult compareResult : array){
             List<String> rowkeys = new ArrayList<>();
             for(FaceFeatureInfo faceFeatureInfo : compareResult.getPictureInfoArrayList()){
@@ -144,6 +144,9 @@ public class ComparatorsImpl implements Comparators{
         queryList[0] = feature;
 
         ArrayList<CompareResult> array = FaceJNI.faceCompareFloat(diku, queryList, 30);
+        if(array == null || array.size() == 0){
+            return new SearchResult();
+        }
         List<FaceFeatureInfo> list = array.get(0).getPictureInfoArrayList();
         SearchResult.Record[] records = new SearchResult.Record[list.size()];
         index = 0;
@@ -160,7 +163,11 @@ public class ComparatorsImpl implements Comparators{
         SearchResult result = new SearchResult(records);
         long compared = System.currentTimeMillis();
         logger.info("The time second compare used is : " + (compared - start));
-        result.sort(sorts);
+        if(sorts != null && (sorts.size() > 1 || (sorts.size() == 1 && sorts.get(0) != 4))){
+            result.sort(sorts);
+        } else {
+            result.sortBySim();
+        }
         logger.info("The time used to sort is : " + (System.currentTimeMillis() - compared));
         return result;
     }
@@ -182,6 +189,9 @@ public class ComparatorsImpl implements Comparators{
             index ++;
         }
         ArrayList<CompareResult> array = FaceJNI.faceCompareFloat(diku, queryList, 30);
+        if(array == null || array.size() == 0){
+            return new SearchResult();
+        }
         Map<FaceObject, Float> temp = new HashMap<>();
         for(CompareResult compareResult : array){
             ArrayList<FaceFeatureInfo> faceFeatureInfos = compareResult.getPictureInfoArrayList();
@@ -207,7 +217,11 @@ public class ComparatorsImpl implements Comparators{
         SearchResult result = new SearchResult(records);
         long compared = System.currentTimeMillis();
         logger.info("The time second compare used is : " + (compared - start));
-        result.sort(sorts);
+        if(sorts != null && (sorts.size() > 1 || (sorts.size() == 1 && sorts.get(0) != 4))) {
+            result.sort(sorts);
+        } else {
+            result.sortBySim();
+        }
         logger.info("The time used to sort is : " + (System.currentTimeMillis() - compared));
         return result;
     }
@@ -231,6 +245,9 @@ public class ComparatorsImpl implements Comparators{
             index ++;
         }
         ArrayList<CompareResult> array = FaceJNI.faceCompareFloat(diku, queryList, 30);
+        if(array == null || array.size() == 0){
+            return new HashMap<>();
+        }
         for(CompareResult compareResult : array){
             SearchResult.Record[] records = new SearchResult.Record[compareResult.getPictureInfoArrayList().size()];
             int recordIndex = 0;
@@ -244,7 +261,11 @@ public class ComparatorsImpl implements Comparators{
                 recordIndex ++;
             }
             SearchResult searchResult = new SearchResult(records);
-            searchResult.sort(sorts);
+            if(sorts != null && (sorts.size() > 1 || (sorts.size() == 1 && sorts.get(0) != 4))) {
+                searchResult.sort(sorts);
+            } else {
+                searchResult.sortBySim();
+            }
             String id = features.get(Integer.parseInt(compareResult.getIndex())).getId();
             result.put(id, searchResult);
         }

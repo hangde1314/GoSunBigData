@@ -1,12 +1,12 @@
 package com.hzgc.compare.worker.compare.task;
 
+import com.hzgc.common.collect.bean.FaceObject;
 import com.hzgc.compare.CompareParam;
-import com.hzgc.compare.FaceObject;
 import com.hzgc.compare.Feature;
 import com.hzgc.compare.SearchResult;
 import com.hzgc.compare.worker.compare.Comparators;
 import com.hzgc.compare.worker.compare.ComparatorsImpl;
-import com.hzgc.compare.worker.persistence.HBaseClient;
+import com.hzgc.compare.worker.persistence.ElasticSearchClient;
 import javafx.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +49,8 @@ public class CompareSamePerson extends CompareTask {
             feature2List.add(feature.getFeature2());
         }
         SearchResult result;
-        HBaseClient client = new HBaseClient();
+//        HBaseClient client = new HBaseClient();
+        ElasticSearchClient client = new ElasticSearchClient();
         Comparators comparators = new ComparatorsImpl();
         // 根据条件过滤
         logger.info("To filter the records from memory.");
@@ -59,8 +60,9 @@ public class CompareSamePerson extends CompareTask {
             logger.info("The result of filter is too bigger , to compare it first.");
             List<String> firstCompared = comparators.compareFirstTheSamePerson(feature1List, hbaseReadMax, dataFilterd);
             //根据对比结果从HBase读取数据
-            logger.info("Read records from HBase with result of first compared.");
-            List<FaceObject> objs =  client.readFromHBase(firstCompared);
+            logger.info("Read records from ES with result of first compared.");
+//            List<FaceObject> objs =  client.readFromHBase(firstCompared);
+            List<FaceObject> objs = client.readFromEs(firstCompared);
             // 第二次对比
             logger.info("Compare records second.");
             result = comparators.compareSecondTheSamePerson(feature2List, sim, objs, param.getSort());
@@ -69,8 +71,9 @@ public class CompareSamePerson extends CompareTask {
             result = result.take(resultCount);
         } else {
             //若过滤结果比较小，则直接进行第二次对比
-            logger.info("Read records from HBase with result of filter.");
-            List<FaceObject> objs = client.readFromHBase2(dataFilterd);
+            logger.info("Read records from ES with result of filter.");
+//            List<FaceObject> objs = client.readFromHBase2(dataFilterd);
+            List<FaceObject> objs = client.readFromEs2(dataFilterd);
             logger.info("Compare records second directly.");
             result = comparators.compareSecondTheSamePerson(feature2List, sim, objs, param.getSort());
             //取相似度最高的几个

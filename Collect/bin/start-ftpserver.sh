@@ -59,7 +59,7 @@ function start_ftpserver()
     if [ ! -d $LOG_DIR ]; then
         mkdir $LOG_DIR;
     fi
-    nohup java -server -Xms2g -Xmx4g -classpath $CONF_DIR:$LIB_JARS com.hzgc.collect.FTP > ${LOG_FILE} 2>&1 &
+    nohup java -server -Xms2g -Xmx4g -classpath $CONF_DIR:$LIB_JARS com.hzgc.collect.service.FTP > ${LOG_FILE} 2>&1 &
     echo "ftpserver started"
 }
 

@@ -35,6 +35,11 @@
             <version>1.0</version>
         </dependency>
         <dependency>
+            <groupId>com.hzgc.common</groupId>
+            <artifactId>common-service</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
             <groupId>com.github.lalyos</groupId>
             <artifactId>jfiglet</artifactId>
             <version>0.0.3</version>
@@ -71,25 +76,39 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.0.0</version>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.hzgc.collect.FtpApplication</mainClass>
+                </configuration>
                 <executions>
                     <execution>
-                        <id>FaceCollect</id>
-                        <phase>package</phase>
                         <goals>
-                            <goal>single</goal>
+                            <goal>repackage</goal>
                         </goals>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>src/assembly/assembly.xml</descriptor>
-                            </descriptors>
-                            <appendAssemblyId>false</appendAssemblyId>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
+            <!--<plugin>-->
+            <!--<groupId>org.apache.maven.plugins</groupId>-->
+            <!--<artifactId>maven-assembly-plugin</artifactId>-->
+            <!--<version>3.0.0</version>-->
+            <!--<executions>-->
+            <!--<execution>-->
+            <!--<id>FaceCollect</id>-->
+            <!--<phase>package</phase>-->
+            <!--<goals>-->
+            <!--<goal>single</goal>-->
+            <!--</goals>-->
+            <!--<configuration>-->
+            <!--<descriptors>-->
+            <!--<descriptor>src/assembly/assembly.xml</descriptor>-->
+            <!--</descriptors>-->
+            <!--<appendAssemblyId>false</appendAssemblyId>-->
+            <!--</configuration>-->
+            <!--</execution>-->
+            <!--</executions>-->
+            <!--</plugin>-->
         </plugins>
     </build>
 </project>

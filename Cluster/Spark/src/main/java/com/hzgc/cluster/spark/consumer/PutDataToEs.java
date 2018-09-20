@@ -2,7 +2,7 @@ package com.hzgc.cluster.spark.consumer;
 
 import com.hzgc.cluster.spark.util.PropertiesUtil;
 import com.hzgc.common.collect.bean.FaceObject;
-import com.hzgc.common.service.facedynrepo.DynamicTable;
+import com.hzgc.common.service.facedynrepo.FaceTable;
 import com.hzgc.common.util.es.ElasticSearchHelper;
 import com.hzgc.jniface.FaceAttribute;
 import org.apache.log4j.Logger;
@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Properties;
 
 public class PutDataToEs implements Serializable {
-    private static Logger LOG = Logger.getLogger(PutDataToEs.class);
     private TransportClient esClient;
 
     private PutDataToEs() {
@@ -42,54 +41,29 @@ public class PutDataToEs implements Serializable {
     }
 
     public int putDataToEs(String ftpurl, FaceObject faceObject) {
-        String timestamp = faceObject.getTimeStamp();
-        String ipcid = faceObject.getIpcId();
-        int timeslot = faceObject.getTimeSlot();
-        String date = faceObject.getDate();
         IndexResponse indexResponse = new IndexResponse();
-        Map <String, Object> map = new HashMap <>();
-        FaceAttribute faceAttr = faceObject.getAttribute();
-        int age = faceAttr.getAge();
-        map.put(DynamicTable.AGE, age);
-        int mask = faceAttr.getMask();
-        map.put(DynamicTable.MASK, mask);
-        int eyeglasses = faceAttr.getEyeglasses();
-        map.put(DynamicTable.EYEGLASSES, eyeglasses);
-        int gender = faceAttr.getGender();
-        map.put(DynamicTable.GENDER, gender);
-        int huzi = faceAttr.getHuzi();
-        map.put(DynamicTable.HUZI, huzi);
-        int sharpness = faceAttr.getSharpness();
-        map.put(DynamicTable.SHARPNESS, sharpness);
-        map.put(DynamicTable.DATE, date);
-        map.put(DynamicTable.TIMESTAMP, timestamp);
-        map.put(DynamicTable.IPCID, ipcid);
-        map.put(DynamicTable.TIMESLOT, timeslot);
-        if (ftpurl != null) {
-            indexResponse = esClient.prepareIndex(DynamicTable.DYNAMIC_INDEX,
-                    DynamicTable.PERSON_INDEX_TYPE, ftpurl).setSource(map).get();
+        Map<String, Object> map = new HashMap<>();
+        if (faceObject.getId() != null && faceObject.getId().length() > 0) {
+            map.put(FaceTable.HOSTNAME, faceObject.getHostname());
+            map.put(FaceTable.TIMESTAMP, faceObject.getTimeStamp());
+            map.put(FaceTable.IPCID, faceObject.getIpcId());
+            map.put(FaceTable.SFTPURL, faceObject.getsFtpUrl());
+            map.put(FaceTable.BFTPURL, faceObject.getbFtpUrl());
+            map.put(FaceTable.BABSOLUTEPATH, faceObject.getbAbsolutePath());
+            map.put(FaceTable.SABSOLUTEPATH, faceObject.getsAbsolutePath());
+            map.put(FaceTable.HOSTNAME, faceObject.getHostname());
+            map.put(FaceTable.AGE, faceObject.getAttribute().getAge());
+            map.put(FaceTable.MASK, faceObject.getAttribute().getMask());
+            map.put(FaceTable.EYEGLASSES, faceObject.getAttribute().getEyeglasses());
+            map.put(FaceTable.GENDER, faceObject.getAttribute().getGender());
+            map.put(FaceTable.HUZI, faceObject.getAttribute().getHuzi());
+            indexResponse = esClient.prepareIndex(FaceTable.DYNAMIC_INDEX,
+                    FaceTable.PERSON_INDEX_TYPE, faceObject.getId()).setSource(map).get();
         }
         if (indexResponse.getVersion() == 1) {
             return 1;
         } else {
             return 0;
-        }
-    }
-
-    public int upDateDataToEs(String ftpurl, String cluserId, String alarmTime, int alarmId) {
-        UpdateResponse updateResponse = new UpdateResponse();
-        Map <String, Object> map = new HashMap <>();
-        map.put(DynamicTable.ALARM_ID, alarmId);
-        map.put(DynamicTable.ALARM_TIME, alarmTime);
-        map.put(DynamicTable.CLUSTERING_ID, cluserId);
-        if (ftpurl != null) {
-            updateResponse = esClient.prepareUpdate(DynamicTable.DYNAMIC_INDEX,
-                    DynamicTable.PERSON_INDEX_TYPE, ftpurl).setDoc(map).get();
-        }
-        if (updateResponse.status().getStatus() == 200) {
-            return RestStatus.OK.getStatus();
-        } else {
-            return RestStatus.CREATED.getStatus();
         }
     }
 }

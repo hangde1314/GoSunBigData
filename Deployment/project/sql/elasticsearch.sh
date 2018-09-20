@@ -6,11 +6,11 @@
 ##curl -XDELETE 's100:9200/person?pretty' -H 'Content-Type:application/json'
 ##curl -XDELETE 's100:9200/car?pretty'  -H 'Content-Type: application/json'
 
-curl -XPUT 's100:9200/dynamic?pretty' -H 'Content-Type: application/json' -d'
+curl -XPUT 's100:9200/dynamicface?pretty' -H 'Content-Type: application/json' -d'
 {
     "settings": {
 	    "number_of_shards":5,
-        "number_of_replicas":1,
+        "number_of_replicas":2,
         "analysis": {
             "filter": {
                 "trigrams_filter": {
@@ -35,84 +35,68 @@ curl -XPUT 's100:9200/dynamic?pretty' -H 'Content-Type: application/json' -d'
         }
     },
     "mappings": {
-         "person": {
+         "face": {
          		"properties": {
-         			"ftpurl": {
-         				"type": "text"
-         			},
+         			"sftpurl": {
+                        "type": "keyword"
+                    },
+                    "bftpurl": {
+                    	"type": "keyword"
+                    },
          			"eyeglasses": {
-         				"type": "long"
+         				"type": "keyword"
          			},
+         			"age": {
+                         "type": "keyword"
+                    },
+         			"mask": {
+                    	"type": "keyword"
+                    },
          			"gender": {
-         				"type": "long"
-         			},
-         			"haircolor": {
-         				"type": "long"
-         			},
-         			"hairstyle": {
-         				"type": "long"
-         			},
-         			"hat": {
-         				"type": "long"
+         				"type": "keyword"
          			},
          			"huzi": {
-         				"type": "long"
+         				"type": "keyword"
          			},
-         			"tie": {
-         				"type": "long"
+         			"feature": {
+         			    "type": "keyword"
+         			},
+         			"bitfeature": {
+         			    "type": "keyword",
          			},
          			"ipcid": {
-         				"type": "text",
-         				"fields": {
-         					"keyword": {
-         						"type": "keyword"
-         					}
-         				}
+         				"type": "keyword",
          			},
-         			"timeslot": {
-         				"type": "long"
-         			},
-         			"date": {
-         				"type": "text"
-         			},
-         			"exacttime": {
+         			"timestamp": {
          				"type": "date",
          				"format": "yyyy-MM-dd HH:mm:ss"
          			},
-         			"searchtype": {
-         				"type": "text"
+         			"hostname": {
+         			    "type": "keyword"
          			},
-         			"clusterid": {
-         				"type": "text"
-         			},
-         			"alarmid": {
-         				"type": "long"
-         			},
-         			"alarmtime": {
-                    	"type": "text",
-                    	"fields": {
-                    		"keyword": {
-                    			"type": "keyword"
-                    		}
-                    	}
+         			"sabsolutepath": {
+                    	"type": "keyword"
+                    },
+                    "babsolutepath": {
+                        "type": "keyword"
                     }
          		}
          	}
         }
     }'
 
-curl -XPUT 's100:9200/dynamic/_settings' -d '{
+curl -XPUT 's100:9200/dynamicperson/_settings' -d '{
     "index": {
         "max_result_window": 1000000000
     }
 }'
 
 ##创建索引--行人
-curl -XPUT 's100:9200/person?pretty' -H 'Content-Type: application/json' -d'
+curl -XPUT 's100:9200/dynamicperson?pretty' -H 'Content-Type: application/json' -d'
 {
     "settings": {
 	    "number_of_shards":5,
-        "number_of_replicas":1,
+        "number_of_replicas":2,
         "analysis": {
             "filter": {
                 "trigrams_filter": {
@@ -134,7 +118,7 @@ curl -XPUT 's100:9200/person?pretty' -H 'Content-Type: application/json' -d'
         }
     },
     "mappings": {
-         "recognize": {
+         "person": {
          		"properties": {
          			"age": {
          				"type": "keyword"
@@ -145,10 +129,10 @@ curl -XPUT 's100:9200/person?pretty' -H 'Content-Type: application/json' -d'
          			"bag": {
          				"type": "keyword"
          			},
-         			"bottomColor": {
+         			"bottomcolor": {
          				"type": "keyword"
          			},
-         			"bottomType": {
+         			"bottomtype": {
          				"type": "keyword"
          			},
          			"hat": {
@@ -160,7 +144,7 @@ curl -XPUT 's100:9200/person?pretty' -H 'Content-Type: application/json' -d'
          			"knapsack": {
          				"type": "keyword"
          			},
-         			"messengerBag": {
+         			"messengerbag": {
          				"type": "keyword"
          			},
          			"orientation": {
@@ -169,65 +153,66 @@ curl -XPUT 's100:9200/person?pretty' -H 'Content-Type: application/json' -d'
          			"sex": {
          				"type": "keyword"
          			},
-         			"shoulderBag": {
+         			"shoulderbag": {
          				"type": "keyword"
          			},
          			"umbrella": {
          				"type": "keyword"
          			},
-         			"upperColor": {
+         			"uppercolor": {
          				"type": "keyword"
          			},
-         			"upperType": {
+         			"uppertype": {
                     	"type": "keyword"
                     },
-					"cType": {
+					"cartype": {
 						"type": "keyword"
 					},
-					"ipcId": {
+					"feature": {
+                        "type": "keyword"
+                    },
+                    "bitfeature": {
+                        "type": "keyword",
+                    },
+					"ipcid": {
 						"type": "keyword"
 					},
-					"timeStamp": {
+					"timestamp": {
+						"type": "date",
+						"format": "yyyy-MM-dd HH:mm:ss"
+					},
+					"sftpurl": {
 						"type": "keyword"
 					},
-					"date": {
-						"type": "keyword"
-					},
-					"timeSlot": {
-						"type": "integer"
-					},
-					"startTime": {
-						"type": "keyword"
-					},
-					"surl": {
-						"type": "keyword"
-					},
-					"burl": {
+					"bftpurl": {
 						"type": "keyword"
 					},
 					"hostname": {
 						"type": "keyword"
 					},
-					"relativePath": {
+					"sabsolutepath": {
 						"type": "keyword"
-					}
+					},
+					"babsolutepath": {
+                    	"type": "keyword"
+                    }
          		}
          	}
         }
     }'
 
-curl -XPUT 's100:9200/person/_settings' -d '{
+curl -XPUT 's100:9200/dynamicperson/_settings' -d '{
      "index": {
         "max_result_window": 1000000000
     }
 }'
 
 ## 创建索引--车辆
-curl -XPUT 's100:9200/car?pretty' -H 'Content-Type: application/json' -d'
+curl -XPUT 's100:9200/dynamiccar?pretty' -H 'Content-Type: application/json' -d'
 {
     "settings": {
 	    "number_of_shards":5,
-        "number_of_replicas":1,
+        "number_of_replicas":2,
         "analysis": {
             "analyzer": {
                 "ik": {
@@ -237,20 +222,14 @@ curl -XPUT 's100:9200/car?pretty' -H 'Content-Type: application/json' -d'
         }
     },
     "mappings": {
-         "recognize": {
+         "car": {
          		"properties": {
          			"ipcid": {
          				"type": "keyword"
          			},
          			"timestamp": {
-         				"type": "keyword"
-         			},
-         			"date": {
-         				"type": "keyword"
-         			},
-
-         			"timeslot": {
-         				"type": "keyword"
+         				"type": "date",
+                        "format": "yyyy-MM-dd HH:mm:ss"
          			},
          			"surl": {
          				"type": "keyword"
@@ -258,18 +237,21 @@ curl -XPUT 's100:9200/car?pretty' -H 'Content-Type: application/json' -d'
          			"burl": {
          				"type": "keyword"
          			},
-         			"relativepath": {
+         			"srelativepath": {
          				"type": "keyword"
          			},
-         			"relativepath_big": {
-         				"type": "keyword"
-         			},
-         			"ip": {
+         			"brelativepath": {
          				"type": "keyword"
          			},
          			"hostname": {
          				"type": "keyword"
          			},
+         			"feature": {
+                        "type": "keyword"
+                    },
+                    "bitfeature": {
+                        "type": "keyword",
+                    },
          			"vehicle_object_type": {
          				"type": "keyword"
          			},
@@ -331,7 +313,7 @@ curl -XPUT 's100:9200/car?pretty' -H 'Content-Type: application/json' -d'
         }
     }'
 
-curl -XPUT 's100:9200/car/_settings' -d '{
+curl -XPUT 's100:9200/dynamiccar/_settings' -d '{
      "index": {
         "max_result_window": 1000000000
     }

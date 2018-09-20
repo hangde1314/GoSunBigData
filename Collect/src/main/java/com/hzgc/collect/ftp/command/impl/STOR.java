@@ -1,7 +1,8 @@
 package com.hzgc.collect.ftp.command.impl;
 
 import com.hzgc.collect.expand.parser.FtpPathMetaData;
-import com.hzgc.collect.expand.parser.FtpPathParse;
+import com.hzgc.collect.expand.parser.FtpPathBootStrap;
+import com.hzgc.collect.expand.parser.Parser;
 import com.hzgc.collect.expand.receiver.Event;
 import com.hzgc.collect.expand.util.CollectProperties;
 import com.hzgc.collect.ftp.command.AbstractCommand;
@@ -18,6 +19,7 @@ import java.net.SocketException;
 
 public class STOR extends AbstractCommand {
     private final Logger LOG = LoggerFactory.getLogger(STOR.class);
+    private Parser parser = null;
 
     public void execute(final FtpIoSession session,
                         final FtpServerContext context, final FtpRequest request)
@@ -101,9 +103,9 @@ public class STOR extends AbstractCommand {
             long transSz = 0L;
             try {
                 fileName = file.getAbsolutePath();
-                LOG.info(fileName + "    " + file.getSize()/1024 + "KB");
-                boolean isReceive = FtpPathParse.isParse(fileName);
-                if (!isReceive){
+                LOG.info(fileName + "    " + file.getSize() / 1024 + "KB");
+                parser = FtpPathBootStrap.getParser(fileName);
+                if (parser == null) {
                     return;
                 }
                 outStream = file.createOutputStream(skipLen);
@@ -147,23 +149,18 @@ public class STOR extends AbstractCommand {
                 //此处获取到的路径是图片上传路径,不是文件系统的绝对路径
                 fileName = file.getAbsolutePath();
                 //LOG.info(fileName + "    " + file.getSize()/1024 + "KB");
-                // 判断当前上传路径是否需要解析
-                boolean isParser = FtpPathParse.isParse(fileName);
-                if (isParser) {
+                if (parser != null) {
                     // 解析上传路径
-                    FtpPathMetaData metaData = FtpPathParse.parse(fileName);
+                    FtpPathMetaData metaData = parser.parse(fileName);
                     if (metaData != null) {
                         Event event = Event.builder()
                                 .setIpcId(metaData.getIpcid())
                                 .setTimeStamp(metaData.getTimeStamp())
-                                .setDate(metaData.getDate())
-                                .setTimeSlot(metaData.getTimeslot())
-                                .setFtpUrl_hostname(FtpPathParse.getFtpUrl_hostname(fileName))
-                                .setFtpUrl_ip(FtpPathParse.getFtpUrl_ip(fileName))
-                                .setFileAbsolutePath(file.getFileAbsolutePa())
-                                .setFtpAbsolutePath(file.getAbsolutePath())
-                                .setIp(CollectProperties.getFtpIp())
-                                .setHostname(CollectProperties.getHostname());
+                                .setbFtpUrl(parser.getFtpUrl_hostname(fileName))
+                                .setsIpcFtpUrl(parser.getFtpUrl_ip(fileName))
+                                .setbAbsolutePath(file.getFileAbsolutePa())
+                                .setHostname(CollectProperties.getHostname())
+                                .setParser(parser);
                         LOG.info("Event = " + JacksonUtil.toJson(event));
                         context.getScheduler().putData(event);
                     }

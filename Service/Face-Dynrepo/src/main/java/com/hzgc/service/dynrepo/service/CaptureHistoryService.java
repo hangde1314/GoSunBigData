@@ -1,6 +1,6 @@
 package com.hzgc.service.dynrepo.service;
 
-import com.hzgc.common.service.facedynrepo.DynamicTable;
+import com.hzgc.common.service.facedynrepo.FaceTable;
 import com.hzgc.common.util.json.JacksonUtil;
 import com.hzgc.service.dynrepo.bean.CaptureOption;
 import com.hzgc.service.dynrepo.bean.CapturedPicture;
@@ -71,8 +71,8 @@ public class CaptureHistoryService {
                 capturePicture = new CapturedPicture();
                 String surl = hit.getId();
                 String burl = captureServiceHelper.surlToBurl(surl);
-                String ipcid = (String) hit.getSource().get(DynamicTable.IPCID);
-                String timestamp = (String) hit.getSource().get(DynamicTable.TIMESTAMP);
+                String ipcid = (String) hit.getSource().get(FaceTable.IPCID);
+                String timestamp = (String) hit.getSource().get(FaceTable.TIMESTAMP);
                 capturePicture.setSurl(captureServiceHelper.getFtpUrl(surl));
                 capturePicture.setBurl(captureServiceHelper.getFtpUrl(burl));
                 capturePicture.setDeviceId(ipcid);
@@ -101,8 +101,8 @@ public class CaptureHistoryService {
                     capturePicture = new CapturedPicture();
                     String surl = hit.getId();
                     String burl = captureServiceHelper.surlToBurl(surl);
-                    String ipc = (String) hit.getSource().get(DynamicTable.IPCID);
-                    String timestamp = (String) hit.getSource().get(DynamicTable.TIMESTAMP);
+                    String ipc = (String) hit.getSource().get(FaceTable.IPCID);
+                    String timestamp = (String) hit.getSource().get(FaceTable.TIMESTAMP);
                     capturePicture.setSurl(captureServiceHelper.getFtpUrl(surl));
                     capturePicture.setBurl(captureServiceHelper.getFtpUrl(burl));
                     capturePicture.setDeviceId(option.getIpcMappingDevice().get(ipc).getId());
@@ -140,8 +140,8 @@ public class CaptureHistoryService {
                 capturePicture = new CapturedPicture();
                 String surl = hit.getId();
                 String burl = captureServiceHelper.surlToBurl(surl);
-                String ipc = (String) hit.getSource().get(DynamicTable.IPCID);
-                String timestamp = (String) hit.getSource().get(DynamicTable.TIMESTAMP);
+                String ipc = (String) hit.getSource().get(FaceTable.IPCID);
+                String timestamp = (String) hit.getSource().get(FaceTable.TIMESTAMP);
                 capturePicture.setSurl(captureServiceHelper.getFtpUrl(surl));
                 capturePicture.setBurl(captureServiceHelper.getFtpUrl(burl));
                 capturePicture.setDeviceId(ipc);

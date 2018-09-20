@@ -1,7 +1,7 @@
 package com.hzgc.service.dynrepo.service;
 
 import com.hzgc.common.collect.facedis.FtpRegisterClient;
-import com.hzgc.common.service.facedynrepo.DynamicTable;
+import com.hzgc.common.service.facedynrepo.FaceTable;
 import com.hzgc.common.service.api.bean.DeviceDTO;
 import com.hzgc.common.service.api.service.DeviceQueryService;
 import com.hzgc.common.util.basic.IsEmpty;
@@ -155,13 +155,13 @@ public class CaptureServiceHelper {
         try {
             while (resultSet.next()) {
                 //小图ftpurl
-                String surl = resultSet.getString(DynamicTable.FTPURL);
+                String surl = resultSet.getString(FaceTable.FTPURL);
                 //设备id
-                String ipcid = resultSet.getString(DynamicTable.IPCID);
+                String ipcid = resultSet.getString(FaceTable.IPCID);
                 //相似度
-                Float similaritys = resultSet.getFloat(DynamicTable.SIMILARITY);
+                Float similaritys = resultSet.getFloat(FaceTable.SIMILARITY);
                 //时间戳
-                Timestamp timestamp = resultSet.getTimestamp(DynamicTable.TIMESTAMP);
+                Timestamp timestamp = resultSet.getTimestamp(FaceTable.TIMESTAMP);
                 //大图ftpurl
                 String burl = surlToBurl(surl);
                 //图片对象
@@ -197,15 +197,15 @@ public class CaptureServiceHelper {
         try {
             while (resultSet.next()) {
                 //小图ftpurl
-                String surl = resultSet.getString(DynamicTable.FTPURL);
+                String surl = resultSet.getString(FaceTable.FTPURL);
                 //设备id
-                String ipcid = resultSet.getString(DynamicTable.IPCID);
+                String ipcid = resultSet.getString(FaceTable.IPCID);
                 //相似度
-                Float similaritys = resultSet.getFloat(DynamicTable.SIMILARITY);
+                Float similaritys = resultSet.getFloat(FaceTable.SIMILARITY);
                 //时间戳
-                Timestamp timestamp = resultSet.getTimestamp(DynamicTable.TIMESTAMP);
+                Timestamp timestamp = resultSet.getTimestamp(FaceTable.TIMESTAMP);
                 //group id
-                String id = resultSet.getString(DynamicTable.GROUP_FIELD);
+                String id = resultSet.getString(FaceTable.GROUP_FIELD);
                 //大图ftpurl
                 String burl = surlToBurl(surl);
                 //图片对象

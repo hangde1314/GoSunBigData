@@ -1,7 +1,7 @@
 package com.hzgc.service.facedispatch.starepo.service;
 
 import com.hzgc.common.util.basic.UuidUtil;
-import com.hzgc.jniface.FaceFunction;
+import com.hzgc.jniface.FaceJNI;
 import com.hzgc.service.facedispatch.starepo.bean.*;
 import com.hzgc.service.facedispatch.starepo.dao.ObjectInfoMapper;
 import com.hzgc.service.facedispatch.starepo.dao.ObjectTypeMapper;
@@ -96,7 +96,7 @@ public class FaceSearchService {
         }
         List<ObjectFeature> objectFeatureList = new ArrayList<>();
         for (ObjectFeature objectFeature : memoryCacheList) {
-            float similarity = FaceFunction.featureCompare(objectFeature.getFeature(), feature);
+            float similarity = FaceJNI.featureCompare(objectFeature.getFeature(), feature);
             if (similarity >= param.getSimilarity()) {
                 objectFeature.setSimilarity(similarity);
                 objectFeatureList.add(objectFeature);

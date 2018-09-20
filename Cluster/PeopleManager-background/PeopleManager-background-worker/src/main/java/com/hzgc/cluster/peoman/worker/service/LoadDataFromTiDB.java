@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import sun.misc.BASE64Decoder;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -34,6 +35,7 @@ class LoadDataFromTiDB {
 
     private void cacheToMemeory(List<Picture> pictures) {
         BASE64Decoder base64Decoder = new BASE64Decoder();
+        List<ComparePicture> comparePictureList = new ArrayList<>();
         for (Picture picture : pictures) {
             if (picture.getBitFeature() != null &&
                     picture.getId() != null &&
@@ -46,9 +48,10 @@ class LoadDataFromTiDB {
                     log.error(e.getMessage());
                 }
                 comparePicture.setPeopleId(picture.getPeopleId());
-                memeoryCache.putData(comparePicture);
+                comparePictureList.add(comparePicture);
             }
         }
+        memeoryCache.putData(comparePictureList);
     }
 
 

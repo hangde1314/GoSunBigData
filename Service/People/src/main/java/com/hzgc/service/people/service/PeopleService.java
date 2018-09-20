@@ -2,7 +2,7 @@ package com.hzgc.service.people.service;
 
 import com.github.pagehelper.PageHelper;
 import com.hzgc.jniface.FaceAttribute;
-import com.hzgc.jniface.FaceFunction;
+import com.hzgc.jniface.FaceJNI;
 import com.hzgc.jniface.PictureFormat;
 import com.hzgc.service.people.dao.*;
 import com.hzgc.service.people.model.*;
@@ -97,12 +97,12 @@ public class PeopleService {
             if (CAPTURE_PIC.equals(picType)) {
                 picture.setCapturepic(bytes);
             }
-            FaceAttribute faceAttribute = FaceFunction.faceFeatureExtract(bytes, PictureFormat.JPG);
+            FaceAttribute faceAttribute = FaceJNI.faceFeatureExtract(bytes, PictureFormat.JPG);
             if (faceAttribute == null || faceAttribute.getFeature() == null || faceAttribute.getBitFeature() == null) {
                 log.info("Face feature extract failed, insert picture to t_picture failed");
                 return 0;
             }
-            picture.setFeature(FaceFunction.floatArray2string(faceAttribute.getFeature()));
+            picture.setFeature(FaceJNI.floatArray2string(faceAttribute.getFeature()));
             try {
                 picture.setBitfeature(new String(faceAttribute.getBitFeature(), "UTF-8"));
             } catch (UnsupportedEncodingException e) {
@@ -135,12 +135,12 @@ public class PeopleService {
             if (CAPTURE_PIC.equals(picType)) {
                 picture.setCapturepic(bytes);
             }
-            FaceAttribute faceAttribute = FaceFunction.faceFeatureExtract(bytes, PictureFormat.JPG);
+            FaceAttribute faceAttribute = FaceJNI.faceFeatureExtract(bytes, PictureFormat.JPG);
             if (faceAttribute == null || faceAttribute.getFeature() == null || faceAttribute.getBitFeature() == null) {
                 log.info("Face feature extract failed, insert picture to t_picture failed");
                 return 0;
             }
-            picture.setFeature(FaceFunction.floatArray2string(faceAttribute.getFeature()));
+            picture.setFeature(FaceJNI.floatArray2string(faceAttribute.getFeature()));
             try {
                 picture.setBitfeature(new String(faceAttribute.getBitFeature(), "UTF-8"));
             } catch (UnsupportedEncodingException e) {

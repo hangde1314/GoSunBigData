@@ -6,7 +6,7 @@ import com.hzgc.compare.SearchResult;
 import com.hzgc.compare.worker.memory.cache.MemoryCacheImpl;
 import com.hzgc.jniface.CompareResult;
 import com.hzgc.jniface.FaceFeatureInfo;
-import com.hzgc.jniface.FaceFunction;
+import com.hzgc.jniface.FaceJNI;
 import javafx.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +51,7 @@ public class ComparatorsImpl implements Comparators{
         byte[][] queryList = new byte[1][32];
         queryList[0] = feature;
         logger.info("The time insert dataes when first compare used is : " + (System.currentTimeMillis() - start));
-        ArrayList<CompareResult> array = FaceFunction.faceCompareBit(diku, queryList, num);
+        ArrayList<CompareResult> array = FaceJNI.faceCompareBit(diku, queryList, num);
         for(FaceFeatureInfo featureInfo : array.get(0).getPictureInfoArrayList()){
             String rowkey = data.get(featureInfo.getIndex()).getKey();
             rowkeys.add(rowkey);
@@ -76,8 +76,8 @@ public class ComparatorsImpl implements Comparators{
             index ++;
         }
         logger.info("The time insert dataes when first compare used is : " + (System.currentTimeMillis() - start));
-        FaceFunction.init();
-        ArrayList<CompareResult> array = FaceFunction.faceCompareBit(diku, queryList, num);
+        FaceJNI.init();
+        ArrayList<CompareResult> array = FaceJNI.faceCompareBit(diku, queryList, num);
         List<String> rowkeys = new ArrayList<>();
         for(CompareResult compareResult : array){
             for(FaceFeatureInfo faceFeatureInfo : compareResult.getPictureInfoArrayList()){
@@ -111,7 +111,7 @@ public class ComparatorsImpl implements Comparators{
         Set<String> set = new HashSet<>();
         index = 0;
         logger.info("The time insert dataes when first compare used is : " + (System.currentTimeMillis() - start));
-        ArrayList<CompareResult> array = FaceFunction.faceCompareBit(diku, queryList, num);
+        ArrayList<CompareResult> array = FaceJNI.faceCompareBit(diku, queryList, num);
         for(CompareResult compareResult : array){
             List<String> rowkeys = new ArrayList<>();
             for(FaceFeatureInfo faceFeatureInfo : compareResult.getPictureInfoArrayList()){
@@ -143,7 +143,7 @@ public class ComparatorsImpl implements Comparators{
         float[][] queryList = new float[1][512];
         queryList[0] = feature;
 
-        ArrayList<CompareResult> array = FaceFunction.faceCompareFloat(diku, queryList, 30);
+        ArrayList<CompareResult> array = FaceJNI.faceCompareFloat(diku, queryList, 30);
         List<FaceFeatureInfo> list = array.get(0).getPictureInfoArrayList();
         SearchResult.Record[] records = new SearchResult.Record[list.size()];
         index = 0;
@@ -181,7 +181,7 @@ public class ComparatorsImpl implements Comparators{
             queryList[index] = feature;
             index ++;
         }
-        ArrayList<CompareResult> array = FaceFunction.faceCompareFloat(diku, queryList, 30);
+        ArrayList<CompareResult> array = FaceJNI.faceCompareFloat(diku, queryList, 30);
         Map<FaceObject, Float> temp = new HashMap<>();
         for(CompareResult compareResult : array){
             ArrayList<FaceFeatureInfo> faceFeatureInfos = compareResult.getPictureInfoArrayList();
@@ -230,7 +230,7 @@ public class ComparatorsImpl implements Comparators{
             queryList[index] = feature.getFeature2();
             index ++;
         }
-        ArrayList<CompareResult> array = FaceFunction.faceCompareFloat(diku, queryList, 30);
+        ArrayList<CompareResult> array = FaceJNI.faceCompareFloat(diku, queryList, 30);
         for(CompareResult compareResult : array){
             SearchResult.Record[] records = new SearchResult.Record[compareResult.getPictureInfoArrayList().size()];
             int recordIndex = 0;

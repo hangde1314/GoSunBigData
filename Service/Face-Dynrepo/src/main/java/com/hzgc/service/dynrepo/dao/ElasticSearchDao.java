@@ -3,7 +3,7 @@ package com.hzgc.service.dynrepo.dao;
 import com.hzgc.common.util.es.ElasticSearchHelper;
 import com.hzgc.common.service.faceattribute.bean.Attribute;
 import com.hzgc.common.service.faceattribute.bean.AttributeValue;
-import com.hzgc.common.service.facedynrepo.DynamicTable;
+import com.hzgc.common.service.facedynrepo.FaceTable;
 import com.hzgc.service.dynrepo.bean.CaptureOption;
 import com.hzgc.service.dynrepo.bean.TimeInterval;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -39,7 +39,7 @@ public class ElasticSearchDao {
                 .setQuery(queryBuilder)
                 .setFrom(option.getStart())
                 .setSize(option.getLimit())
-                .addSort(DynamicTable.TIMESTAMP,
+                .addSort(FaceTable.TIMESTAMP,
                         Objects.equals(sortParam, EsSearchParam.DESC) ? SortOrder.DESC : SortOrder.ASC);
         return requestBuilder.get();
     }
@@ -51,7 +51,7 @@ public class ElasticSearchDao {
                 .setQuery(queryBuilder)
                 .setFrom(option.getStart())
                 .setSize(option.getLimit())
-                .addSort(DynamicTable.TIMESTAMP,
+                .addSort(FaceTable.TIMESTAMP,
                         Objects.equals(sortParam, EsSearchParam.DESC) ? SortOrder.DESC : SortOrder.ASC);
         return requestBuilder.get();
     }
@@ -63,14 +63,14 @@ public class ElasticSearchDao {
                 .setQuery(queryBuilder)
                 .setFrom(option.getStart())
                 .setSize(option.getLimit())
-                .addSort(DynamicTable.TIMESTAMP,
+                .addSort(FaceTable.TIMESTAMP,
                         Objects.equals(sortParam, EsSearchParam.DESC) ? SortOrder.DESC : SortOrder.ASC);
         return requestBuilder.get();
     }
 
     private SearchRequestBuilder createSearchRequestBuilder() {
-        return esClient.prepareSearch(DynamicTable.DYNAMIC_INDEX)
-                .setTypes(DynamicTable.PERSON_INDEX_TYPE);
+        return esClient.prepareSearch(FaceTable.DYNAMIC_INDEX)
+                .setTypes(FaceTable.PERSON_INDEX_TYPE);
     }
 
     private BoolQueryBuilder createBoolQueryBuilder(CaptureOption option) {
@@ -100,27 +100,27 @@ public class ElasticSearchDao {
             String start_ts = String.valueOf(start_sj * 100 / 60 + start_sj % 60);
             int end_sj = temp.getEnd();
             String end_ts = String.valueOf(end_sj * 100 / 60 + end_sj % 60);
-            timeInQB.should(QueryBuilders.rangeQuery(DynamicTable.TIMESLOT).gte(start_ts).lte(end_ts));
+            timeInQB.should(QueryBuilders.rangeQuery(FaceTable.TIMESLOT).gte(start_ts).lte(end_ts));
             totalBQ.must(timeInQB);
         }
     }
 
     private void setStartEndTime(BoolQueryBuilder totalBQ, String startTime, String endTime) {
-        totalBQ.must(QueryBuilders.rangeQuery(DynamicTable.TIMESTAMP).gte(startTime).lte(endTime));
+        totalBQ.must(QueryBuilders.rangeQuery(FaceTable.TIMESTAMP).gte(startTime).lte(endTime));
     }
 
     private void setDeviceIdList(BoolQueryBuilder totalBQ, List<String> deviceId) {
         // 设备ID 的的boolQueryBuilder
         BoolQueryBuilder devicdIdBQ = QueryBuilders.boolQuery();
         for (Object t : deviceId) {
-            devicdIdBQ.should(QueryBuilders.matchPhraseQuery(DynamicTable.IPCID, t).analyzer(EsSearchParam.STANDARD));
+            devicdIdBQ.should(QueryBuilders.matchPhraseQuery(FaceTable.IPCID, t).analyzer(EsSearchParam.STANDARD));
         }
         totalBQ.must(devicdIdBQ);
     }
 
     private void setDeviceId(BoolQueryBuilder totalBQ, String ipc) {
         BoolQueryBuilder deviceIdBQ = QueryBuilders.boolQuery();
-        deviceIdBQ.should(QueryBuilders.matchPhraseQuery(DynamicTable.IPCID, ipc).analyzer(EsSearchParam.STANDARD));
+        deviceIdBQ.should(QueryBuilders.matchPhraseQuery(FaceTable.IPCID, ipc).analyzer(EsSearchParam.STANDARD));
         totalBQ.must(deviceIdBQ);
     }
 
@@ -145,17 +145,17 @@ public class ElasticSearchDao {
 
     public String getLastCaptureTime(String ipcId) {
         BoolQueryBuilder totalBQ = QueryBuilders.boolQuery();
-        totalBQ.must(QueryBuilders.matchPhraseQuery(DynamicTable.IPCID, ipcId));
+        totalBQ.must(QueryBuilders.matchPhraseQuery(FaceTable.IPCID, ipcId));
         SearchResponse searchResponse = createSearchRequestBuilder()
                 .setQuery(totalBQ)
                 .setSize(1)
-                .addSort(DynamicTable.TIMESTAMP, SortOrder.DESC)
+                .addSort(FaceTable.TIMESTAMP, SortOrder.DESC)
                 .get();
         SearchHits hits =  searchResponse.getHits();
         SearchHit[] searchHits = hits.getHits();
         String lastTime = "";
         for (SearchHit hit : searchHits){
-            lastTime = String.valueOf(hit.getSource().get(DynamicTable.TIMESTAMP));
+            lastTime = String.valueOf(hit.getSource().get(FaceTable.TIMESTAMP));
         }
         return lastTime;
     }

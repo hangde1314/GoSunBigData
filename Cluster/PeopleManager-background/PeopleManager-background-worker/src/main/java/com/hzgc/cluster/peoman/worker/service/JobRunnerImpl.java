@@ -26,6 +26,10 @@ public class JobRunnerImpl implements JobRunner {
     @SuppressWarnings("unused")
     private String workId;
 
+    @Autowired
+    @SuppressWarnings("unused")
+    private WorkerRegister workerRegister;
+
     private boolean isRun = false;
 
     @Override

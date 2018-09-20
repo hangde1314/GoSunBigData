@@ -71,7 +71,7 @@ function index_es_dynamic()
         sed -i "s#^\"max_result_window\"#\"max_result_window\":${Max_Result_Window}#g" ${BIN_DIR}/dynamic-index.sh
 
 
-        sh ${BIN_DIR}/dynamic-index.sh
+        sh ${BIN_DIR}/elasticsearch.sh
 		if [ $? = 0 ];then
 			echo "修改dynamic-index.sh成功并执行......"
 		fi

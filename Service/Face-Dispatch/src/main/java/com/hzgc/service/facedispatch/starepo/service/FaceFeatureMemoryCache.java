@@ -36,8 +36,8 @@ public class FaceFeatureMemoryCache {
             ObjectFeature feature = new ObjectFeature();
             feature.setId(info.getId());
             feature.setTypeId(info.getTypeid());
-            feature.setFeature(FaceFunction.string2floatArray(info.getFeature()));
-            feature.setBitfea(FaceFunction.string2floatArray(info.getBitfea()));
+            feature.setFeature(FaceFunction.base64Str2floatFeature(info.getFeature()));
+            feature.setBitfea(FaceFunction.base64Str2floatFeature(info.getBitfea()));
             ConcurrentHashMap<String, ObjectFeature> typeMap = memoryCache.get(info.getTypeid());
             if (typeMap == null) {
                 typeMap = new ConcurrentHashMap<>();

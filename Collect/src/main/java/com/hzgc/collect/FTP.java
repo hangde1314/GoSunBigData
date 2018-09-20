@@ -17,7 +17,7 @@ import com.hzgc.collect.expand.util.CollectProperties;
 import com.hzgc.common.collect.facedis.FtpRegisterClient;
 import com.hzgc.common.collect.facedis.FtpRegisterInfo;
 import com.hzgc.common.collect.facesub.FtpSubscribeClient;
-import com.hzgc.jniface.FaceFunction;
+import com.hzgc.jniface.FaceJNI;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
@@ -115,10 +115,10 @@ public class FTP extends ClusterOverFtp implements Serializable {
         int detectorNum = CollectProperties.getFaceDetectorNumber();
         LOG.info("Init face detector, number is " + detectorNum);
         if (detectorNum == 0) {
-            FaceFunction.init();
+            FaceJNI.init();
         }else {
             for (int i = 0; i < detectorNum; i++) {
-                FaceFunction.init();
+                FaceJNI.init();
             }
         }
     }

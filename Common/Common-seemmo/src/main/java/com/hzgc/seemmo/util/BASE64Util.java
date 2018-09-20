@@ -1,10 +1,9 @@
 package com.hzgc.seemmo.util;
 
-import sun.misc.BASE64Encoder;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Base64;
 
 public class BASE64Util {
 
@@ -20,14 +19,12 @@ public class BASE64Util {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        // 加密
-        BASE64Encoder encoder = new BASE64Encoder();
-        return encoder.encode(data);
+
+        return Base64.getEncoder().encodeToString(data);
     }
 
     //根据图片字节数组进行提特征
     public static String getImageStr(byte[] bytes) {
-        BASE64Encoder encoder = new BASE64Encoder();
-        return encoder.encode(bytes);
+        return Base64.getEncoder().encodeToString(bytes);
     }
 }

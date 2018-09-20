@@ -2,10 +2,7 @@ package com.hzgc.cluster.peoman.worker.service;
 
 import com.hzgc.cluster.peoman.worker.dao.PictureMapper;
 import com.hzgc.cluster.peoman.worker.model.Picture;
-import com.hzgc.jniface.CompareResult;
-import com.hzgc.jniface.FaceAttribute;
-import com.hzgc.jniface.FaceFeatureInfo;
-import com.hzgc.jniface.FaceFunction;
+import com.hzgc.jniface.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Component
 @Slf4j
@@ -37,24 +35,33 @@ public class MemeoryCache {
     private LinkedList<byte[]> bitFeatureList = new LinkedList<>();
     private Map<String, List<ComparePicture>> pictureMap = new HashMap<>();
     private AtomicInteger atomicInteger = new AtomicInteger();
+    private ReentrantLock lock = new ReentrantLock();
 
     public MemeoryCache() {
-        FaceFunction.init();
+        FaceJNI.init();
     }
 
-    void putData(ComparePicture picture) {
-        int index = atomicInteger.getAndIncrement();
-        bitFeatureList.add(index, picture.getBitFeature());
-        indexToPictureKey.put(index, picture.getPeopleId());
-        picture.setIndex(index);
-        if (pictureMap.containsKey(picture.getPeopleId())) {
-            List<ComparePicture> comparePictures = pictureMap.get(picture.getPeopleId());
-            comparePictures.add(picture);
-        } else {
+    void putData(List<ComparePicture> pictureList) {
+        try {
+            lock.lock();
+            for (ComparePicture picture : pictureList) {
+                int index = atomicInteger.getAndIncrement();
+                bitFeatureList.add(index, picture.getBitFeature());
+                indexToPictureKey.put(index, picture.getPeopleId());
+                picture.setIndex(index);
+                if (pictureMap.containsKey(picture.getPeopleId())) {
+                    List<ComparePicture> comparePictures = pictureMap.get(picture.getPeopleId());
+                    comparePictures.add(picture);
+                } else {
 
-            List<ComparePicture> comparePictures = new ArrayList<>();
-            comparePictures.add(picture);
-            pictureMap.put(picture.getPeopleId(), comparePictures);
+                    List<ComparePicture> comparePictures = new ArrayList<>();
+                    comparePictures.add(picture);
+                    pictureMap.put(picture.getPeopleId(), comparePictures);
+                }
+            }
+
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -64,7 +71,7 @@ public class MemeoryCache {
             byte[][] queryList = new byte[1][];
             queryList[0] = bitFeature;
             ArrayList<CompareResult> compareResList =
-                    FaceFunction.faceCompareBit(bitFeatureList.toArray(new byte[0][]), queryList, 1);
+                    FaceJNI.faceCompareBit(bitFeatureList.toArray(new byte[0][]), queryList, 1);
             CompareResult compareResult = compareResList.get(0);
             ArrayList<FaceFeatureInfo> featureInfos = compareResult.getPictureInfoArrayList();
             FaceFeatureInfo faceFeatureInfo = featureInfos.get(0);
@@ -81,7 +88,7 @@ public class MemeoryCache {
                 Picture picture = pictureMapper.selectByPictureId(comparePicture.getId());
                 String floatFeatureStr = picture.getFeature();
                 if (floatFeatureStr != null && !"".equals(floatFeatureStr)) {
-                    float[] floatFeature = FaceFunction.string2floatArray(floatFeatureStr);
+                    float[] floatFeature = FaceFunction.base64Str2floatFeature(floatFeatureStr);
                     if (floatFeature.length == 512 && faceAttribute.getFeature().length == 512) {
                         float sim = FaceFunction.featureCompare(floatFeature, faceAttribute.getFeature());
                         if (sim >= this.floatThreshold) {

@@ -93,7 +93,7 @@ public class ElasticSearchDao {
 
     //时间过滤
     private void setStartEndTime(BoolQueryBuilder totalBQ, String startTime, String endTime) {
-        totalBQ.must(QueryBuilders.rangeQuery(VehicleTable.DATE).gte(startTime).lte(endTime));
+        totalBQ.must(QueryBuilders.rangeQuery(VehicleTable.TIMESTAMP).gte(startTime).lte(endTime));
     }
 
     //多个ipcid查询

@@ -3,6 +3,7 @@ package com.hzgc.service.people.service;
 import com.github.pagehelper.PageHelper;
 import com.hzgc.jniface.FaceAttribute;
 import com.hzgc.jniface.FaceFunction;
+import com.hzgc.jniface.FaceJNI;
 import com.hzgc.jniface.PictureFormat;
 import com.hzgc.service.people.dao.*;
 import com.hzgc.service.people.model.*;
@@ -66,9 +67,9 @@ public class PeopleService {
 
     public Integer people_flag_update(String peopleId, List<Integer> flags) {
         List<Long> idList = flagMapper.selectIdByPeopleId(peopleId);
-        for (Long id : idList){
+        for (Long id : idList) {
             int status = flagMapper.deleteByPrimaryKey(id);
-            if (status != 1){
+            if (status != 1) {
                 log.info("Update people, but delete t_flag failed, id: " + id);
                 return 0;
             }
@@ -97,17 +98,13 @@ public class PeopleService {
             if (CAPTURE_PIC.equals(picType)) {
                 picture.setCapturepic(bytes);
             }
-            FaceAttribute faceAttribute = FaceFunction.faceFeatureExtract(bytes, PictureFormat.JPG);
+            FaceAttribute faceAttribute = FaceJNI.faceFeatureExtract(bytes, PictureFormat.JPG);
             if (faceAttribute == null || faceAttribute.getFeature() == null || faceAttribute.getBitFeature() == null) {
                 log.info("Face feature extract failed, insert picture to t_picture failed");
                 return 0;
             }
-            picture.setFeature(FaceFunction.floatArray2string(faceAttribute.getFeature()));
-            try {
-                picture.setBitfeature(new String(faceAttribute.getBitFeature(), "UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
+            picture.setFeature(FaceFunction.floatFeature2Base64Str(faceAttribute.getFeature()));
+            picture.setBitfeature(FaceFunction.bitFeautre2Base64Str(faceAttribute.getBitFeature()));
             int insertStatus = pictureMapper.insertSelective(picture);
             if (insertStatus != 1) {
                 log.info("Insert people, but insert picture to t_picture failed");
@@ -119,9 +116,9 @@ public class PeopleService {
 
     public Integer people_picture_update(String peopleId, String picType, List<byte[]> pics) {
         List<Long> idList = pictureMapper.selectIdByPeopleId(peopleId);
-        for (Long id : idList){
+        for (Long id : idList) {
             int status = pictureMapper.deleteByPrimaryKey(id);
-            if (status != 1){
+            if (status != 1) {
                 log.info("Update people, but delete t_picture failed, id: " + id);
                 return 0;
             }
@@ -135,17 +132,13 @@ public class PeopleService {
             if (CAPTURE_PIC.equals(picType)) {
                 picture.setCapturepic(bytes);
             }
-            FaceAttribute faceAttribute = FaceFunction.faceFeatureExtract(bytes, PictureFormat.JPG);
+            FaceAttribute faceAttribute = FaceJNI.faceFeatureExtract(bytes, PictureFormat.JPG);
             if (faceAttribute == null || faceAttribute.getFeature() == null || faceAttribute.getBitFeature() == null) {
                 log.info("Face feature extract failed, insert picture to t_picture failed");
                 return 0;
             }
-            picture.setFeature(FaceFunction.floatArray2string(faceAttribute.getFeature()));
-            try {
-                picture.setBitfeature(new String(faceAttribute.getBitFeature(), "UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
+            picture.setFeature(FaceFunction.floatFeature2Base64Str(faceAttribute.getFeature()));
+            picture.setBitfeature(FaceFunction.bitFeautre2Base64Str(faceAttribute.getBitFeature()));
             int insertStatus = pictureMapper.insertSelective(picture);
             if (insertStatus != 1) {
                 log.info("Update people, but insert picture to t_picture failed");
@@ -171,9 +164,9 @@ public class PeopleService {
 
     public Integer people_imsi_update(String peopleId, List<String> imsis) {
         List<Long> idList = imsiMapper.selectIdByPeopleId(peopleId);
-        for (Long id : idList){
+        for (Long id : idList) {
             int status = imsiMapper.deleteByPrimaryKey(id);
-            if (status != 1){
+            if (status != 1) {
                 log.info("Update people, but delete t_imsi failed, id: " + id);
                 return 0;
             }
@@ -207,9 +200,9 @@ public class PeopleService {
 
     public Integer people_phone_update(String peopleId, List<String> phones) {
         List<Long> idList = phoneMapper.selectIdByPeopleId(peopleId);
-        for (Long id : idList){
+        for (Long id : idList) {
             int status = phoneMapper.deleteByPrimaryKey(id);
-            if (status != 1){
+            if (status != 1) {
                 log.info("Update people, but delete t_phone failed, id: " + id);
                 return 0;
             }
@@ -243,9 +236,9 @@ public class PeopleService {
 
     public Integer people_house_update(String peopleId, List<String> houses) {
         List<Long> idList = houseMapper.selectIdByPeopleId(peopleId);
-        for (Long id : idList){
+        for (Long id : idList) {
             int status = houseMapper.deleteByPrimaryKey(id);
-            if (status != 1){
+            if (status != 1) {
                 log.info("Update people, but delete t_house failed, id: " + id);
                 return 0;
             }
@@ -279,9 +272,9 @@ public class PeopleService {
 
     public Integer people_car_update(String peopleId, List<String> cars) {
         List<Long> idList = carMapper.selectIdByPeopleId(peopleId);
-        for (Long id : idList){
+        for (Long id : idList) {
             int status = carMapper.deleteByPrimaryKey(id);
-            if (status != 1){
+            if (status != 1) {
                 log.info("Update people, but delete t_car failed, id: " + id);
                 return 0;
             }
@@ -307,10 +300,10 @@ public class PeopleService {
      */
     public byte[] searchPictureByPicId(Long pictureId) {
         PictureWithBLOBs picture = pictureMapper.selectPictureById(pictureId);
-        if (picture != null){
-            if (picture.getIdcardpic() != null){
-               return picture.getIdcardpic();
-            }else {
+        if (picture != null) {
+            if (picture.getIdcardpic() != null) {
+                return picture.getIdcardpic();
+            } else {
                 return picture.getCapturepic();
             }
         }
@@ -320,15 +313,15 @@ public class PeopleService {
     public PictureVO searchPictureByPeopleId(String peopleId) {
         PictureVO pictureVO = new PictureVO();
         List<PictureWithBLOBs> pictures = pictureMapper.selectPictureByPeopleId(peopleId);
-        if(pictures != null && pictures.size() > 0){
+        if (pictures != null && pictures.size() > 0) {
             List<byte[]> idcardPics = new ArrayList<>();
             List<byte[]> capturePics = new ArrayList<>();
-            for (PictureWithBLOBs picture : pictures){
-                if (picture != null){
+            for (PictureWithBLOBs picture : pictures) {
+                if (picture != null) {
                     byte[] idcardPic = picture.getIdcardpic();
-                    if (idcardPic != null && idcardPic.length > 0){
+                    if (idcardPic != null && idcardPic.length > 0) {
                         idcardPics.add(idcardPic);
-                    }else {
+                    } else {
                         capturePics.add(picture.getCapturepic());
                     }
                 }
@@ -348,7 +341,7 @@ public class PeopleService {
     public PeopleVO selectByPeopleId(String peopleId) {
         People people = peopleMapper.selectByPrimaryKey(peopleId);
         PeopleVO peopleVO = new PeopleVO();
-        if (people != null){
+        if (people != null) {
             peopleVO.setId(people.getId());
             peopleVO.setName(people.getName());
             peopleVO.setIdCard(people.getIdcard());
@@ -365,53 +358,53 @@ public class PeopleService {
             peopleVO.setCommunity(String.valueOf(people.getCommunity()));
             peopleVO.setImportant(people.getImportant());
             peopleVO.setCare(people.getCare());
-            if (people.getLasttime() != null){
+            if (people.getLasttime() != null) {
                 peopleVO.setLastTime(sdf.format(people.getLasttime()));
             }
-            if (people.getCreatetime() != null){
+            if (people.getCreatetime() != null) {
                 peopleVO.setCreateTime(sdf.format(people.getCreatetime()));
             }
-            if (people.getUpdatetime() != null){
+            if (people.getUpdatetime() != null) {
                 peopleVO.setUpdateTime(sdf.format(people.getUpdatetime()));
             }
             List<Flag> flags = people.getFlag();
             List<Integer> flagIdList = new ArrayList<>();
-            for (Flag flag : flags){
+            for (Flag flag : flags) {
                 flagIdList.add(flag.getFlagid());
             }
             peopleVO.setFlag(flagIdList);
             List<Imsi> imsis = people.getImsi();
             List<String> imsiList = new ArrayList<>();
-            for (Imsi imsi : imsis){
+            for (Imsi imsi : imsis) {
                 imsiList.add(imsi.getImsi());
             }
             peopleVO.setImsi(imsiList);
             List<Phone> phones = people.getPhone();
             List<String> phoneList = new ArrayList<>();
-            for (Phone phone : phones){
+            for (Phone phone : phones) {
                 phoneList.add(phone.getPhone());
             }
             peopleVO.setPhone(phoneList);
             List<House> houses = people.getHouse();
             List<String> houseList = new ArrayList<>();
-            for (House house : houses){
+            for (House house : houses) {
                 houseList.add(house.getHouse());
             }
             peopleVO.setHouse(houseList);
             List<Car> cars = people.getCar();
             List<String> carList = new ArrayList<>();
-            for (Car car : cars){
+            for (Car car : cars) {
                 carList.add(car.getCar());
             }
             peopleVO.setCar(carList);
             List<PictureWithBLOBs> pictures = people.getPicture();
-            if (pictures != null && pictures.size() > 0){
+            if (pictures != null && pictures.size() > 0) {
                 List<byte[]> idcardPictureList = new ArrayList<>();
                 List<byte[]> capturePictureList = new ArrayList<>();
-                for (PictureWithBLOBs picture : pictures){
-                    if (picture.getIdcardpic() != null){
+                for (PictureWithBLOBs picture : pictures) {
+                    if (picture.getIdcardpic() != null) {
                         idcardPictureList.add(picture.getIdcardpic());
-                    }else {
+                    } else {
                         capturePictureList.add(picture.getCapturepic());
                     }
                 }
@@ -437,7 +430,7 @@ public class PeopleService {
         if (peoples != null && peoples.size() > 0) {
             for (People people : peoples) {
                 PeopleVO peopleVO = new PeopleVO();
-                if (people != null){
+                if (people != null) {
                     peopleVO.setId(people.getId());
                     peopleVO.setName(people.getName());
                     peopleVO.setIdCard(people.getIdcard());
@@ -454,30 +447,30 @@ public class PeopleService {
                     peopleVO.setCommunity(String.valueOf(people.getCommunity()));
                     peopleVO.setImportant(people.getImportant());
                     peopleVO.setCare(people.getCare());
-                    if (people.getLasttime() != null){
+                    if (people.getLasttime() != null) {
                         peopleVO.setLastTime(sdf.format(people.getLasttime()));
                     }
-                    if (people.getCreatetime() != null){
+                    if (people.getCreatetime() != null) {
                         peopleVO.setCreateTime(sdf.format(people.getCreatetime()));
                     }
-                    if (people.getUpdatetime() != null){
+                    if (people.getUpdatetime() != null) {
                         peopleVO.setUpdateTime(sdf.format(people.getUpdatetime()));
                     }
                     List<Flag> flags = people.getFlag();
                     List<Integer> flagIdList = new ArrayList<>();
-                    for (Flag flag : flags){
+                    for (Flag flag : flags) {
                         flagIdList.add(flag.getFlagid());
                     }
                     peopleVO.setFlag(flagIdList);
-                    if (people.getPicture() != null && people.getPicture().size() > 0){
+                    if (people.getPicture() != null && people.getPicture().size() > 0) {
                         PictureWithBLOBs picture = people.getPicture().get(0);
-                        if (picture.getIdcardpic() != null){
+                        if (picture.getIdcardpic() != null) {
                             peopleVO.setPicture(picture.getIdcardpic());
-                        }else {
+                        } else {
                             peopleVO.setPicture(picture.getCapturepic());
                         }
                     }
-                list.add(peopleVO);
+                    list.add(peopleVO);
                 }
             }
         }

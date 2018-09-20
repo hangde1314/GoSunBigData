@@ -5,14 +5,14 @@ import java.util
 import java.util.Date
 
 import com.google.gson.Gson
-import com.hzgc.cluster.spark.consumer.{AlarmMessage, PutDataToEs}
+import com.hzgc.cluster.spark.consumer.PutDataToEs
 import com.hzgc.cluster.spark.message.{AddAlarmMessage, Item, RecognizeAlarmMessage}
 import com.hzgc.common.service.facestarepo.alarm.StaticRepoUtil
 import com.hzgc.cluster.spark.util.{FaceObjectUtil, PropertiesUtil}
 import com.hzgc.common.service.facedispatch.DeviceUtilImpl
 import com.hzgc.common.service.facedispatch.table.DispatchTable
 import com.hzgc.common.util.rocketmq.RocketMQProducer
-import com.hzgc.jni.FaceFunction
+import com.hzgc.jniface.FaceFunction
 import kafka.serializer.StringDecoder
 import org.apache.log4j.Logger
 import org.apache.spark.SparkConf
@@ -61,7 +61,7 @@ object FaceAlarmJob {
         val totalList = JavaConverters.
           asScalaBufferConverter(StaticRepoUtil.getInstance(kafkaBootStrapBroadCast.value, jdbcUrlBroadCast.value).getTotalList).asScala
         val faceObj = massage._2
-        LOG.info("faceObject is " + faceObj.getBurl)
+        LOG.info("faceObject is " + faceObj.getbFtpUrl())
         val ipcID = faceObj.getIpcId
         val alarmRule = deviceUtilI.isWarnTypeBinding(ipcID)
         val filterResult = new ArrayBuffer[Json]()
@@ -128,64 +128,35 @@ object FaceAlarmJob {
               StaticRepoUtil.getInstance(kafkaBootStrapBroadCast.value, jdbcUrlBroadCast.value).updateObjectInfoTime(updateTimeList)
             }
             val recognizeAlarmMessage = new RecognizeAlarmMessage()
-            val AlarmMessage = new AlarmMessage()
             val dateStr = df.format(new Date())
-            val surl = result._1.getRelativePath
-            val burl = result._1.getBurl.substring(result._1.getBurl.indexOf(":2121")+5)
-            val esSurl = result._1.getSurl
-            val esBurl = result._1.getBurl
             val staticId = result._4(0).staticID
             val sim = result._4(0).sim.toString
             val staticObjectType = result._4(0).staticObjectType
-            AlarmMessage.setAlarmType(DispatchTable.IDENTIFY)
-            AlarmMessage.setIpcID(result._2)
-            AlarmMessage.setSmallPictureURL(esSurl)
-            AlarmMessage.setBigPictureURL(esBurl)
-            AlarmMessage.setAlarmTime(dateStr)
-            AlarmMessage.setHostName(result._1.getHostname)
-            AlarmMessage.setStaticID(staticId)
-            AlarmMessage.setSim(sim)
-            AlarmMessage.setObjectType(staticObjectType)
-            AlarmMessage.setFlag(0)
-            AlarmMessage.setConfirm(1)
             recognizeAlarmMessage.setAlarmType(DispatchTable.IDENTIFY)
-            recognizeAlarmMessage.setSmallPictureURL(surl)
-            recognizeAlarmMessage.setBigPictureURL(burl)
+            recognizeAlarmMessage.setSmallPictureURL(result._1.getsRelativePath())
+            recognizeAlarmMessage.setBigPictureURL(result._1.getbRelativePath())
             recognizeAlarmMessage.setItems(itemsResult.toArray)
             recognizeAlarmMessage.setHostName(result._1.getHostname)
             recognizeAlarmMessage.setDynamicDeviceID(result._2)
             recognizeAlarmMessage.setAlarmTime(dateStr)
             rocketMQProducer.send(result._3,
               "alarm_" + DispatchTable.IDENTIFY,
-              surl,
+              result._1.getsRelativePath(),
               gson.toJson(recognizeAlarmMessage).getBytes(),
               null)
           }
-          if (addWarnRule != null &&  addItems.isEmpty) {
+          if (addWarnRule != null && addItems.isEmpty) {
             val addAlarmMessage = new AddAlarmMessage()
-            val AlarmMessage = new AlarmMessage()
             val dateStr = df.format(new Date())
-            val surl = result._1.getRelativePath
-            val burl = result._1.getBurl.substring(result._1.getBurl.indexOf(":2121")+5)
-            val esSurl = result._1.getSurl
-            val esBurl = result._1.getBurl
-            AlarmMessage.setAlarmType(DispatchTable.ADDED)
-            AlarmMessage.setIpcID(result._2)
-            AlarmMessage.setSmallPictureURL(esSurl)
-            AlarmMessage.setBigPictureURL(esBurl)
-            AlarmMessage.setAlarmTime(dateStr)
-            AlarmMessage.setHostName(result._1.getHostname)
-            AlarmMessage.setFlag(0)
-            AlarmMessage.setConfirm(1)
             addAlarmMessage.setAlarmTime(dateStr)
             addAlarmMessage.setAlarmType(DispatchTable.ADDED)
-            addAlarmMessage.setSmallPictureURL(surl)
-            addAlarmMessage.setBigPictureURL(burl)
+            addAlarmMessage.setSmallPictureURL(result._1.getsRelativePath())
+            addAlarmMessage.setBigPictureURL(result._1.getbRelativePath())
             addAlarmMessage.setDynamicDeviceID(result._2)
             addAlarmMessage.setHostName(result._1.getHostname)
             rocketMQProducer.send(result._3,
               "alarm_" + DispatchTable.ADDED,
-              surl,
+              result._1.getsRelativePath(),
               gson.toJson(addAlarmMessage).getBytes(),
               null)
           }

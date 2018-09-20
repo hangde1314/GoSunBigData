@@ -7,15 +7,17 @@ import java.io.Serializable;
 public class CarObject implements Serializable {
     private String ipcId;               // 设备ID
     private String timeStamp;           // 时间（格式：2017-01-01 00：00：00）
-    private String date;                // 日期（格式：2017-01-01）
-    private int timeSlot;               // 时间段（格式：0000）（小时+分钟）
     private Vehicle attribute;          // 车辆属性对象
-    private String surl;                // 小图ftp路径（带hostname的ftpurl）
-    private String burl;                // 大图ftp路径（带hostname的ftpurl）
-    private String relativePath;        // 小图相对路径（不带ftp根跟路径）
-    private String relativePath_big;    // 大图相对路径（不带ftp根跟路径）
-    private String ip;                  // 图片保存主机:ip
+    private String sFtpUrl;                // 小图ftp路径（带hostname的ftpurl）
+    private String bFtpUrl;                // 大图ftp路径（带hostname的ftpurl）
+    private String sAbsolutePath;        // 小图相对路径（不带ftp根跟路径）
+    private String bAbsolutePath;    // 大图相对路径（不带ftp根跟路径）
+    private String sRelativePath;       //小图存储绝对路径(不带ftp根目录)
+    private String bRelativePath;       //大图存储绝对路径(不带ftp根目录)
     private String hostname;            // 图片保存主机:hostname
+    private String feature;             //float特征值
+    private String bitfeature;          //bit特征值
+    private String ip;
 
     public static CarObject builder() {
         return new CarObject();
@@ -39,24 +41,6 @@ public class CarObject implements Serializable {
         return this;
     }
 
-    public String getDate() {
-        return date;
-    }
-
-    public CarObject setDate(String date) {
-        this.date = date;
-        return this;
-    }
-
-    public int getTimeSlot() {
-        return timeSlot;
-    }
-
-    public CarObject setTimeSlot(int timeSlot) {
-        this.timeSlot = timeSlot;
-        return this;
-    }
-
     public Vehicle getAttribute() {
         return attribute;
     }
@@ -66,44 +50,65 @@ public class CarObject implements Serializable {
         return this;
     }
 
-    public String getSurl() {
-        return surl;
+    public String getHostname() {
+        return hostname;
     }
 
-    public CarObject setSurl(String surl) {
-        this.surl = surl;
+    public CarObject setHostname(String hostname) {
+        this.hostname = hostname;
         return this;
     }
 
-    public String getBurl() {
-        return burl;
+    public String getsFtpUrl() {
+        return sFtpUrl;
     }
 
-    public CarObject setBurl(String burl) {
-        this.burl = burl;
+    public CarObject setsFtpUrl(String sFtpUrl) {
+        this.sFtpUrl = sFtpUrl;
         return this;
     }
 
-    public String getRelativePath() {
-        return relativePath;
+    public String getbFtpUrl() {
+        return bFtpUrl;
     }
 
-    public CarObject setRelativePath(String relativePath) {
-        this.relativePath = relativePath;
+    public CarObject setbFtpUrl(String bFtpUrl) {
+        this.bFtpUrl = bFtpUrl;
         return this;
     }
 
-    public String getRelativePath_big() {
-        return relativePath_big;
+    public String getsAbsolutePath() {
+        return sAbsolutePath;
     }
 
-    public CarObject setRelativePath_big(String relativePath_big) {
-        this.relativePath_big = relativePath_big;
+    public CarObject setsAbsolutePath(String sAbsolutePath) {
+        this.sAbsolutePath = sAbsolutePath;
         return this;
     }
 
-    public String getIp() {
-        return ip;
+    public String getbAbsolutePath() {
+        return bAbsolutePath;
+    }
+
+    public CarObject setbAbsolutePath(String bAbsolutePath) {
+        this.bAbsolutePath = bAbsolutePath;
+        return this;
+    }
+
+    public String getFeature() {
+        return feature;
+    }
+
+    public void setFeature(String feature) {
+        this.feature = feature;
+    }
+
+    public String getBitfeature() {
+        return bitfeature;
+    }
+
+    public void setBitfeature(String bitfeature) {
+        this.bitfeature = bitfeature;
     }
 
     public CarObject setIp(String ip) {
@@ -111,12 +116,25 @@ public class CarObject implements Serializable {
         return this;
     }
 
-    public String getHostname() {
-        return hostname;
+    public String getIp() {
+        return ip;
     }
 
-    public CarObject setHostname(String hostname) {
-        this.hostname = hostname;
+    public String getsRelativePath() {
+        return sRelativePath;
+    }
+
+    public CarObject setsRelativePath(String sRelativePath) {
+        this.sRelativePath = sRelativePath;
+        return this;
+    }
+
+    public String getbRelativePath() {
+        return bRelativePath;
+    }
+
+    public CarObject setbRelativePath(String bRelativePath) {
+        this.bRelativePath = bRelativePath;
         return this;
     }
 }

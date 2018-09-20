@@ -1,12 +1,14 @@
 package com.hzgc.cluster.spark.consumer
 
 import java.sql.Timestamp
-import java.util.Properties
+import java.util.{Base64, Properties}
 
 import com.google.common.base.Stopwatch
 import com.hzgc.cluster.spark.util.PropertiesUtil
 import com.hzgc.common.collect.bean.{CarObject, FaceObject, PersonObject}
+import com.hzgc.common.service.facedynrepo.{FaceTable, PersonTable, VehicleTable}
 import com.hzgc.common.util.json.JacksonUtil
+import com.hzgc.jniface.FaceFunction
 import kafka.common.TopicAndPartition
 import kafka.message.MessageAndMetadata
 import kafka.serializer.StringDecoder
@@ -19,20 +21,49 @@ import org.apache.spark.sql.{SaveMode, SparkSession}
 import org.apache.spark.streaming.dstream.InputDStream
 import org.apache.spark.streaming.kafka.{HasOffsetRanges, KafkaUtils}
 import org.apache.spark.streaming.{Durations, StreamingContext}
-import org.elasticsearch.spark.rdd.EsSpark
-
 
 object KafkaToParquet {
   val log: Logger = Logger.getLogger(KafkaToParquet.getClass)
-  case class Picture(ftpurl: String, //图片搜索地址
-                     //feature：图片特征值 ipcid：设备id timeslot：时间段
-                     feature_float: Array[Float],feature_byte: Array[Byte], ipcid: String, timeslot: Int,
-                     //timestamp:时间戳 pictype：图片类型 date：时间
-                     exacttime: Timestamp, date: String,
-                     //人脸属性：眼镜、性别、口罩
-                     eyeglasses: Int, gender: Int, mask: Int,
-                     //人脸属性：胡子、清晰度评价
-                     huzi: Int, age: Int, sharpness: Int)
+
+  case class Face(id: String, sftpurl: String, bftpurl: String, timestamp: Timestamp, ipcid: String, hostname: String,
+                  babsolutepath: String, sabsolutepath: String, eyeglasses: Int, gender: Int, age: Int, mask: Int,
+                  huzi: Int, feature: Array[Float], bitfeature: String) {
+    def toEsMap: Map[String, Any] = Map("id" -> id, "sftpurl" -> sftpurl, "bftpurl" -> bftpurl, "timestamp" -> timestamp.toString,
+      "ipcid" -> ipcid, "hostname" -> hostname, "babsolutepath" -> babsolutepath, "sabsolutepath" -> sabsolutepath,
+      "eyeglasses" -> eyeglasses, "gender" -> gender, "age" -> age, "mask" -> mask, "huzi" -> huzi,
+      "feature" -> FaceFunction.floatFeature2Base64Str(feature), "bitfeature" -> bitfeature)
+  }
+
+  case class Person(id: String, sftpurl: String, bftpurl: String, timestamp: String, ipcid: String, hostname: String,
+                    babsolutepath: String, sabsolutepath: String, age: String, baby: String, bag: String,
+                    bottomcolor: String, bottomtype: String, hat: String, hair: String, knapsack: String,
+                    messengerbag: String, orientation: String, sex: String, shoulderbag: String, umbrella: String,
+                    uppercolor: String, uppertype: String, cartype: String, feature: String, bitfeature: String) {
+    def toEsMap: Map[String, Any] = Map(
+      "id" -> id, "sftpurl" -> sftpurl, "bftpurl" -> bftpurl, "timestamp" -> timestamp, "ipcid" -> ipcid,
+      "hostname" -> hostname, "babsolutepath" -> babsolutepath, "sabsolutepath" -> sabsolutepath, "age" -> age,
+      "baby" -> baby, "bag" -> bag, "bottomcolor" -> bottomcolor, "bottomtype" -> bottomtype, "hat" -> hat,
+      "hair" -> hair, "knapsack" -> knapsack, "messengerbag" -> messengerbag, "orientation" -> orientation,
+      "sex" -> sex, "shoulderbag" -> shoulderbag, "umbrella" -> umbrella, "uppercolor" -> uppercolor,
+      "uppertype" -> uppertype, "cartype" -> cartype)
+  }
+
+  case class Car(id: String, sftpurl: String, bftpurl: String, timestamp: String, ipcid: String, hostname: String,
+                 babsolutepath: String, sabsolutepath: String, vehicle_object_type: String, belt_maindriver: String,
+                 belt_codriver: String, brand_name: String, call_code: String, vehicle_color: String, crash_code: String,
+                 danger_code: String, marker_code: String, plate_schelter_code: String, plate_flag_code: String,
+                 plate_licence: String, plate_destain_code: String, plate_color_code: String, plate_type_code: String,
+                 rack_code: String, sunroof_code: String, vehicle_type: String, feature: String, bitfeature: String) {
+    def toEsMap: Map[String, Any] = Map(
+      "id" -> id, "sftpurl" -> sftpurl, "bftpurl" -> bftpurl, "timestamp" -> timestamp, "ipcid" -> ipcid, "hostname" -> hostname,
+      "babsolutepath" -> babsolutepath, "sabsolutepath" -> sabsolutepath, "vehicle_object_type" -> vehicle_object_type,
+      "belt_maindriver" -> belt_maindriver, "belt_codriver" -> belt_codriver, "brand_name" -> brand_name,
+      "call_code" -> call_code, "vehicle_color" -> vehicle_color, "crash_code" -> crash_code, "danger_code" -> danger_code,
+      "marker_code" -> marker_code, "plate_schelter_code" -> plate_schelter_code, "plate_flag_code" -> plate_flag_code,
+      "plate_licence" -> plate_licence, "plate_destain_code" -> plate_destain_code, "plate_color_code" -> plate_color_code,
+      "plate_type_code" -> plate_type_code, "rack_code" -> rack_code, "sunroof_code" -> sunroof_code,
+      "vehicle_type" -> vehicle_type)
+  }
 
   def main(args: Array[String]): Unit = {
 
@@ -54,9 +85,9 @@ object KafkaToParquet {
 
     val zkClient = new ZkClient(zkHosts)
     val conf = new SparkConf().setAppName(appName)
-      .set("es.index.auto.create","true")
-      .set("es.nodes",esNodes)
-      .set("es.port",esPort)
+      .set("es.index.auto.create", "true")
+      .set("es.nodes", esNodes)
+      .set("es.port", esPort)
     val spark: SparkSession = SparkSession.builder().config(conf).appName(appName).getOrCreate()
     val sc = spark.sparkContext
     val ssc: StreamingContext = new StreamingContext(sc, Durations.seconds(timeInterval.toLong))
@@ -73,41 +104,71 @@ object KafkaToParquet {
   }
 
 
-
-  def face2es(spark:SparkSession, ssc:StreamingContext, zkClient: ZkClient, kafkaParams:Map[String, String], topics:Set[String], zkHosts:String, zkPath:String, storeAddress:String): Unit = {
+  def face2es(spark: SparkSession, ssc: StreamingContext, zkClient: ZkClient, kafkaParams: Map[String, String],
+              topics: Set[String], zkHosts: String, zkPath: String, storeAddress: String): Unit = {
+    import org.elasticsearch.spark.streaming._
     val messages = createCustomDirectKafkaStream(ssc, kafkaParams, zkHosts, zkPath, topics)
-    val kafkaDF: Unit = messages.map(data => (data._1, JacksonUtil.toObject(data._2, classOf[FaceObject]))).map(faceobject => {
-      (Picture(faceobject._1, faceobject._2.getAttribute.getFeature,faceobject._2.getAttribute.getBitFeature, faceobject._2.getIpcId,
-        faceobject._2.getTimeSlot, Timestamp.valueOf(faceobject._2.getTimeStamp),
-        faceobject._2.getDate, faceobject._2.getAttribute.getEyeglasses, faceobject._2.getAttribute.getGender,
-        faceobject._2.getAttribute.getMask, faceobject._2.getAttribute.getAge,
-        faceobject._2.getAttribute.getHuzi, faceobject._2.getAttribute.getSharpness), faceobject._1, faceobject._2)
-    }).foreachRDD(rdd => {
+    val kafkaDF = messages.map(data => (data._1, JacksonUtil.toObject(data._2, classOf[FaceObject])))
+      .map(faceobject => {
+        Face(faceobject._1, faceobject._2.getsFtpUrl(), faceobject._2.getbFtpUrl(),
+          Timestamp.valueOf(faceobject._2.getTimeStamp), faceobject._2.getIpcId, faceobject._2.getHostname,
+          faceobject._2.getbAbsolutePath(), faceobject._2.getsAbsolutePath(), faceobject._2.getAttribute.getEyeglasses,
+          faceobject._2.getAttribute.getGender, faceobject._2.getAttribute.getAge, faceobject._2.getAttribute.getMask,
+          faceobject._2.getAttribute.getHuzi, faceobject._2.getAttribute.getFeature,
+          Base64.getEncoder.encodeToString(faceobject._2.getAttribute.getBitFeature))
+      })
+    kafkaDF.foreachRDD(rdd => {
       import spark.implicits._
-      rdd.map(rdd => rdd._1).repartition(1).toDF().write.mode(SaveMode.Append).parquet(storeAddress)
-      val rddData = rdd.map(data => faceObject2Map(data._2, data._3))
-      EsSpark.saveToEs(rddData, "dynamic/person", Map("es.mapping.id"->"ftpurl"))
+      rdd.map(rdd => rdd).repartition(1).toDF().write.mode(SaveMode.Append).parquet(storeAddress)
     })
+    kafkaDF.map(data => data.toEsMap).saveToEs(FaceTable.DYNAMIC_INDEX + "/" + FaceTable.PERSON_INDEX_TYPE,
+      Map("es.mapping.id" -> "id"))
     messages.foreachRDD(rdd => saveOffsets(zkClient, zkHosts, zkPath, rdd))
-
   }
 
-  def person2es(ssc:StreamingContext, zkClient: ZkClient, kafkaParams:Map[String, String], topics:Set[String], zkHosts:String, zkPath:String) {
+  def person2es(ssc: StreamingContext, zkClient: ZkClient, kafkaParams: Map[String, String],
+                topics: Set[String], zkHosts: String, zkPath: String) {
+    import org.elasticsearch.spark.streaming._
     val messages = createCustomDirectKafkaStream(ssc, kafkaParams, zkHosts, zkPath, topics)
-    messages.foreachRDD(rdd => {
-      val rddData = rdd.map(data => personObject2Map(data._1, JacksonUtil.toObject(data._2, classOf[PersonObject])))
-      EsSpark.saveToEs(rddData, "person/recognize", Map("es.mapping.id"->"ftpurl"))
-    })
+    val kafkaDF = messages.map(data => (data._1, JacksonUtil.toObject(data._2, classOf[PersonObject])))
+      .map(personObject => Person(
+        personObject._1, personObject._2.getsFtpUrl(), personObject._2.getbFtpUrl(), personObject._2.getTimeStamp,
+        personObject._2.getIpcId, personObject._2.getHostname, personObject._2.getbAbsolutePath(),
+        personObject._2.getsAbsolutePath(), personObject._2.getAttribute.getAge_code, personObject._2.getAttribute.getBaby_code,
+        personObject._2.getAttribute.getBag_code, personObject._2.getAttribute.getBottomcolor_code,
+        personObject._2.getAttribute.getBottomtype_code, personObject._2.getAttribute.getHat_code,
+        personObject._2.getAttribute.getHair_code, personObject._2.getAttribute.getKnapsack_code,
+        personObject._2.getAttribute.getMessengerbag_code, personObject._2.getAttribute.getOrientation_code,
+        personObject._2.getAttribute.getSex_code, personObject._2.getAttribute.getShoulderbag_code,
+        personObject._2.getAttribute.getUmbrella_code, personObject._2.getAttribute.getUppercolor_code,
+        personObject._2.getAttribute.getUppertype_code, personObject._2.getAttribute.getCar_type,
+        personObject._2.getFeature, personObject._2.getBitfeature
+      ))
+    kafkaDF.saveToEs(PersonTable.DYNAMIC_INDEX + "/" + PersonTable.PERSON_INDEX_TYPE,
+      Map("es.mapping.id" -> "id"))
     messages.foreachRDD(rdd => saveOffsets(zkClient, zkHosts, zkPath, rdd))
-
   }
 
-  def car2es(ssc:StreamingContext, zkClient: ZkClient, kafkaParams:Map[String, String], topics:Set[String], zkHosts:String, zkPath:String) {
+  def car2es(ssc: StreamingContext, zkClient: ZkClient, kafkaParams: Map[String, String], topics: Set[String],
+             zkHosts: String, zkPath: String) {
+    import org.elasticsearch.spark.streaming._
     val messages = createCustomDirectKafkaStream(ssc, kafkaParams, zkHosts, zkPath, topics)
-    messages.foreachRDD(rdd => {
-      val rddData = rdd.map(data => carObject2Map(data._1, JacksonUtil.toObject(data._2, classOf[CarObject])))
-      EsSpark.saveToEs(rddData, "car/recognize", Map("es.mapping.id"->"ftpurl"))
-    })
+    val kafkfDF = messages.map(data => (data._1, JacksonUtil.toObject(data._2, classOf[CarObject])))
+      .map(carObject => Car(
+        carObject._1, carObject._2.getsFtpUrl(), carObject._2.getbFtpUrl(), carObject._2.getTimeStamp,
+        carObject._2.getIpcId, carObject._2.getHostname, carObject._2.getbAbsolutePath(), carObject._2.getsAbsolutePath(),
+        carObject._2.getAttribute.getVehicle_object_type, carObject._2.getAttribute.getBelt_maindriver,
+        carObject._2.getAttribute.getBelt_codriver, carObject._2.getAttribute.getBrand_name,
+        carObject._2.getAttribute.getCall_code, carObject._2.getAttribute.getVehicle_color,
+        carObject._2.getAttribute.getCrash_code, carObject._2.getAttribute.getDanger_code,
+        carObject._2.getAttribute.getMarker_code, carObject._2.getAttribute.getPlate_schelter_code,
+        carObject._2.getAttribute.getPlate_flag_code, carObject._2.getAttribute.getPlate_licence,
+        carObject._2.getAttribute.getPlate_destain_code, carObject._2.getAttribute.getPlate_color_code,
+        carObject._2.getAttribute.getPlate_type_code, carObject._2.getAttribute.getRack_code,
+        carObject._2.getAttribute.getSunroof_code, carObject._2.getAttribute.getVehicle_type,
+        carObject._2.getFeature, carObject._2.getBitfeature))
+    kafkfDF.map(data => data.toEsMap).saveToEs(VehicleTable.INDEX + "/" + VehicleTable.TYPE,
+      Map("es.mapping.id" -> "id"))
     messages.foreachRDD(rdd => saveOffsets(zkClient, zkHosts, zkPath, rdd))
 
   }
@@ -163,102 +224,5 @@ object KafkaToParquet {
     log.info("Done updating offsets in Zookeeper. Took " + stopwatch)
     log.info("==================================================================")
   }
-
-  def faceObject2Map(ftpUrl:String, faceObject: FaceObject): Map[String, Any] = {
-    val face = faceObject.getAttribute
-    val map = Map("ftpurl"->ftpUrl,
-      "ipcid"->faceObject.getIpcId,
-      "timeStamp"->faceObject.getTimeStamp,
-      "date"->faceObject.getDate,
-      "timeslot"->faceObject.getTimeSlot,
-      "surl"->faceObject.getSurl,
-      "burl"->faceObject.getBurl,
-      "relativePath"->faceObject.getRelativePath,
-      "relativePath_big"->faceObject.getRelativePath_big,
-      "ip"->faceObject.getIp,
-      "hostname"->faceObject.getHostname,
-
-      "age"->face.getAge ,
-      "mask"->face.getMask ,
-      "gender"->face.getGender ,
-      "huzi"->face.getHuzi ,
-      "eyeglasses"->face.getEyeglasses,
-      "sharpness"->face.getSharpness
-    )
-    map
-  }
-
-  def personObject2Map(ftpUrl:String, personObject: PersonObject): Map[String, String] = {
-    val person = personObject.getAttribute
-    val map = Map("ftpurl"->ftpUrl,
-      "ipcid"->personObject.getIpcId,
-      "timestamp"->personObject.getTimeStamp,
-      "date"->personObject.getDate,
-      "timeslot"->personObject.getTimeSlot.toString,
-      "surl"->personObject.getSurl,
-      "burl"->personObject.getBurl,
-      "relativepath"->personObject.getRelativePath,
-      "relativepath_big"->personObject.getRelativePath_big,
-      "ip"->personObject.getIp,
-      "hostname"->personObject.getHostname,
-
-      "age_code"->person.getAge_code,
-      "baby_code"->person.getBaby_code,
-      "bag_code"->person.getBag_code,
-      "bottomcolor_code"->person.getBottomcolor_code,
-      "bottomtype_code"->person.getBottomtype_code,
-      "hat_code"->person.getHat_code,
-      "hair_code"->person.getHair_code,
-      "knapsack_code"->person.getKnapsack_code,
-      "messengerbag_code"->person.getMessengerbag_code,
-      "orientation_code"->person.getOrientation_code,
-      "sex_code"->person.getSex_code,
-      "shoulderbag_code"->person.getShoulderbag_code,
-      "umbrella_code"->person.getUmbrella_code,
-      "uppercolor_code"->person.getUppercolor_code,
-      "uppertype_code"->person.getUppertype_code,
-      "car_type"->person.getCar_type
-    )
-    map
-  }
-
-  def carObject2Map(ftpUrl:String, carObject:CarObject): Map[String, String] = {
-    val car = carObject.getAttribute
-    val map = Map("ftpurl"->ftpUrl,
-      "ipcid"->carObject.getIpcId,
-      "timestamp"->carObject.getTimeStamp,
-      "date"->carObject.getDate,
-      "timeslot"->carObject.getTimeSlot.toString,
-      "surl"->carObject.getSurl,
-      "burl"->carObject.getBurl,
-      "relativepath"->carObject.getRelativePath,
-      "relativepath_big"->carObject.getRelativePath_big,
-      "ip"->carObject.getIp,
-      "hostname"->carObject.getHostname,
-
-      "vehicle_object_type"->car.getVehicle_object_type ,
-      "belt_maindriver"->car.getBelt_maindriver ,
-      "belt_codriver"->car.getBelt_codriver ,
-      "brand_name"->car.getBrand_name ,
-      "call_code"->car.getCall_code ,
-      "vehicle_color"->car.getVehicle_color ,
-      "crash_code"->car.getCrash_code ,
-      "danger_code"->car.getDanger_code ,
-      "marker_code"->car.getMarker_code ,
-      "plate_schelter_code"->car.getPlate_schelter_code ,
-      "plate_flag_code"->car.getPlate_flag_code ,
-      "plate_licence"->car.getPlate_licence ,
-      "plate_destain_code"->car.getPlate_destain_code ,
-      "plate_color_code"->car.getPlate_color_code ,
-      "plate_type_code"->car.getPlate_type_code ,
-      "rack_code"->car.getRack_code ,
-      "sparetire_code"->car.getSparetire_code ,
-      "mistake_code"->car.getMistake_code ,
-      "sunroof_code"->car.getSunroof_code ,
-      "vehicle_type"->car.getVehicle_type
-    )
-    map
-  }
-
 }
 

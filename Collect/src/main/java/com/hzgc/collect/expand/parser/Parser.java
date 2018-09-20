@@ -11,4 +11,8 @@ public interface Parser {
     String ftpUrl_b2s(String burl, String type, int index);
     // 大图路径转小图路径(绝对路径和ftp相对路径都可以转)
     String path_b2s(String burl, String type, int index);
+    //通过上传文件路径解析到ftpUrl
+    String getFtpUrl_ip(String filePath);
+    //通过上传文件路径解析到ftpUrl（ftp发送至kafka的key）
+    String getFtpUrl_hostname(String filePath);
 }

@@ -5,17 +5,18 @@ import com.hzgc.jniface.FaceAttribute;
 import java.io.Serializable;
 
 public class FaceObject implements Serializable {
+    private String id;                  //对象唯一ID
     private String ipcId;               // 设备ID
     private String timeStamp;           // 时间（格式：2017-01-01 00：00：00）
-    private String date;                // 日期（格式：2017-01-01）
-    private int timeSlot;               // 时间段（格式：0000）（小时+分钟）
     private FaceAttribute attribute;    // 人脸属性对象
-    private String surl;                // 小图ftp路径（带hostname的ftpurl）
-    private String burl;                // 大图ftp路径（带hostname的ftpurl）
-    private String relativePath;        // 小图相对路径（不带ftp根跟路径）
-    private String relativePath_big;    // 大图相对路径（不带ftp根跟路径）
-    private String ip;                  // 图片保存主机:ip
+    private String sFtpUrl;                // 小图ftp路径（带hostname的ftpurl）
+    private String bFtpUrl;                // 大图ftp路径（带hostname的ftpurl）
+    private String sAbsolutePath;        // 小图存储绝对路径(带ftp根目录)
+    private String bAbsolutePath;       //大图存储绝对路径(带ftp根目录)
+    private String sRelativePath;       //小图存储绝对路径(不带ftp根目录)
+    private String bRelativePath;       //大图存储绝对路径(不带ftp根目录)
     private String hostname;            // 图片保存主机:hostname
+    private String ip;                  //ftp服务器ip
 
     public static FaceObject builder() {
         return new FaceObject();
@@ -39,24 +40,6 @@ public class FaceObject implements Serializable {
         return this;
     }
 
-    public String getDate() {
-        return date;
-    }
-
-    public FaceObject setDate(String date) {
-        this.date = date;
-        return this;
-    }
-
-    public int getTimeSlot() {
-        return timeSlot;
-    }
-
-    public FaceObject setTimeSlot(int timeSlot) {
-        this.timeSlot = timeSlot;
-        return this;
-    }
-
     public FaceAttribute getAttribute() {
         return attribute;
     }
@@ -66,48 +49,39 @@ public class FaceObject implements Serializable {
         return this;
     }
 
-    public String getSurl() {
-        return surl;
+    public String getsFtpUrl() {
+        return sFtpUrl;
     }
 
-    public FaceObject setSurl(String surl) {
-        this.surl = surl;
+    public FaceObject setsFtpUrl(String sFtpUrl) {
+        this.sFtpUrl = sFtpUrl;
         return this;
     }
 
-    public String getBurl() {
-        return burl;
+    public String getbFtpUrl() {
+        return bFtpUrl;
     }
 
-    public FaceObject setBurl(String burl) {
-        this.burl = burl;
+    public FaceObject setbFtpUrl(String bFtpUrl) {
+        this.bFtpUrl = bFtpUrl;
         return this;
     }
 
-    public String getRelativePath() {
-        return relativePath;
+    public String getsAbsolutePath() {
+        return sAbsolutePath;
     }
 
-    public FaceObject setRelativePath(String relativePath) {
-        this.relativePath = relativePath;
+    public FaceObject setsAbsolutePath(String sAbsolutePath) {
+        this.sAbsolutePath = sAbsolutePath;
         return this;
     }
 
-    public String getRelativePath_big() {
-        return relativePath_big;
+    public String getbAbsolutePath() {
+        return bAbsolutePath;
     }
 
-    public FaceObject setRelativePath_big(String relativePath_big) {
-        this.relativePath_big = relativePath_big;
-        return this;
-    }
-
-    public String getIp() {
-        return ip;
-    }
-
-    public FaceObject setIp(String ip) {
-        this.ip = ip;
+    public FaceObject setbAbsolutePath(String bAbsolutePath) {
+        this.bAbsolutePath = bAbsolutePath;
         return this;
     }
 
@@ -117,6 +91,42 @@ public class FaceObject implements Serializable {
 
     public FaceObject setHostname(String hostname) {
         this.hostname = hostname;
+        return this;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public FaceObject setId(String id) {
+        this.id = id;
+        return this;
+    }
+
+    public FaceObject setIp(String ftpIp) {
+        this.ip = ftpIp;
+        return this;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public String getsRelativePath() {
+        return sRelativePath;
+    }
+
+    public FaceObject setsRelativePath(String sRelativePath) {
+        this.sRelativePath = sRelativePath;
+        return this;
+    }
+
+    public String getbRelativePath() {
+        return bRelativePath;
+    }
+
+    public FaceObject setbRelativePath(String bRelativePath) {
+        this.bRelativePath = bRelativePath;
         return this;
     }
 }

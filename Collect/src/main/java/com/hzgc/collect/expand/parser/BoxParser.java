@@ -1,6 +1,6 @@
 package com.hzgc.collect.expand.parser;
 
-public class BoxParser implements Parser {
+public class BoxParser extends AbstractParser {
     /**
      * 判断是否是可处理图片
      *
@@ -25,32 +25,22 @@ public class BoxParser implements Parser {
     @Override
     public FtpPathMetaData parse(String path) {
         FtpPathMetaData message = new FtpPathMetaData();
-        if (canParse(path)) {
-            String ipcID = path.substring(1, path.indexOf("/", 1));
-            String timeStr = path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("_")).replace("_", "");
+        String ipcID = path.substring(1, path.indexOf("/", 1));
+        String timeStr = path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("_")).replace("_", "");
 
-            String year = timeStr.substring(0, 4);
-            String month = timeStr.substring(4, 6);
-            String day = timeStr.substring(6, 8);
-            String hour = timeStr.substring(8, 10);
-            String minute = timeStr.substring(10, 12);
-            String second = timeStr.substring(12, 14);
+        String year = timeStr.substring(0, 4);
+        String month = timeStr.substring(4, 6);
+        String day = timeStr.substring(6, 8);
+        String hour = timeStr.substring(8, 10);
+        String minute = timeStr.substring(10, 12);
+        String second = timeStr.substring(12, 14);
 
-            StringBuilder time = new StringBuilder();
-            time = time.append(year).append("-").append(month).append("-").append(day).
-                    append(" ").append(hour).append(":").append(minute).append(":").append(second);
+        StringBuilder time = new StringBuilder();
+        time = time.append(year).append("-").append(month).append("-").append(day).
+                append(" ").append(hour).append(":").append(minute).append(":").append(second);
 
-            StringBuilder date = new StringBuilder();
-            date = date.append(year).append("-").append(month).append("-").append(day);
-
-            StringBuilder sj = new StringBuilder();
-            sj = sj.append(hour).append(minute);
-
-            message.setIpcid(ipcID);
-            message.setTimeStamp(time.toString());
-            message.setDate(date.toString());
-            message.setTimeslot(Integer.parseInt(sj.toString()));
-        }
+        message.setIpcid(ipcID);
+        message.setTimeStamp(time.toString());
         return message;
     }
 

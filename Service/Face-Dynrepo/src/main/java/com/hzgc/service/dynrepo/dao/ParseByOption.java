@@ -2,9 +2,9 @@ package com.hzgc.service.dynrepo.dao;
 
 import com.hzgc.common.service.faceattribute.bean.Attribute;
 import com.hzgc.common.service.faceattribute.bean.Logistic;
-import com.hzgc.common.service.facedynrepo.DynamicTable;
+import com.hzgc.common.service.facedynrepo.FaceTable;
 import com.hzgc.common.util.basic.IsEmpty;
-import com.hzgc.jniface.FaceFunction;
+import com.hzgc.jniface.FaceJNI;
 import com.hzgc.service.dynrepo.bean.SearchOption;
 import com.hzgc.service.dynrepo.bean.SortParam;
 import org.apache.log4j.Logger;
@@ -21,20 +21,20 @@ class ParseByOption {
     private static String MID_FIELD = null;
 
     static {
-        MID_FIELD = DynamicTable.FTPURL +
+        MID_FIELD = FaceTable.FTPURL +
                 ", " +
-                DynamicTable.IPCID +
+                FaceTable.IPCID +
                 ", " +
-                DynamicTable.TIMESLOT +
+                FaceTable.TIMESLOT +
                 ", " +
-                DynamicTable.TIMESTAMP +
+                FaceTable.TIMESTAMP +
                 ", " +
-                DynamicTable.DATE;
+                FaceTable.DATE;
     }
 
     static String getFinalSQLwithOption(SearchOption option, boolean printSql) throws SQLException {
         if (option.getImages().size() == 1) {
-            String feature = FaceFunction.
+            String feature = FaceJNI.
                     floatArray2string(option.getImages().get(0).getFeature().getFeature());
             return getNotOnePersonSQL(option, feature, printSql);
         } else if (!option.isSinglePerson()) {
@@ -62,22 +62,22 @@ class ParseByOption {
                 .append("greatest(");
         String[] simFieldConatiner = new String[option.getImages().size()];
         for (int i = 0; i < option.getImages().size(); i++) {
-            String simField = DynamicTable.SIMILARITY + i;
+            String simField = FaceTable.SIMILARITY + i;
             simFieldConatiner[i] = simField;
             if (option.getImages().size() - i > 1) {
                 finalSql.append(simField).append(", ");
             } else {
                 finalSql.append(simField).append(") as ")
-                        .append(DynamicTable.SIMILARITY)
+                        .append(FaceTable.SIMILARITY)
                         .append(" from (");
             }
         }
         StringBuilder prefix = getOnePersonPrefix(option, simFieldConatiner, printSql);
         finalSql.append(prefix)
-                .append(DynamicTable.PERSON_TABLE)
+                .append(FaceTable.PERSON_TABLE)
                 .append(" union all ")
                 .append(prefix)
-                .append(DynamicTable.MID_TABLE)
+                .append(FaceTable.MID_TABLE)
                 .append(")) as temp_table ")
                 .append(getFilterOption(option));
         return finalSql.toString();
@@ -101,15 +101,15 @@ class ParseByOption {
                     .append(MID_FIELD)
                     .append(", ")
                     .append(getAttributes(option))
-                    .append(DynamicTable.SIMILARITY)
+                    .append(FaceTable.SIMILARITY)
                     .append(" from (")
                     .append(prefix)
                     .append(" from ")
-                    .append(DynamicTable.PERSON_TABLE)
+                    .append(FaceTable.PERSON_TABLE)
                     .append(" union all ")
                     .append(prefix)
                     .append(" from ")
-                    .append(DynamicTable.MID_TABLE)
+                    .append(FaceTable.MID_TABLE)
                     .append(") temp_table ")
                     .append(getFilterOption(option));
             return finalSql.toString();
@@ -119,27 +119,27 @@ class ParseByOption {
                 if (printSql) {
                     feature = "";
                 } else {
-                    feature = FaceFunction.floatArray2string(option.getImages().get(i).getFeature().getFeature());
+                    feature = FaceJNI.floatArray2string(option.getImages().get(i).getFeature().getFeature());
                 }
                 StringBuilder strBuilder = new StringBuilder();
                 strBuilder.append("(select ")
                         .append("'")
                         .append(option.getImages().get(i).getImageID())
                         .append("' as ")
-                        .append(DynamicTable.GROUP_FIELD)
+                        .append(FaceTable.GROUP_FIELD)
                         .append(", ")
                         .append(MID_FIELD)
                         .append(", ")
                         .append(getAttributes(option))
-                        .append(DynamicTable.SIMILARITY)
+                        .append(FaceTable.SIMILARITY)
                         .append(" from (")
                         .append(getNotOnePersonPrefix(feature, option))
                         .append(" from ")
-                        .append(DynamicTable.PERSON_TABLE)
+                        .append(FaceTable.PERSON_TABLE)
                         .append(" union all ")
                         .append(getNotOnePersonPrefix(feature, option))
                         .append(" from ")
-                        .append(DynamicTable.MID_TABLE)
+                        .append(FaceTable.MID_TABLE)
                         .append(") temp_table ")
                         .append(getFilterOption(option))
                         .append(")");
@@ -167,25 +167,25 @@ class ParseByOption {
         for (int i = 0; i < option.getSort().size(); i++) {
             switch (sortParamList.get(i)) {
                 case TIMEDESC:
-                    finalSql.append(DynamicTable.TIMESTAMP).append(" desc");
+                    finalSql.append(FaceTable.TIMESTAMP).append(" desc");
                     if (sortParamList.size() - 1 > i) {
                         finalSql.append(", ");
                     }
                     break;
                 case SIMDESC:
-                    finalSql.append(DynamicTable.SIMILARITY).append(" desc");
+                    finalSql.append(FaceTable.SIMILARITY).append(" desc");
                     if (sortParamList.size() - 1 > i) {
                         finalSql.append(", ");
                     }
                     break;
                 case SIMDASC:
-                    finalSql.append(DynamicTable.SIMILARITY);
+                    finalSql.append(FaceTable.SIMILARITY);
                     if (sortParamList.size() - 1 > i) {
                         finalSql.append(", ");
                     }
                     break;
                 case TIMEASC:
-                    finalSql.append(DynamicTable.TIMESTAMP);
+                    finalSql.append(FaceTable.TIMESTAMP);
                     if (sortParamList.size() - 1 > i) {
                         finalSql.append(", ");
                     }
@@ -202,7 +202,7 @@ class ParseByOption {
      */
     private static void getDeviceIpcId(StringBuilder finalSql, SearchOption option) {
         finalSql.append(" and ")
-                .append(DynamicTable.IPCID)
+                .append(FaceTable.IPCID)
                 .append(" in ")
                 .append("(");
         for (int i = 0; option.getDeviceIpcs().size() > i; i++) {
@@ -231,13 +231,13 @@ class ParseByOption {
         //判断开始时间和结束时间 数据格式 年-月-日 时:分:秒
         finalSql
                 .append(" and ")
-                .append(DynamicTable.TIMESTAMP)
+                .append(FaceTable.TIMESTAMP)
                 .append(">=")
                 .append("'")
                 .append(option.getStartTime())
                 .append("'")
                 .append(" and ")
-                .append(DynamicTable.TIMESTAMP)
+                .append(FaceTable.TIMESTAMP)
                 .append("<=")
                 .append("'")
                 .append(option.getEndTime())
@@ -245,7 +245,7 @@ class ParseByOption {
         //判断日期分区 数据格式 年-月-日
         finalSql
                 .append(" and ")
-                .append(DynamicTable.DATE)
+                .append(FaceTable.DATE)
                 .append(" between ")
                 .append("'")
                 .append(Date.valueOf(option.getStartTime().split(" ")[0]))
@@ -272,7 +272,7 @@ class ParseByOption {
             int end_st = (end_sj / 60) * 100 + end_sj % 60;
             if (option.getPeriodTimes().size() - 1 > i) {
                 finalSql
-                        .append(DynamicTable.TIMESLOT)
+                        .append(FaceTable.TIMESLOT)
                         .append(" between ")
                         .append(start_st)
                         .append(" and ")
@@ -280,7 +280,7 @@ class ParseByOption {
                         .append(" or ");
             } else {
                 finalSql
-                        .append(DynamicTable.TIMESLOT)
+                        .append(FaceTable.TIMESLOT)
                         .append(" between ")
                         .append(start_st)
                         .append(" and ")
@@ -364,13 +364,13 @@ class ParseByOption {
                 MID_FIELD +
                 ", " +
                 getAttributes(option) +
-                DynamicTable.FUNCTION_NAME +
+                FaceTable.FUNCTION_NAME +
                 "('" +
                 searchFeaStr +
                 "', " +
-                DynamicTable.FEATURE +
+                FaceTable.FEATURE +
                 ") as " +
-                DynamicTable.SIMILARITY;
+                FaceTable.SIMILARITY;
     }
 
     /**
@@ -392,14 +392,14 @@ class ParseByOption {
             if (printSql) {
                 feature = "";
             } else {
-                feature = FaceFunction.
+                feature = FaceJNI.
                         floatArray2string(option.getImages().get(i).getFeature().getFeature());
             }
-            prefix.append(DynamicTable.FUNCTION_NAME)
+            prefix.append(FaceTable.FUNCTION_NAME)
                     .append("('")
                     .append(feature)
                     .append("', ")
-                    .append(DynamicTable.FEATURE)
+                    .append(FaceTable.FEATURE)
                     .append(") as ")
                     .append(fieldContainer[i]);
             if (option.getImages().size() - i > 1) {
@@ -418,7 +418,7 @@ class ParseByOption {
     private static String getFilterOption(SearchOption option) {
         StringBuilder finalSql = new StringBuilder();
         finalSql.append("where ")
-                .append(DynamicTable.SIMILARITY)
+                .append(FaceTable.SIMILARITY)
                 .append(">=")
                 .append(option.getSimilarity())
                 .append(getAttributesAndValues(option));
@@ -445,6 +445,6 @@ class ParseByOption {
     }
 
     private static void getClean(StringBuilder finalSql) {
-        finalSql.append(" and ").append(DynamicTable.SHARPNESS).append(" = 0 ");
+        finalSql.append(" and ").append(FaceTable.SHARPNESS).append(" = 0 ");
     }
 }

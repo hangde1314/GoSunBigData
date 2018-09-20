@@ -2,6 +2,7 @@ package com.hzgc.cluster.peoman.worker.service;
 
 import com.hzgc.common.service.peoman.SyncPeopleManager;
 import com.hzgc.common.util.json.JacksonUtil;
+import com.hzgc.jniface.FaceFunction;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -11,9 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
-import sun.misc.BASE64Decoder;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -61,35 +62,37 @@ public class InnerConsumer implements Runnable {
     public void run() {
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(pollTime);
+            List<SyncPeopleManager> managers = new ArrayList<>();
             for (ConsumerRecord<String, String> record : records) {
                 SyncPeopleManager message = JacksonUtil.toObject(record.value(), SyncPeopleManager.class);
                 String type = message.getType();
                 switch (type) {
                     case "2":
-                         addPerson(message);
+                        managers.add(message);
                         break;
                 }
             }
+            addPerson(managers);
         }
     }
 
     /**
      * 添加人员
-     * @param message 消息对象
+     *
+     * @param managerList 消息对象
      */
-    private void addPerson(SyncPeopleManager message) {
-        List<ComparePicture> comparePictureList = memeoryCache.getPeople(message.getPersonid());
-        if (comparePictureList != null) {
-            BASE64Decoder base64Decoder = new BASE64Decoder();
-            ComparePicture comparePicture = new ComparePicture();
-            comparePicture.setPeopleId(message.getPersonid());
-            try {
-                comparePicture.setBitFeature(base64Decoder.decodeBuffer(message.getBitFeature()));
-            } catch (IOException e) {
-                e.printStackTrace();
+    private void addPerson(List<SyncPeopleManager> managerList) {
+        List<ComparePicture> newComparePicture = new ArrayList<>();
+        for (SyncPeopleManager message : managerList) {
+            List<ComparePicture> comparePictureList = memeoryCache.getPeople(message.getPersonid());
+            if (comparePictureList != null) {
+                ComparePicture comparePicture = new ComparePicture();
+                comparePicture.setPeopleId(message.getPersonid());
+                comparePicture.setBitFeature(FaceFunction.base64Str2BitFeature(message.getBitFeature()));
+                comparePicture.setId(message.getPictureId());
+                newComparePicture.add(comparePicture);
             }
-            comparePicture.setId(message.getPictureId());
-            memeoryCache.putData(comparePicture);
         }
+        memeoryCache.putData(newComparePicture);
     }
 }

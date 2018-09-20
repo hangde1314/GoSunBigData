@@ -1,125 +1,16 @@
 package com.hzgc.jniface;
 
+import org.xerial.snappy.Snappy;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.ArrayList;
+import java.util.Base64;
 
-public class FaceFunction implements Serializable {
-
+public class FaceFunction {
     private static final String SPLIT = ":";
-
-    static {
-        System.loadLibrary("JNILIB");
-    }
-
-    /**
-     * 算法初始化操作，此处为初始化一次,若需要调用n次可以循环调用次方法
-     * 算法初始化次数增加在一定程度上会提高特征提取效率,但是会没初始化一次
-     * 会占用一定的显存,所以需要适量
-     */
-    public static native void init();
-
-    /**
-     * 算法初始化操作，此处可指定初始化次数,若需要调用n次可以循环调用次方法
-     * 算法初始化次数增加在一定程度上会提高特征提取效率,但是会没初始化一次
-     * 会占用一定的显存,所以需要适量
-     */
-    public static native void initThreadNum(int threadNum);
-
-    /**
-     * 大图检测功能,此方法可以同时检测人,车,脸三种
-     *
-     * @param pictureStream 二进制图片
-     * @param pictureFormat 图片格式
-     * @return 检测结果,检测不到返回 null
-     */
-    public static native ArrayList<SmallImage> bigPictureCheck(byte[] pictureStream, String pictureFormat);
-
-    /**
-     * 大图检测功能,此方法只能检测人脸图片
-     *
-     * @param pictureStream 二进制图片
-     * @param pictureFormat 图片格式
-     * @return 检测结果,检测不到返回 null
-     */
-    public static native ArrayList<SmallImage> faceCheck(byte[] pictureStream, String pictureFormat);
-
-    /**
-     * 大图检测功能,此方法只能检测行人图片
-     *
-     * @param pictureStream 二进制图片
-     * @param pictureFormat 图片格式
-     * @return 检测结果,检测不到返回 null
-     */
-    public static native ArrayList<SmallImage> personCheck(byte[] pictureStream, String pictureFormat);
-
-    /**
-     * 大图检测功能,此方法只能检测车辆图片
-     *
-     * @param pictureStream 二进制图片
-     * @param pictureFormat 图片格式
-     * @return 检测结果,检测不到返回 null
-     */
-    public static native ArrayList<SmallImage> carCheck(byte[] pictureStream, String pictureFormat);
-
-    /**
-     * 大图检测功能,此方法可同时检测人脸和行人图片
-     *
-     * @param pictureStream 二进制图片
-     * @param pictureFormat 图片格式
-     * @return 检测结果,检测不到返回 null
-     */
-    public static native ArrayList<SmallImage> faceAndPersonCheck(byte[] pictureStream, String pictureFormat);
-
-    /**
-     * 大图检测功能,此方法可同时检测人脸和车辆图片
-     *
-     * @param pictureStream 二进制图片
-     * @param pictureFormat 图片格式
-     * @return 检测结果,检测不到返回 null
-     */
-    public static native ArrayList<SmallImage> faceAndCarCheck(byte[] pictureStream, String pictureFormat);
-
-    /**
-     * 大图检测功能,此方法可同时检测行人和车辆图片
-     *
-     * @param pictureStream 二进制图片
-     * @param pictureFormat 图片格式
-     * @return 检测结果,检测不到返回 null
-     */
-    public static native ArrayList<SmallImage> personAndCarCheck(byte[] pictureStream, String pictureFormat);
-
-    /**
-     * 人脸特征提取
-     *
-     * @param pictureStream 小图二进制图片
-     * @param pictureFormat 图片格式
-     * @return 提取结果,提取不到则返回 null
-     */
-    public static native FaceAttribute faceFeatureExtract(byte[] pictureStream, String pictureFormat);
-
-
-    /**
-     * 人脸比对粗筛
-     * @param featureList 要查询的特征值集合,即可查单条或者多条
-     * @param queryList 被比对的特征值集合
-     * @param topN 取前 n 条
-     * @return 比对结果
-     */
-    public static native ArrayList<CompareResult> faceCompareBit(byte[][] featureList, byte[][] queryList, int topN);
-
-    /**
-     * 人脸比对精筛
-     * @param diku  数据底库
-     * @param queryList 图片数据
-     * @param topN 取前 n 条
-     * @return 比对结果
-     */
-    public static native ArrayList<CompareResult> faceCompareFloat(float[][] diku, float[][] queryList, int topN);
 
     /**
      * 特征提取方法 （内）（赵喆）
@@ -166,6 +57,7 @@ public class FaceFunction implements Serializable {
      * @param feature 传入编码为UTF-8的String
      * @return 返回float[]类型的特征值
      */
+    @Deprecated
     public static float[] string2floatArray(String feature) {
         if (feature != null && feature.length() > 0) {
             float[] featureFloat = new float[512];
@@ -185,9 +77,10 @@ public class FaceFunction implements Serializable {
      * @param historyFeatureStr 库中的特征值
      * @return 相似度
      */
+    @Deprecated
     public static float featureCompare(String currentFeatureStr, String historyFeatureStr) {
-        float[] currentFeature = FaceFunction.string2floatArray(currentFeatureStr);
-        float[] historyFeature = FaceFunction.string2floatArray(historyFeatureStr);
+        float[] currentFeature = string2floatArray(currentFeatureStr);
+        float[] historyFeature = string2floatArray(historyFeatureStr);
         return featureCompare(currentFeature, historyFeature);
     }
 
@@ -217,6 +110,7 @@ public class FaceFunction implements Serializable {
      * @param feature 传入float[]类型的特征值
      * @return 输出指定编码为UTF-8的String
      */
+    @Deprecated
     public static String floatArray2string(float[] feature) {
         if (feature != null && feature.length == 512) {
             StringBuilder sb = new StringBuilder();
@@ -232,4 +126,61 @@ public class FaceFunction implements Serializable {
         return "";
     }
 
+    /**
+     * 将float特征值转为Base64加密的String类型
+     * @param feature float特征值
+     * @return Base64加密的String类型
+     */
+    public static String floatFeature2Base64Str(float[] feature) {
+        if (feature != null && feature.length == 512) {
+            try {
+                byte[] zipFeautre = Snappy.compress(feature);
+                return Base64.getEncoder().encodeToString(zipFeautre);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return "";
+    }
+
+    /**
+     * 将Base64加密的特征值转为float特征值
+     * @param base64Str Base64加密的特征值
+     * @return float特征值
+     */
+    public static float[] base64Str2floatFeature(String base64Str) {
+        if (base64Str != null && !"".equals(base64Str)) {
+            byte[] zipFeature = Base64.getDecoder().decode(base64Str);
+            try {
+                return Snappy.uncompressFloatArray(zipFeature);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return new float[0];
+    }
+
+    /**
+     * 将bit特征值转为Base64字符串
+     * @param bitFeature bit特征值
+     * @return Base64字符串
+     */
+    public static String bitFeautre2Base64Str(byte[] bitFeature) {
+        if (bitFeature != null && bitFeature.length > 0) {
+            return Base64.getEncoder().encodeToString(bitFeature);
+        }
+        return "";
+    }
+
+    /**
+     * 将Base64字符串转为bit特征值
+     * @param base64Str Base64字符串
+     * @return bit特征值
+     */
+    public static byte[] base64Str2BitFeature(String base64Str) {
+        if (base64Str != null && !"".equals(base64Str)) {
+            return Base64.getDecoder().decode(base64Str);
+        }
+        return new byte[0];
+    }
 }

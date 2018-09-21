@@ -8,7 +8,6 @@ public class ConverFtpurl {
                                         .append(ip)
                                         .append(":")
                                         .append(port)
-                                        .append("/get_image")
                                         .append("?url=")
                                         .append(absolutePath);
         return append.toString();

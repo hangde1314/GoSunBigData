@@ -96,7 +96,8 @@ public class DefaultMessageResource implements MessageResource {
         // load default resource
         String defaultResourceName;
         if (lang == null) {
-            defaultResourceName = RESOURCE_PATH + "src/main/resources/ftpserver/message/FtpStatus.properties";
+//            defaultResourceName = RESOURCE_PATH + "BOOT-INF/classes/ftpserver/message/FtpStatus.properties";
+            defaultResourceName = "BOOT-INF/classes/ftpserver/message/FtpStatus.properties";
         } else {
             defaultResourceName = RESOURCE_PATH + "FtpStatus_" + lang
                     + ".properties";
@@ -105,6 +106,10 @@ public class DefaultMessageResource implements MessageResource {
         try {
             in = getClass().getClassLoader().getResourceAsStream(
                     defaultResourceName);
+            if (in == null) {
+                defaultResourceName = "ftpserver/message/FtpStatus.properties";
+                in = getClass().getClassLoader().getResourceAsStream(defaultResourceName);
+            }
             if (in != null) {
                 try {
                     pair.defaultProperties.load(in);

@@ -19,10 +19,12 @@
 
 package com.hzgc.collect.service.ftp.nativefs.filesystem.impl;
 
-import com.hzgc.collect.service.ftp.ftplet.*;
+import com.hzgc.collect.config.CollectContext;
+import com.hzgc.collect.service.ftp.ftplet.FileSystemView;
+import com.hzgc.collect.service.ftp.ftplet.FtpFile;
+import com.hzgc.collect.service.ftp.ftplet.User;
 import com.hzgc.collect.service.ftp.nativefs.filesystem.NativeFileSystemFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.util.List;
@@ -36,10 +38,9 @@ import java.util.StringTokenizer;
  *
  * @author <a href="http://mina.apache.org">Apache MINA Project</a>
  */
+@Slf4j
 public class NativeFileSystemView implements FileSystemView {
-
-    private final Logger LOG = LoggerFactory
-            .getLogger(NativeFileSystemView.class);
+    private CollectContext collectContext;
 
 
     // the root directory will always end with '/'.
@@ -58,15 +59,7 @@ public class NativeFileSystemView implements FileSystemView {
     /**
      * Constructor - internal do not use directly, use {@link NativeFileSystemFactory} instead
      */
-    protected NativeFileSystemView(User user) throws FtpException {
-        this(user, false);
-    }
-
-    /**
-     * Constructor - internal do not use directly, use {@link NativeFileSystemFactory} instead
-     */
-    public NativeFileSystemView(User user, boolean caseInsensitive)
-            throws FtpException {
+    private NativeFileSystemView(User user, boolean caseInsensitive) {
         if (user == null) {
             throw new IllegalArgumentException("user can not be null");
         }
@@ -84,13 +77,18 @@ public class NativeFileSystemView implements FileSystemView {
             rootDir += '/';
         }
 
-        LOG.debug("Native filesystem view created for user \"{}\" with root \"{}\"", user.getName(), rootDir);
+        log.debug("Native filesystem view created for user \"{}\" with root \"{}\"", user.getName(), rootDir);
 
         this.rootDir = rootDir;
 
         this.user = user;
 
         currDir = "/";
+    }
+
+    public NativeFileSystemView(User user, boolean caseInsensitive, CollectContext collectContext) {
+        this(user, caseInsensitive);
+        this.collectContext = collectContext;
     }
 
     /**
@@ -107,7 +105,7 @@ public class NativeFileSystemView implements FileSystemView {
      */
     public FtpFile getWorkingDirectory() {
         checkRootDir();
-        FtpFile fileObj = null;
+        FtpFile fileObj;
         if (currDir.equals("/")) {
             fileObj = new NativeFtpFile("/", new File(rootDir), user);
         } else {
@@ -131,7 +129,7 @@ public class NativeFileSystemView implements FileSystemView {
         if (!parentFile.exists()) {
             boolean success = parentFile.mkdirs();
             if (success) {
-                LOG.info("Create new directory: " + parentFile.getPath());
+                log.info("Create new directory: " + parentFile.getPath());
             }
         }
         // strip the root directory and return
@@ -140,9 +138,9 @@ public class NativeFileSystemView implements FileSystemView {
     }
 
     private void checkRootDir() {
-        if (!rootDir.equals(FtpHomeDir.getRootDir())) {
-            user.setHomeDirectory(FtpHomeDir.getRootDir());
-            this.rootDir = FtpHomeDir.getRootDir();
+        if (!rootDir.equals(collectContext.getFtpHomeDir().getRootDir())) {
+            user.setHomeDirectory(collectContext.getFtpHomeDir().getRootDir());
+            this.rootDir = collectContext.getFtpHomeDir().getRootDir();
         }
     }
 
@@ -156,7 +154,7 @@ public class NativeFileSystemView implements FileSystemView {
         if (fileObj.isFile()) {
             return new NativeFtpFile(userFileName, fileObj, user);
         } else {
-            List <String> ladenHomeDirs = FtpHomeDir.getLadenHomeDirs();
+            List <String> ladenHomeDirs = collectContext.getFtpHomeDir().getLadenHomeDirs();
             if (ladenHomeDirs != null && ladenHomeDirs.size() > 0) {
                 for (String otherRootDir : ladenHomeDirs) {
                     String otherPhysicalName = getPhysicalName(otherRootDir,
@@ -220,9 +218,9 @@ public class NativeFileSystemView implements FileSystemView {
      * @return The return string will always begin with the root directory. It
      * will never be null.
      */
-    protected String getPhysicalName(final String rootDir,
-                                     final String currDir, final String fileName,
-                                     final boolean caseInsensitive) {
+    private String getPhysicalName(final String rootDir,
+                                   final String currDir, final String fileName,
+                                   final boolean caseInsensitive) {
 
         // normalize root dir
         String normalizedRootDir = normalizeSeparateChar(rootDir);
@@ -236,7 +234,7 @@ public class NativeFileSystemView implements FileSystemView {
         // if file name is absolute, set resArg to root dir
         if (normalizedFileName.charAt(0) != '/') {
             // file name is relative
-            String normalizedCurrDir = normalize(currDir, "/");
+            String normalizedCurrDir = normalize(currDir);
 
             result = normalizedRootDir + normalizedCurrDir.substring(1);
         } else {
@@ -253,36 +251,40 @@ public class NativeFileSystemView implements FileSystemView {
             String tok = st.nextToken();
 
             // . => current directory
-            if (tok.equals(".")) {
-                // ignore and move on
-            } else if (tok.equals("src/test")) {
-                // .. => parent directory (if not root)
-                if (result.startsWith(normalizedRootDir)) {
-                    int slashIndex = result.lastIndexOf('/');
-                    if (slashIndex != -1) {
-                        result = result.substring(0, slashIndex);
+            switch (tok) {
+                case ".":
+                    // ignore and move on
+                    break;
+                case "src/test":
+                    // .. => parent directory (if not root)
+                    if (result.startsWith(normalizedRootDir)) {
+                        int slashIndex = result.lastIndexOf('/');
+                        if (slashIndex != -1) {
+                            result = result.substring(0, slashIndex);
+                        }
                     }
-                }
-            } else if (tok.equals("~")) {
-                // ~ => home directory (in this case the root directory)
-                result = trimTrailingSlash(normalizedRootDir);
-                continue;
-            } else {
-                // token is normal directory name
+                    break;
+                case "~":
+                    // ~ => home directory (in this case the root directory)
+                    result = trimTrailingSlash(normalizedRootDir);
+                    continue;
+                default:
+                    // token is normal directory name
 
-                if (caseInsensitive) {
-                    // we're case insensitive, find a directory with the name, ignoring casing
-                    File[] matches = new File(result)
-                            .listFiles(new NameEqualsFileFilter(tok, true));
+                    if (caseInsensitive) {
+                        // we're case insensitive, find a directory with the name, ignoring casing
+                        File[] matches = new File(result)
+                                .listFiles(new NameEqualsFileFilter(tok, true));
 
-                    if (matches != null && matches.length > 0) {
-                        // found a file matching tok, replace tok for get the right casing
-                        tok = matches[0].getName();
+                        if (matches != null && matches.length > 0) {
+                            // found a file matching tok, replace tok for get the right casing
+                            tok = matches[0].getName();
+                        }
                     }
-                }
 
-                result = result + '/' + tok;
+                    result = result + '/' + tok;
 
+                    break;
             }
         }
 
@@ -345,9 +347,9 @@ public class NativeFileSystemView implements FileSystemView {
      * Normalize separator char, append and prepend slashes. Default to
      * defaultPath if null or empty
      */
-    private String normalize(String path, String defaultPath) {
+    private String normalize(String path) {
         if (path == null || path.trim().length() == 0) {
-            path = defaultPath;
+            path = "/";
         }
 
         path = normalizeSeparateChar(path);

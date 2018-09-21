@@ -2,19 +2,21 @@ package com.hzgc.common.collect.facesub;
 
 import com.hzgc.common.util.json.JacksonUtil;
 import com.hzgc.common.util.zookeeper.Curator;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.ChildData;
 import org.apache.curator.framework.recipes.cache.PathChildrenCache;
-import org.apache.log4j.Logger;
 import org.apache.zookeeper.CreateMode;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 public class FtpSubscribeClient implements Serializable {
-
-    private static final Logger LOG = Logger.getLogger(FtpSubscribeClient.class);
     private static Map<String, List<String>> sessionMap = new ConcurrentHashMap<>();
     private final String ftp_subscribe_path = "/ftp_subscribe";
     private Curator subscribeClient;
@@ -23,10 +25,10 @@ public class FtpSubscribeClient implements Serializable {
     public FtpSubscribeClient(String zkAddress) {
         subscribeClient = new Curator(zkAddress, 20000, 15000);
         if (subscribeClient.nodePathExists(ftp_subscribe_path)) {
-            LOG.info("Ftp subscribe root path '" + ftp_subscribe_path + "' is exists");
+            log.info("Ftp subscribe root path '" + ftp_subscribe_path + "' is exists");
         } else {
             subscribeClient.createNode(ftp_subscribe_path, null, CreateMode.PERSISTENT);
-            LOG.info("Ftp subscribe root path '" + ftp_subscribe_path + "' create successfully");
+            log.info("Ftp subscribe root path '" + ftp_subscribe_path + "' create successfully");
         }
         initPathCache(subscribeClient.getClient());
     }
@@ -44,11 +46,11 @@ public class FtpSubscribeClient implements Serializable {
             byte[] nodeData = JacksonUtil.toJson(ipcIdList).getBytes();
             if (subscribeClient.nodePathExists(nodePath)) {
                 subscribeClient.setNodeDate(nodePath, nodeData);
-                LOG.info("Update ftp subscribe child node path: " + nodePath
+                log.info("Update ftp subscribe child node path: " + nodePath
                         + " successfully, update data: " + JacksonUtil.toJson(ipcIdList));
             } else {
                 subscribeClient.createNode(nodePath, nodeData, CreateMode.PERSISTENT);
-                LOG.info("Create ftp subscribe child node path: " + nodePath
+                log.info("Create ftp subscribe child node path: " + nodePath
                         + " successfully, data: " + JacksonUtil.toJson(ipcIdList));
             }
         }
@@ -63,9 +65,9 @@ public class FtpSubscribeClient implements Serializable {
         String nodePath = ftp_subscribe_path + "/" + sessionId;
         if (subscribeClient.nodePathExists(nodePath)) {
             subscribeClient.deleteChildNode(nodePath);
-            LOG.info("Delete ftp subscribe child node path: " + nodePath + " successful");
+            log.info("Delete ftp subscribe child node path: " + nodePath + " successful");
         } else {
-            LOG.info("Delete ftp subscribe child node path: " + nodePath + " is not exists");
+            log.info("Delete ftp subscribe child node path: " + nodePath + " is not exists");
         }
     }
 
@@ -75,9 +77,9 @@ public class FtpSubscribeClient implements Serializable {
         try {
             pathCache.start(PathChildrenCache.StartMode.BUILD_INITIAL_CACHE);
             pathCache.getListenable().addListener((client, event) -> {
-                String log = event.getData() != null ? event.getData().getPath() : null;
-                LOG.info("Ftp subscribe child event [type:" + event.getType()
-                        + ", path:" + log + "]");
+                String data = event.getData() != null ? event.getData().getPath() : null;
+                log.info("Ftp subscribe child event [type:" + event.getType()
+                        + ", path:" + data + "]");
                 switch (event.getType()) {
                     case CHILD_ADDED:
                         refreshData(pathCache.getCurrentData());
@@ -108,7 +110,7 @@ public class FtpSubscribeClient implements Serializable {
                 List<String> ipcIds = JacksonUtil.toObject(new String(childData.getData()), List.class);
                 sessionMap.put(sessionId, ipcIds);
             }
-            LOG.info("Ftp subscribe info:" + JacksonUtil.toJson(sessionMap));
+            log.info("Ftp subscribe info:" + JacksonUtil.toJson(sessionMap));
         }
     }
 

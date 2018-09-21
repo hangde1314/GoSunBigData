@@ -25,7 +25,9 @@ import com.hzgc.collect.service.ftp.FtpServerConfigurationException;
 import com.hzgc.collect.service.ftp.ipfilter.SessionFilter;
 import com.hzgc.collect.service.ftp.listener.nio.NioListener;
 import com.hzgc.collect.service.ftp.ssl.SslConfiguration;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.mina.filter.firewall.Subnet;
+import org.springframework.stereotype.Component;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -37,8 +39,9 @@ import java.util.List;
  *
  * @author <a href="http://mina.apache.org">Apache MINA Project</a>
  */
+@Component
+@Slf4j
 public class ListenerFactory {
-
     private String serverAddress;
 
     private int port = 21;
@@ -154,6 +157,7 @@ public class ListenerFactory {
      */
     public void setPort(int port) {
         this.port = port;
+        log.info("The port for listener is " + port);
     }
 
     /**

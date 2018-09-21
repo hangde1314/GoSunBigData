@@ -27,8 +27,10 @@ import com.hzgc.collect.service.ftp.usermanager.PropertiesUserManagerFactory;
 import com.hzgc.collect.service.ftp.usermanager.UsernamePasswordAuthentication;
 import com.hzgc.collect.service.ftp.util.BaseProperties;
 import com.hzgc.collect.service.ftp.util.IOUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
 
 import java.io.*;
 import java.net.URL;
@@ -36,58 +38,58 @@ import java.util.*;
 
 /**
  * <strong>Internal class, do not use directly.</strong>
- * 
+ *
  * <p>Properties file based <code>UserManager</code> implementation. We use
  * <code>user.properties</code> file to store user data.</p>
  *
  * </p>The file will use the following properties for storing users:</p>
  * <table>
  * <tr>
- *      <th>Property</th>
- *      <th>Documentation</th>
+ * <th>Property</th>
+ * <th>Documentation</th>
  * </tr>
  * <tr>
- *      <td>ftpserver.user.{username}.homedirectory</td>
- *      <td>Path to the home directory for the user, based on the file system implementation used</td>
+ * <td>ftpserver.user.{username}.homedirectory</td>
+ * <td>Path to the home directory for the user, based on the file system implementation used</td>
  * </tr>
  * <tr>
- *      <td>ftpserver.user.{username}.userpassword</td>
- *      <td>The password for the user. Can be in clear text, MD5 hash or salted SHA hash based on the 
- *              configuration on the user manager
- *      </td>
+ * <td>ftpserver.user.{username}.userpassword</td>
+ * <td>The password for the user. Can be in clear text, MD5 hash or salted SHA hash based on the
+ * configuration on the user manager
+ * </td>
  * </tr>
  * <tr>
- *      <td>ftpserver.user.{username}.enableflag</td>
- *      <td>true if the user is enabled, false otherwise</td>
+ * <td>ftpserver.user.{username}.enableflag</td>
+ * <td>true if the user is enabled, false otherwise</td>
  * </tr>
  * <tr>
- *      <td>ftpserver.user.{username}.writepermission</td>
- *      <td>true if the user is allowed to upload files and create directories, false otherwise</td>
+ * <td>ftpserver.user.{username}.writepermission</td>
+ * <td>true if the user is allowed to upload files and create directories, false otherwise</td>
  * </tr>
  * <tr>
- *      <td>ftpserver.user.{username}.idletime</td>
- *      <td>The number of seconds the user is allowed to be idle before disconnected. 
- *              0 disables the idle timeout
- *      </td>
+ * <td>ftpserver.user.{username}.idletime</td>
+ * <td>The number of seconds the user is allowed to be idle before disconnected.
+ * 0 disables the idle timeout
+ * </td>
  * </tr>
  * <tr>
- *      <td>ftpserver.user.{username}.maxloginnumber</td>
- *      <td>The maximum number of concurrent logins by the user. 0 disables the check.</td>
+ * <td>ftpserver.user.{username}.maxloginnumber</td>
+ * <td>The maximum number of concurrent logins by the user. 0 disables the check.</td>
  * </tr>
  * <tr>
- *      <td>ftpserver.user.{username}.maxloginperip</td>
- *      <td>The maximum number of concurrent logins from the same IP address by the user. 0 disables the check.</td>
+ * <td>ftpserver.user.{username}.maxloginperip</td>
+ * <td>The maximum number of concurrent logins from the same IP address by the user. 0 disables the check.</td>
  * </tr>
  * <tr>
- *      <td>ftpserver.user.{username}.uploadrate</td>
- *      <td>The maximum number of bytes per second the user is allowed to upload files. 0 disables the check.</td>
+ * <td>ftpserver.user.{username}.uploadrate</td>
+ * <td>The maximum number of bytes per second the user is allowed to upload files. 0 disables the check.</td>
  * </tr>
  * <tr>
- *      <td>ftpserver.user.{username}.downloadrate</td>
- *      <td>The maximum number of bytes per second the user is allowed to download files. 0 disables the check.</td>
+ * <td>ftpserver.user.{username}.downloadrate</td>
+ * <td>The maximum number of bytes per second the user is allowed to download files. 0 disables the check.</td>
  * </tr>
  * </table>
- * 
+ *
  * <p>Example:</p>
  * <pre>
  * ftpserver.user.admin.homedirectory=/ftproot
@@ -100,8 +102,10 @@ import java.util.*;
  * ftpserver.user.admin.uploadrate=0
  * ftpserver.user.admin.downloadrate=0
  * </pre>
+ *
  * @author <a href="http://mina.apache.org">Apache MINA Project</a>
  */
+@Slf4j
 public class PropertiesUserManager extends AbstractUserManager {
 
     private final Logger LOG = LoggerFactory
@@ -119,7 +123,7 @@ public class PropertiesUserManager extends AbstractUserManager {
      * Internal constructor, do not use directly. Use {@link PropertiesUserManagerFactory} instead.
      */
     public PropertiesUserManager(PasswordEncryptor passwordEncryptor,
-            File userDataFile, String adminName) {
+                                 File userDataFile, String adminName) {
         super(adminName, passwordEncryptor);
 
         loadFromFile(userDataFile);
@@ -129,10 +133,22 @@ public class PropertiesUserManager extends AbstractUserManager {
      * Internal constructor, do not use directly. Use {@link PropertiesUserManagerFactory} instead.
      */
     public PropertiesUserManager(PasswordEncryptor passwordEncryptor,
-            URL userDataPath, String adminName) {
+                                 URL userDataPath, String adminName) {
         super(adminName, passwordEncryptor);
 
         loadFromUrl(userDataPath);
+    }
+
+    /**
+     * 整合Springoot自定义构造器
+     */
+    public PropertiesUserManager(PasswordEncryptor passwordEncryptor, Properties properties, String adminName) {
+        super(adminName, passwordEncryptor);
+        userDataProp = new BaseProperties();
+        for (String key : properties.stringPropertyNames()) {
+            userDataProp.setProperty(key, properties.getProperty(key));
+            log.info("Set ftp user properties successfull, key:?, value:?", key, properties.getProperty(key));
+        }
     }
 
     private void loadFromFile(File userDataFile) {
@@ -214,7 +230,7 @@ public class PropertiesUserManager extends AbstractUserManager {
                 LOG.debug("Refreshing user manager using file: "
                         + userDataFile.getAbsolutePath());
                 loadFromFile(userDataFile);
-    
+
             } else {
                 //file is null, must have been created using URL
                 LOG.debug("Refreshing user manager using URL: "
@@ -226,6 +242,7 @@ public class PropertiesUserManager extends AbstractUserManager {
 
     /**
      * Retrive the file backing this user manager
+     *
      * @return The file
      */
     public File getFile() {
@@ -342,14 +359,14 @@ public class PropertiesUserManager extends AbstractUserManager {
 
     /**
      * Get user password. Returns the encrypted value.
-     * 
+     *
      * <pre>
      * If the password value is not null
-     *    password = new password 
-     * else 
+     *    password = new password
+     * else
      *   if user does exist
      *     password = old password
-     *   else 
+     *   else
      *     password = &quot;&quot;
      * </pre>
      */

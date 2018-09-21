@@ -77,4 +77,11 @@ public class WritePermission implements Authority {
         return request instanceof WriteRequest;
     }
 
+    public String getPermissionRoot() {
+        return permissionRoot;
+    }
+
+    public void setPermissionRoot(String permissionRoot) {
+        this.permissionRoot = permissionRoot;
+    }
 }

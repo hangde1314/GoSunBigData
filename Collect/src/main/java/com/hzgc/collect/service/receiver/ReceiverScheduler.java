@@ -1,14 +1,10 @@
 package com.hzgc.collect.service.receiver;
 
 import com.hzgc.collect.service.processer.ProcessThread;
-import com.hzgc.collect.config.CollectConfiguration;
+import com.hzgc.collect.config.CollectContext;
 import com.hzgc.common.util.json.JacksonUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +16,8 @@ public class ReceiverScheduler implements Serializable {
 
     private final List<ReceiverImpl> container = new ArrayList<>();
 
+    private CollectContext collectContext;
+
     /**
      * 配置文件中配置的receiver的数量
      */
@@ -30,8 +28,9 @@ public class ReceiverScheduler implements Serializable {
      */
     private int pollingCount;
 
-    public ReceiverScheduler(CollectConfiguration configuration) {
-        this.receiveNumber = receiveNumber;
+    public ReceiverScheduler(CollectContext collectContext) {
+        this.receiveNumber = collectContext.getReceiveNumber();
+        this.collectContext = collectContext;
     }
 
     /**
@@ -79,9 +78,9 @@ public class ReceiverScheduler implements Serializable {
             for (int i = 0; i < this.receiveNumber; i++) {
                 //用来存放工作线程的线程池
                 ExecutorService pool = Executors.newFixedThreadPool(receiveNumber);
-                ReceiverImpl receiver = new ReceiverImpl(i + "");
+                ReceiverImpl receiver = new ReceiverImpl(i + "", collectContext);
                 register(receiver);
-                pool.execute(new ProcessThread(receiver.getQueue()));
+                pool.execute(new ProcessThread(receiver.getQueue(), collectContext));
             }
         }
 

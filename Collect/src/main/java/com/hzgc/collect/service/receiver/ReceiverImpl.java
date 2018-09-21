@@ -1,22 +1,21 @@
 package com.hzgc.collect.service.receiver;
 
-import com.hzgc.collect.config.CollectConfiguration;
-import org.apache.log4j.Logger;
+import com.hzgc.collect.config.CollectContext;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+@Slf4j
 public class ReceiverImpl implements Receiver, Serializable {
-
-    private static Logger LOG = Logger.getLogger(ReceiverImpl.class);
 
     private BlockingQueue<Event> queue;
     private String queueID;
 
-    ReceiverImpl(String queueID) {
+    ReceiverImpl(String queueID, CollectContext collectContext) {
         this.queueID = queueID;
-        this.queue = new ArrayBlockingQueue<>(CollectConfiguration.getReceiveQueueCapacity());
+        this.queue = new ArrayBlockingQueue<>(collectContext.getReceiveQueueCapacity());
     }
 
     @Override
@@ -24,7 +23,7 @@ public class ReceiverImpl implements Receiver, Serializable {
         if (event != null) {
             try {
                 queue.put(event);
-                LOG.info("current queue is:" + queueID + ", the size  waiting is th queue is:" + getQueue().size());
+                log.info("current queue is:" + queueID + ", the size  waiting is th queue is:" + getQueue().size());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

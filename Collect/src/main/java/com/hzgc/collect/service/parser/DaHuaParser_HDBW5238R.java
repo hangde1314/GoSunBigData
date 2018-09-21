@@ -1,10 +1,19 @@
 package com.hzgc.collect.service.parser;
 
+import com.hzgc.collect.config.CollectContext;
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * 大华工程机路径解析
  * 相机配置根路径: IPC-HDBW5238R-AS
  */
+@Slf4j
 public class DaHuaParser_HDBW5238R extends AbstractParser {
+
+    DaHuaParser_HDBW5238R(CollectContext collectContext) {
+        super(collectContext);
+    }
+
     @Override
     public boolean canParse(String path) {
         if (path.contains("unknown") || !path.contains(".jpg")) {
@@ -20,21 +29,25 @@ public class DaHuaParser_HDBW5238R extends AbstractParser {
     @Override
     public FtpPathMetaData parse(String path) {
         FtpPathMetaData message = new FtpPathMetaData();
-        String ipcID = path.substring(path.indexOf("/", 1))
-                .substring(1, path.substring(path.indexOf("/", 1)).indexOf("/", 1));
-        String dateStr = path.split("/")[3].replace("-", "");
-        String year = dateStr.substring(0, 4);
-        String month = dateStr.substring(4, 6);
-        String day = dateStr.substring(6, 8);
-        String timeStr = path.split("/")[5] + path.split("/")[6] + path.split("/")[7];
-        String hour = timeStr.substring(0, 2);
-        String minute = timeStr.substring(2, 4);
-        String second = timeStr.substring(4, 6);
+        try {
+            String ipcID = path.substring(path.indexOf("/", 1))
+                    .substring(1, path.substring(path.indexOf("/", 1)).indexOf("/", 1));
+            String dateStr = path.split("/")[3].replace("-", "");
+            String year = dateStr.substring(0, 4);
+            String month = dateStr.substring(4, 6);
+            String day = dateStr.substring(6, 8);
+            String timeStr = path.split("/")[5] + path.split("/")[6] + path.split("/")[7];
+            String hour = timeStr.substring(0, 2);
+            String minute = timeStr.substring(2, 4);
+            String second = timeStr.substring(4, 6);
 
-        message.setIpcid(ipcID);
-        String time = year + "-" + month + "-" + day +
-                " " + hour + ":" + minute + ":" + second;
-        message.setTimeStamp(time);
+            message.setIpcid(ipcID);
+            String time = year + "-" + month + "-" + day +
+                    " " + hour + ":" + minute + ":" + second;
+            message.setTimeStamp(time);
+        } catch (Exception e) {
+            log.error("Parse failed, path is:?" + path);
+        }
         return message;
     }
 

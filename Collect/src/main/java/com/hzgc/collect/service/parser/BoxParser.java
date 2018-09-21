@@ -1,6 +1,14 @@
 package com.hzgc.collect.service.parser;
 
+import com.hzgc.collect.config.CollectContext;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class BoxParser extends AbstractParser {
+    BoxParser(CollectContext collectContext) {
+        super(collectContext);
+    }
+
     /**
      * 判断是否是可处理图片
      *
@@ -25,22 +33,25 @@ public class BoxParser extends AbstractParser {
     @Override
     public FtpPathMetaData parse(String path) {
         FtpPathMetaData message = new FtpPathMetaData();
-        String ipcID = path.substring(1, path.indexOf("/", 1));
-        String timeStr = path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("_")).replace("_", "");
+        try {
+            String ipcID = path.substring(1, path.indexOf("/", 1));
+            String timeStr = path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("_")).replace("_", "");
 
-        String year = timeStr.substring(0, 4);
-        String month = timeStr.substring(4, 6);
-        String day = timeStr.substring(6, 8);
-        String hour = timeStr.substring(8, 10);
-        String minute = timeStr.substring(10, 12);
-        String second = timeStr.substring(12, 14);
+            String year = timeStr.substring(0, 4);
+            String month = timeStr.substring(4, 6);
+            String day = timeStr.substring(6, 8);
+            String hour = timeStr.substring(8, 10);
+            String minute = timeStr.substring(10, 12);
+            String second = timeStr.substring(12, 14);
 
-        StringBuilder time = new StringBuilder();
-        time = time.append(year).append("-").append(month).append("-").append(day).
-                append(" ").append(hour).append(":").append(minute).append(":").append(second);
+            message.setIpcid(ipcID);
+            String time = year + "-" + month + "-" + day +
+                    " " + hour + ":" + minute + ":" + second;
+            message.setTimeStamp(time);
+        } catch (Exception e) {
+          log.error("Parse failed, path is:?" + path);
+        }
 
-        message.setIpcid(ipcID);
-        message.setTimeStamp(time.toString());
         return message;
     }
 

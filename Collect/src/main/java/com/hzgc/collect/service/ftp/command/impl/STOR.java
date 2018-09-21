@@ -1,13 +1,12 @@
 package com.hzgc.collect.service.ftp.command.impl;
 
-import com.hzgc.collect.service.parser.FtpPathMetaData;
-import com.hzgc.collect.service.parser.FtpPathBootStrap;
-import com.hzgc.collect.service.parser.Parser;
-import com.hzgc.collect.service.receiver.Event;
-import com.hzgc.collect.config.CollectConfiguration;
 import com.hzgc.collect.service.ftp.command.AbstractCommand;
 import com.hzgc.collect.service.ftp.ftplet.*;
 import com.hzgc.collect.service.ftp.impl.*;
+import com.hzgc.collect.service.parser.FtpPathBootStrap;
+import com.hzgc.collect.service.parser.FtpPathMetaData;
+import com.hzgc.collect.service.parser.Parser;
+import com.hzgc.collect.service.receiver.Event;
 import com.hzgc.common.util.json.JacksonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,7 +103,7 @@ public class STOR extends AbstractCommand {
             try {
                 fileName = file.getAbsolutePath();
                 LOG.info(fileName + "    " + file.getSize() / 1024 + "KB");
-                parser = FtpPathBootStrap.getParser(fileName);
+                parser = context.getCollectContext().getFtpPathBootStrap().getParser(fileName);
                 if (parser == null) {
                     return;
                 }
@@ -159,7 +158,7 @@ public class STOR extends AbstractCommand {
                                 .setbFtpUrl(parser.getFtpUrl_hostname(fileName))
                                 .setsIpcFtpUrl(parser.getFtpUrl_ip(fileName))
                                 .setbAbsolutePath(file.getFileAbsolutePa())
-                                .setHostname(CollectConfiguration.getHostname())
+                                .setHostname(context.getCollectContext().getHostname())
                                 .setParser(parser)
                                 .setbRelativePath(fileName);
                         LOG.info("Event = " + JacksonUtil.toJson(event));

@@ -19,29 +19,37 @@
 
 package com.hzgc.collect.service.ftp.nativefs.filesystem;
 
+import com.hzgc.collect.config.CollectContext;
 import com.hzgc.collect.service.ftp.ftplet.FileSystemFactory;
 import com.hzgc.collect.service.ftp.ftplet.FileSystemView;
 import com.hzgc.collect.service.ftp.ftplet.FtpException;
 import com.hzgc.collect.service.ftp.ftplet.User;
 import com.hzgc.collect.service.ftp.nativefs.filesystem.impl.NativeFileSystemView;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.hzgc.common.util.json.JacksonUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Native file system factory. It uses the OS file system.
  *
  * @author <a href="http://mina.apache.org">Apache MINA Project</a>
  */
+@Slf4j
+@Component
 public class NativeFileSystemFactory implements FileSystemFactory {
-
-    private final Logger LOG = LoggerFactory
-            .getLogger(NativeFileSystemFactory.class);
 
     private boolean createHome;
 
     private boolean caseInsensitive;
+
+    private ReentrantLock lock = new ReentrantLock();
+
+    @Autowired
+    private CollectContext collectContext;
 
     /**
      * Should the home directories be created automatically
@@ -82,25 +90,27 @@ public class NativeFileSystemFactory implements FileSystemFactory {
      * Create the appropriate user file system view.
      */
     public FileSystemView createFileSystemView(User user) throws FtpException {
-        synchronized (user) {
+        try {
+            lock.lock();
             // create home if does not exist
             if (createHome) {
                 String homeDirStr = user.getHomeDirectory();
                 File homeDir = new File(homeDirStr);
                 if (homeDir.isFile()) {
-                    LOG.warn("Not a directory :: " + homeDirStr);
+                    log.warn("Not a directory :: " + homeDirStr);
                     throw new FtpException("Not a directory :: " + homeDirStr);
                 }
                 if ((!homeDir.exists()) && (!homeDir.mkdirs())) {
-                    LOG.warn("Cannot create user home :: " + homeDirStr);
+                    log.warn("Cannot create user home :: " + homeDirStr);
                     throw new FtpException("Cannot create user home :: "
                             + homeDirStr);
                 }
             }
-
-            FileSystemView fsView = new NativeFileSystemView(user,
-                    caseInsensitive);
-            return fsView;
+            log.info("Create file system view, user info is: ?", JacksonUtil.toJson(user));
+            return new NativeFileSystemView(user,
+                    caseInsensitive, collectContext);
+        } finally {
+            lock.unlock();
         }
     }
 

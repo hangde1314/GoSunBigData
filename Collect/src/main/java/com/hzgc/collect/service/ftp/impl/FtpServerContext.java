@@ -19,6 +19,7 @@
 
 package com.hzgc.collect.service.ftp.impl;
 
+import com.hzgc.collect.config.CollectContext;
 import com.hzgc.collect.service.receiver.ReceiverScheduler;
 import com.hzgc.collect.service.ftp.ConnectionConfig;
 import com.hzgc.collect.service.ftp.command.CommandFactory;
@@ -70,6 +71,11 @@ public interface FtpServerContext extends FtpletContext {
      * 获取ReceiverScheduler对象
      */
     ReceiverScheduler getScheduler();
+
+    /**
+     * 获取CollectContext对象
+     */
+    CollectContext getCollectContext();
 
     /**
      * Returns the thread pool executor for this context.  

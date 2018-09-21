@@ -22,6 +22,7 @@ package com.hzgc.collect.service.ftp;
 import com.hzgc.collect.service.ftp.impl.DefaultDataConnectionConfiguration;
 import com.hzgc.collect.service.ftp.impl.PassivePorts;
 import com.hzgc.collect.service.ftp.ssl.SslConfiguration;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,10 +35,9 @@ import java.util.Collections;
  *
  * @author <a href="http://mina.apache.org">Apache MINA Project</a>
  */
+@Slf4j
 public class DataConnectionConfigurationFactory {
 
-    private Logger log = LoggerFactory.getLogger(DataConnectionConfigurationFactory.class);
-    
     // maximum idle time in seconds
     private int idleTime = 300;
     private SslConfiguration ssl;
@@ -92,7 +92,7 @@ public class DataConnectionConfigurationFactory {
      * Set the maximum idle time in seconds.
      * @param idleTime The maximum idle time
      */
-    
+
     public void setIdleTime(int idleTime) {
         this.idleTime = idleTime;
     }

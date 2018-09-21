@@ -19,17 +19,24 @@
 
 package com.hzgc.collect.service.ftp.usermanager;
 
+import com.hzgc.collect.config.CollectContext;
 import com.hzgc.collect.service.ftp.ftplet.UserManager;
 import com.hzgc.collect.service.ftp.usermanager.impl.PropertiesUserManager;
+import com.hzgc.collect.service.ftp.util.BaseProperties;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Properties;
 
 /**
  * Factory for the properties file based <code>UserManager</code> implementation.
  *
  * @author <a href="http://mina.apache.org">Apache MINA Project</a>
  */
+@Component
 public class PropertiesUserManagerFactory implements UserManagerFactory {
 
     private String adminName = "admin";
@@ -40,6 +47,10 @@ public class PropertiesUserManagerFactory implements UserManagerFactory {
 
     private PasswordEncryptor passwordEncryptor = new Md5PasswordEncryptor();
 
+    @Autowired
+    private CollectContext collectContext;
+
+
     /**
      * Creates a {@link PropertiesUserManager} instance based on the provided configuration
      */
@@ -47,15 +58,17 @@ public class PropertiesUserManagerFactory implements UserManagerFactory {
         if (userDataURL != null) {
             return new PropertiesUserManager(passwordEncryptor, userDataURL,
                     adminName);
-        } else {
-
+        } else if (userDataFile != null) {
             return new PropertiesUserManager(passwordEncryptor, userDataFile,
                     adminName);
+        } else {
+            return new PropertiesUserManager(passwordEncryptor, collectContext.getUserMangerProperties(), adminName);
         }
     }
 
     /**
      * Get the admin name.
+     *
      * @return The admin user name
      */
     public String getAdminName() {
@@ -65,9 +78,8 @@ public class PropertiesUserManagerFactory implements UserManagerFactory {
     /**
      * Set the name to use as the administrator of the server. The default value
      * is "admin".
-     * 
-     * @param adminName
-     *            The administrator user name
+     *
+     * @param adminName The administrator user name
      */
     public void setAdminName(String adminName) {
         this.adminName = adminName;
@@ -75,6 +87,7 @@ public class PropertiesUserManagerFactory implements UserManagerFactory {
 
     /**
      * Retrieve the file used to load and store users
+     *
      * @return The file
      */
     public File getFile() {
@@ -82,10 +95,9 @@ public class PropertiesUserManagerFactory implements UserManagerFactory {
     }
 
     /**
-     * Set the file used to store and read users. 
-     * 
-     * @param propFile
-     *            A file containing users
+     * Set the file used to store and read users.
+     *
+     * @param propFile A file containing users
      */
     public void setFile(File propFile) {
         this.userDataFile = propFile;
@@ -93,6 +105,7 @@ public class PropertiesUserManagerFactory implements UserManagerFactory {
 
     /**
      * Retrieve the URL used to load and store users
+     *
      * @return The {@link URL}
      */
     public URL getUrl() {
@@ -100,19 +113,19 @@ public class PropertiesUserManagerFactory implements UserManagerFactory {
     }
 
     /**
-     * Set the URL used to store and read users. 
-     * 
-     * @param userDataURL
-     *            A {@link URL} containing users
+     * Set the URL used to store and read users.
+     *
+     * @param userDataURL A {@link URL} containing users
      */
     public void setUrl(URL userDataURL) {
         this.userDataURL = userDataURL;
     }
-    
+
     /**
      * Retrieve the password encryptor used by user managers created by this factory
+     *
      * @return The password encryptor. Default to {@link Md5PasswordEncryptor}
-     *  if no other has been provided
+     * if no other has been provided
      */
     public PasswordEncryptor getPasswordEncryptor() {
         return passwordEncryptor;
@@ -120,6 +133,7 @@ public class PropertiesUserManagerFactory implements UserManagerFactory {
 
     /**
      * Set the password encryptor to use by user managers created by this factory
+     *
      * @param passwordEncryptor The password encryptor
      */
     public void setPasswordEncryptor(PasswordEncryptor passwordEncryptor) {

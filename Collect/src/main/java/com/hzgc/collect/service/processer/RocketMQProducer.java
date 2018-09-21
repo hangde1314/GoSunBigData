@@ -1,7 +1,6 @@
 package com.hzgc.collect.service.processer;
 
-import com.hzgc.collect.config.CollectConfiguration;
-import org.apache.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.MessageQueueSelector;
@@ -12,33 +11,21 @@ import org.apache.rocketmq.common.message.MessageQueue;
 import java.io.Serializable;
 import java.util.List;
 
+@Slf4j
 public class RocketMQProducer implements Serializable {
-    private static Logger LOG = Logger.getLogger(RocketMQProducer.class);
-    private static RocketMQProducer instance = null;
     private DefaultMQProducer defaultMQProducer;
 
-    private RocketMQProducer(){
-        defaultMQProducer = new DefaultMQProducer(CollectConfiguration.getRokcetmqCaptureGroup());
+    public RocketMQProducer(String rokcetmqCaptureGroup, String rocketmqAddress) {
+        defaultMQProducer = new DefaultMQProducer(rokcetmqCaptureGroup);
         defaultMQProducer.setRetryTimesWhenSendFailed(4);
         defaultMQProducer.setRetryAnotherBrokerWhenNotStoreOK(true);
-        defaultMQProducer.setNamesrvAddr(CollectConfiguration.getRocketmqAddress());
+        defaultMQProducer.setNamesrvAddr(rocketmqAddress);
         try {
             defaultMQProducer.start();
         } catch (MQClientException e) {
-            LOG.error("DefaultMQProducer init error...");
+            log.error("DefaultMQProducer init error...");
             e.printStackTrace();
         }
-    }
-
-    public static RocketMQProducer getInstance() {
-        if (instance == null) {
-            synchronized (RocketMQProducer.class) {
-                if (instance == null) {
-                    instance = new RocketMQProducer();
-                }
-            }
-        }
-        return instance;
     }
 
     public SendResult send(String topic, String tag, String key, byte[] data) {
@@ -65,11 +52,11 @@ public class RocketMQProducer implements Serializable {
             } else {
                 sendResult = defaultMQProducer.send(msg);
             }
-            LOG.info("Send RocketMQ successfully! message:[topic:" + msg.getTopic() + ", tag:" + msg.getTags() +
+            log.info("Send RocketMQ successfully! message:[topic:" + msg.getTopic() + ", tag:" + msg.getTags() +
                     ", key:" + msg.getKeys() + ", data:" + new String(data) + "], " + sendResult);
         } catch (Exception e) {
             e.printStackTrace();
-            LOG.error("Send message error...");
+            log.error("Send message error...");
         }
         return sendResult;
     }

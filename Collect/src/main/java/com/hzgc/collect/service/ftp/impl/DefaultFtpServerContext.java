@@ -19,6 +19,7 @@
 
 package com.hzgc.collect.service.ftp.impl;
 
+import com.hzgc.collect.config.CollectContext;
 import com.hzgc.collect.service.receiver.ReceiverScheduler;
 import com.hzgc.collect.service.ftp.ConnectionConfig;
 import com.hzgc.collect.service.ftp.ConnectionConfigFactory;
@@ -62,7 +63,7 @@ public class DefaultFtpServerContext implements FtpServerContext {
 
     private MessageResource messageResource = new MessageResourceFactory().createMessageResource();
 
-    private UserManager userManager = new PropertiesUserManagerFactory().createUserManager();
+    private UserManager userManager;
 
     private FileSystemFactory fileSystemManager = new NativeFileSystemFactory();
 
@@ -208,6 +209,11 @@ public class DefaultFtpServerContext implements FtpServerContext {
 
     @Override
     public ReceiverScheduler getScheduler() {
+        return null;
+    }
+
+    @Override
+    public CollectContext getCollectContext() {
         return null;
     }
 

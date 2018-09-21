@@ -15,7 +15,7 @@ public class SendMqMessage implements Serializable{
         return sessionIds;
     }
 
-    public void setSessionIds(List<String> sessionIds) {
+    void setSessionIds(List<String> sessionIds) {
         this.sessionIds = sessionIds;
     }
 
@@ -23,7 +23,7 @@ public class SendMqMessage implements Serializable{
         return ftpUrl;
     }
 
-    public void setFtpUrl(String ftpUrl) {
+    void setFtpUrl(String ftpUrl) {
         this.ftpUrl = ftpUrl;
     }
 

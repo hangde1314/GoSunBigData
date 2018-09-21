@@ -1,8 +1,14 @@
 package com.hzgc.collect.service.parser;
 
-import com.hzgc.collect.config.CollectConfiguration;
+import com.hzgc.collect.config.CollectContext;
 
 public abstract class AbstractParser implements Parser {
+    private CollectContext collectContext;
+
+    AbstractParser(CollectContext collectContext) {
+        this.collectContext = collectContext;
+    }
+
     /**
      * 通过上传文件路径解析到ftpUrl
      *
@@ -11,7 +17,7 @@ public abstract class AbstractParser implements Parser {
      */
     @Override
     public String getFtpUrl_ip(String filePath) {
-        return "ftp://" + CollectConfiguration.getFtpIp() + ":" + CollectConfiguration.getFtpPort() + filePath;
+        return "ftp://" + collectContext.getFtpIp() + ":" + collectContext.getFtpPort() + filePath;
     }
 
     /**
@@ -22,6 +28,6 @@ public abstract class AbstractParser implements Parser {
      */
     @Override
     public String getFtpUrl_hostname(String filePath) {
-        return "ftp://" + CollectConfiguration.getHostname() + ":" + CollectConfiguration.getFtpPort() + filePath;
+        return "ftp://" + collectContext.getHostname() + ":" + collectContext.getFtpPort() + filePath;
     }
 }

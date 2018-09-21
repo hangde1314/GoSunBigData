@@ -19,17 +19,20 @@
 
 package com.hzgc.collect.service.ftp;
 
+import com.hzgc.collect.config.CollectContext;
 import com.hzgc.collect.service.ftp.impl.DefaultConnectionConfig;
-
-import java.io.IOException;
-import java.util.Properties;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
 
 /**
  * Factory for creating connection configurations
  *
  * @author <a href="http://mina.apache.org">Apache MINA Project</a>
- *
  */
+@Slf4j
+@Component
 public class ConnectionConfigFactory {
 
     private int maxLogins = 10;
@@ -44,8 +47,11 @@ public class ConnectionConfigFactory {
 
     private int maxThreads = 0;
 
+    @Autowired
+    private CollectContext collectContext;
     /**
      * Create a connection configuration instances based on the configuration on this factory
+     *
      * @return The {@link ConnectionConfig} instance
      */
     public ConnectionConfig createConnectionConfig() {
@@ -55,30 +61,20 @@ public class ConnectionConfigFactory {
     }
 
     public ConnectionConfig createUDConnectionConfig() {
-        FtpServerFactory factory = new FtpServerFactory();
-        Properties props = new Properties();
-        try {
-            props.load(ClassLoader.getSystemResourceAsStream("users.properties"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        int maxLogins = Integer.parseInt(props.getProperty("com.hzgc.ftpserver.user.admin.maxloginnumber"));
-        boolean anonymousLoginEnabled = Boolean.parseBoolean(props.getProperty("com.hzgc.ftpserver.user.anonymous.enableflag"));
-        int maxAnonymousLogins = Integer.parseInt(props.getProperty("com.hzgc.ftpserver.user.anonymous.maxloginnumber"));
-        int maxLoginFailures = Integer.parseInt(props.getProperty("com.hzgc.ftpserver.user.maxLoginFailures"));
-        int loginFailureDelay = Integer.parseInt(props.getProperty("com.hzgc.ftpserver.user.loginFailureDelay"));
-        int maxThreads = Integer.parseInt(props.getProperty("com.hzgc.ftpserver.user.maxThreads"));
-
-        factory.setConnectionConfig(new DefaultConnectionConfig(anonymousLoginEnabled,
-                loginFailureDelay, maxLogins, maxAnonymousLogins,
-                maxLoginFailures, maxThreads));
-        return factory.getConnectionConfig();
+        int maxLogins = collectContext.getConnectionMaxLogins();
+        boolean anonymousLoginEnabled = collectContext.getConnectionAnonymousLoginEnable();
+        int maxAnonymousLogins = collectContext.getConnectionMaxAnonymousLogins();
+        int maxLoginFailures = collectContext.getConnectionMaxLoginFailures();
+        int loginFailureDelay = collectContext.getConnectionLoginFailureDelay();
+        int maxThreads = collectContext.getConnectionMaxThread();
+        return new DefaultConnectionConfig(anonymousLoginEnabled, loginFailureDelay, maxLogins, maxAnonymousLogins,
+                maxLoginFailures, maxThreads);
     }
 
     /**
-     * The delay in number of milliseconds between login failures. Important to 
+     * The delay in number of milliseconds between login failures. Important to
      * make brute force attacks harder.
-     * 
+     *
      * @return The delay time in milliseconds
      */
     public int getLoginFailureDelay() {
@@ -87,6 +83,7 @@ public class ConnectionConfigFactory {
 
     /**
      * The maximum number of anonymous logins the server would allow at any given time
+     *
      * @return The maximum number of anonymous logins
      */
     public int getMaxAnonymousLogins() {
@@ -95,6 +92,7 @@ public class ConnectionConfigFactory {
 
     /**
      * The maximum number of time an user can fail to login before getting disconnected
+     *
      * @return The maximum number of failure login attempts
      */
     public int getMaxLoginFailures() {
@@ -103,6 +101,7 @@ public class ConnectionConfigFactory {
 
     /**
      * The maximum number of concurrently logged in users
+     *
      * @return The maximum number of users
      */
     public int getMaxLogins() {
@@ -111,6 +110,7 @@ public class ConnectionConfigFactory {
 
     /**
      * Is anonymous logins allowed at the server?
+     *
      * @return true if anonymous logins are enabled
      */
     public boolean isAnonymousLoginEnabled() {
@@ -119,6 +119,7 @@ public class ConnectionConfigFactory {
 
     /**
      * Set she maximum number of concurrently logged in users
+     *
      * @param maxLogins The maximum number of users
      */
 
@@ -129,9 +130,9 @@ public class ConnectionConfigFactory {
     /**
      * Returns the maximum number of threads the server is allowed to create for
      * processing client requests.
-     * 
+     *
      * @return the maximum number of threads the server is allowed to create for
-     *         processing client requests.
+     * processing client requests.
      */
     public int getMaxThreads() {
         return maxThreads;
@@ -140,10 +141,9 @@ public class ConnectionConfigFactory {
     /**
      * Sets the maximum number of threads the server is allowed to create for
      * processing client requests.
-     * 
-     * @param maxThreads
-     *            the maximum number of threads the server is allowed to create
-     *            for processing client requests.
+     *
+     * @param maxThreads the maximum number of threads the server is allowed to create
+     *                   for processing client requests.
      */
     public void setMaxThreads(int maxThreads) {
         this.maxThreads = maxThreads;
@@ -151,6 +151,7 @@ public class ConnectionConfigFactory {
 
     /**
      * Set if anonymous logins are allowed at the server
+     *
      * @param anonymousLoginEnabled true if anonymous logins should be enabled
      */
     public void setAnonymousLoginEnabled(final boolean anonymousLoginEnabled) {
@@ -159,6 +160,7 @@ public class ConnectionConfigFactory {
 
     /**
      * Sets the maximum number of anonymous logins the server would allow at any given time
+     *
      * @param maxAnonymousLogins The maximum number of anonymous logins
      */
     public void setMaxAnonymousLogins(final int maxAnonymousLogins) {
@@ -167,6 +169,7 @@ public class ConnectionConfigFactory {
 
     /**
      * Set the maximum number of time an user can fail to login before getting disconnected
+     *
      * @param maxLoginFailures The maximum number of failure login attempts
      */
     public void setMaxLoginFailures(final int maxLoginFailures) {
@@ -174,9 +177,9 @@ public class ConnectionConfigFactory {
     }
 
     /**
-     * Set the delay in number of milliseconds between login failures. Important to 
+     * Set the delay in number of milliseconds between login failures. Important to
      * make brute force attacks harder.
-     * 
+     *
      * @param loginFailureDelay The delay time in milliseconds
      */
     public void setLoginFailureDelay(final int loginFailureDelay) {

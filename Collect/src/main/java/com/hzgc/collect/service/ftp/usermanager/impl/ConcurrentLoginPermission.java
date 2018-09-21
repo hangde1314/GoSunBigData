@@ -75,4 +75,12 @@ public class ConcurrentLoginPermission implements Authority {
     public boolean canAuthorize(AuthorizationRequest request) {
         return request instanceof ConcurrentLoginRequest;
     }
+
+    public int getMaxConcurrentLogins() {
+        return maxConcurrentLogins;
+    }
+
+    public int getMaxConcurrentLoginsPerIP() {
+        return maxConcurrentLoginsPerIP;
+    }
 }

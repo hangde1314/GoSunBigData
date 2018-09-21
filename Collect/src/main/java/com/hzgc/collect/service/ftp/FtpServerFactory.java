@@ -19,7 +19,7 @@
 
 package com.hzgc.collect.service.ftp;
 
-import com.hzgc.collect.config.CollectConfiguration;
+import com.hzgc.collect.config.CollectContext;
 import com.hzgc.collect.service.ftp.command.CommandFactory;
 import com.hzgc.collect.service.ftp.ftplet.FileSystemFactory;
 import com.hzgc.collect.service.ftp.ftplet.Ftplet;
@@ -30,6 +30,8 @@ import com.hzgc.collect.service.ftp.impl.DefaultFtpServerContext;
 import com.hzgc.collect.service.ftp.impl.ReceiverFtpServerContext;
 import com.hzgc.collect.service.ftp.listener.Listener;
 import com.hzgc.collect.service.ftp.message.MessageResource;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -40,6 +42,8 @@ import java.util.Map;
  *
  * @author <a href="http://mina.apache.org">Apache MINA Project</a>
  */
+@Component
+@Slf4j
 public class FtpServerFactory {
 
     private DefaultFtpServerContext serverContext;
@@ -48,15 +52,15 @@ public class FtpServerFactory {
      * Creates a server with the default configuration
      * 此构造使用的是原生Ftpserver
      */
-    public FtpServerFactory(String origin) {
-        serverContext = new DefaultFtpServerContext();
-    }
+//    public FtpServerFactory(String origin) {
+//        serverContext = new DefaultFtpServerContext();
+//    }
 
     /**
-     * 通过CommonConf创建一个FtpServerContext
+     * 通过CollectConfiguration创建一个FtpServerContext
      */
-    public FtpServerFactory(CollectConfiguration configuration) {
-        this.serverContext = new ReceiverFtpServerContext(configuration);
+    public void createCustomContext(CollectContext collectContext) {
+        this.serverContext = new ReceiverFtpServerContext(collectContext);
     }
 
     /**
@@ -96,6 +100,7 @@ public class FtpServerFactory {
      */
     public void addListener(final String name, final Listener listener) {
         serverContext.addListener(name, listener);
+        log.info("Add listner, name:default, class:" + listener.getClass());
     }
 
     /**
@@ -149,6 +154,7 @@ public class FtpServerFactory {
      */
     public void setUserManager(final UserManager userManager) {
         serverContext.setUserManager(userManager);
+        log.info("Set customer user manager factory is successful, " + userManager.getClass());
     }
 
     /**
@@ -168,6 +174,7 @@ public class FtpServerFactory {
      */
     public void setFileSystem(final FileSystemFactory fileSystem) {
         serverContext.setFileSystemManager(fileSystem);
+        log.info("Set customer file system factory is successful, " + fileSystem.getClass());
     }
 
     /**
@@ -187,6 +194,7 @@ public class FtpServerFactory {
      */
     public void setCommandFactory(final CommandFactory commandFactory) {
         serverContext.setCommandFactory(commandFactory);
+        log.info("Set customer command factory is successful, " + commandFactory.getClass());
     }
 
     /**
@@ -225,5 +233,6 @@ public class FtpServerFactory {
      */
     public void setConnectionConfig(final ConnectionConfig connectionConfig) {
         serverContext.setConnectionConfig(connectionConfig);
+        log.info("FTP Server Maximum logon number:" + connectionConfig.getMaxLogins());
     }
 }

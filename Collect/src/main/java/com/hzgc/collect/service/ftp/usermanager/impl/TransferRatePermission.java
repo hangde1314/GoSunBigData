@@ -62,4 +62,20 @@ public class TransferRatePermission implements Authority {
     public boolean canAuthorize(AuthorizationRequest request) {
         return request instanceof TransferRateRequest;
     }
+
+    public int getMaxDownloadRate() {
+        return maxDownloadRate;
+    }
+
+    public void setMaxDownloadRate(int maxDownloadRate) {
+        this.maxDownloadRate = maxDownloadRate;
+    }
+
+    public int getMaxUploadRate() {
+        return maxUploadRate;
+    }
+
+    public void setMaxUploadRate(int maxUploadRate) {
+        this.maxUploadRate = maxUploadRate;
+    }
 }

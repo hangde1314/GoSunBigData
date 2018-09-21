@@ -1,5 +1,8 @@
 package com.hzgc.service.dyncar.service;
 
+import com.hzgc.common.collect.facedis.FtpRegisterClient;
+import com.hzgc.common.collect.util.ConverFtpurl;
+import com.hzgc.common.service.facedynrepo.VehicleTable;
 import com.hzgc.common.util.json.JacksonUtil;
 import com.hzgc.common.util.basic.UuidUtil;
 import com.hzgc.jniface.CarAttribute;
@@ -12,16 +15,21 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class CaptureHistoryService {
+
+    @Autowired
+    FtpRegisterClient ftpRegisterClient;
     @Autowired
     @SuppressWarnings("unused")
     private ElasticSearchDao elasticSearchDao;
@@ -31,6 +39,8 @@ public class CaptureHistoryService {
     @Autowired
     @SuppressWarnings("unused")
     private CaptureServiceHelper captureServiceHelper;
+    @Value("${ftp.port}")
+    private String ftpPort;
 
     public SearchResult getCaptureHistory(CaptureOption option) {
         String sortParam = EsSearchParam.DESC;
@@ -69,16 +79,18 @@ public class CaptureHistoryService {
             if (hits.length > 0) {
                 for (SearchHit hit : hits) {
                     capturePicture = new CapturedPicture();
-                    String surl = (String) hit.getSource().get("surl");
-                    String burl = (String) hit.getSource().get("burl");
-                    String ipc = (String) hit.getSource().get("ipcid");
-                    String ip = (String) hit.getSource().get("ip");
-                    String timestamp = (String) hit.getSource().get("timestamp");
+                    String sabsolutepath = (String) hit.getSource().get(VehicleTable.SABSOLUTEPATH);
+                    String babsolutepath = (String) hit.getSource().get(VehicleTable.BABSOLUTEPATH);
+                    String ipc = (String) hit.getSource().get(VehicleTable.IPCID);
+                    String timestamp = (String) hit.getSource().get(VehicleTable.TIMESTAMP);
+                    String hostname = (String) hit.getSource().get(VehicleTable.HOSTNAME);
+                    Map <String, String> ftpIpMapping = ftpRegisterClient.getFtpIpMapping();
+                    String ip = ftpIpMapping.get(hostname);
                     //参数封装
                     CarAttribute carAttribute = carDataPackage(hit);
                     capturePicture.setCarAttribute(carAttribute);
-                    capturePicture.setSurl(captureServiceHelper.getFtpUrl(surl, ip));
-                    capturePicture.setBurl(captureServiceHelper.getFtpUrl(burl, ip));
+                    capturePicture.setSabsolutepath(ConverFtpurl.toHttpPath(ip,ftpPort,sabsolutepath));
+                    capturePicture.setBabsolutepath(ConverFtpurl.toHttpPath(ip,ftpPort,babsolutepath));
                     capturePicture.setDeviceId(option.getIpcMappingDevice().get(ipc).getId());
                     capturePicture.setDeviceName(option.getIpcMappingDevice().get(ipc).getName());
                     capturePicture.setTimestamp(timestamp);
@@ -111,16 +123,18 @@ public class CaptureHistoryService {
         if (hits.length > 0) {
             for (SearchHit hit : hits) {
                 capturePicture = new CapturedPicture();
-                String surl = (String) hit.getSource().get("surl");
-                String burl = (String) hit.getSource().get("burl");
-                String ipcid = (String) hit.getSource().get("ipcid");
-                String ip = (String) hit.getSource().get("ip");
-                String timestamp = (String) hit.getSource().get("timestamp");
+                String sabsolutepath = (String) hit.getSource().get(VehicleTable.SABSOLUTEPATH);
+                String babsolutepath = (String) hit.getSource().get(VehicleTable.BABSOLUTEPATH);
+                String ipcid = (String) hit.getSource().get(VehicleTable.IPCID);
+                String timestamp = (String) hit.getSource().get(VehicleTable.TIMESTAMP);
+                String hostname = (String) hit.getSource().get(VehicleTable.HOSTNAME);
+                Map <String, String> ftpIpMapping = ftpRegisterClient.getFtpIpMapping();
+                String ip = ftpIpMapping.get(hostname);
                 //参数封装
                 CarAttribute carAttribute = carDataPackage(hit);
                 capturePicture.setCarAttribute(carAttribute);
-                capturePicture.setSurl(captureServiceHelper.getFtpUrl(surl,ip));
-                capturePicture.setBurl(captureServiceHelper.getFtpUrl(burl,ip));
+                capturePicture.setSabsolutepath(ConverFtpurl.toHttpPath(ip,ftpPort,sabsolutepath));
+                capturePicture.setBabsolutepath(ConverFtpurl.toHttpPath(ip,ftpPort,babsolutepath));
                 capturePicture.setDeviceId(ipcid);
                 capturePicture.setDeviceName(option.getIpcMappingDevice().get(ipcid).getName());
                 capturePicture.setTimestamp(timestamp);
@@ -147,16 +161,18 @@ public class CaptureHistoryService {
         if (hits.length > 0) {
             for (SearchHit hit : hits) {
                 capturePicture = new CapturedPicture();
-                String surl = (String) hit.getSource().get("surl");
-                String burl = (String) hit.getSource().get("burl");
-                String ipc = (String) hit.getSource().get("ipcid");
-                String ip = (String) hit.getSource().get("ip");
-                String timestamp = (String) hit.getSource().get("timestamp");
+                String sabsolutepath = (String) hit.getSource().get(VehicleTable.SABSOLUTEPATH);
+                String babsolutepath = (String) hit.getSource().get(VehicleTable.BABSOLUTEPATH);
+                String ipc = (String) hit.getSource().get(VehicleTable.IPCID);
+                String timestamp = (String) hit.getSource().get(VehicleTable.TIMESTAMP);
+                String hostname = (String) hit.getSource().get(VehicleTable.HOSTNAME);
+                Map <String, String> ftpIpMapping = ftpRegisterClient.getFtpIpMapping();
+                String ip = ftpIpMapping.get(hostname);
                 //参数封装
                 CarAttribute carAttribute = carDataPackage(hit);
                 capturePicture.setCarAttribute(carAttribute);
-                capturePicture.setSurl(captureServiceHelper.getFtpUrl(surl,ip));
-                capturePicture.setBurl(captureServiceHelper.getFtpUrl(burl,ip));
+                capturePicture.setSabsolutepath(ConverFtpurl.toHttpPath(ip,ftpPort,sabsolutepath));
+                capturePicture.setBabsolutepath(ConverFtpurl.toHttpPath(ip,ftpPort,babsolutepath));
                 capturePicture.setDeviceId(ipc);
                 capturePicture.setTimestamp(timestamp);
                 capturePicture.setDeviceId(option.getIpcMappingDevice().get(ipc).getId());

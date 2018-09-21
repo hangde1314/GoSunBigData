@@ -13,9 +13,9 @@ public class VehicleTable implements Serializable{
     //时间戳 数据格式 xxxx-xx-xx xx:xx:xx(年-月-日 时:分:秒)
     public static final String TIMESTAMP = "timestamp";
     //小图路径
-    public static final String SURL = "sftpurl";
+    public static final String SFTPURL = "sftpurl";
     //大图路径
-    public static final String BURL = "bftpurl";
+    public static final String BFTPURL = "bftpurl";
     //小图本地绝对路径
     public static final String SABSOLUTEPATH = "sabsolutepath";
     //大图本地绝对路径

@@ -12,10 +12,10 @@ import java.io.Serializable;
 public class CapturedPicture implements Serializable {
 
     //小图url
-    private String surl;
+    private String sabsolutepath;
 
     //大图url
-    private String burl;
+    private String babsolutepath;
 
     //捕获照片的设备 id
     private String deviceId;

@@ -1,5 +1,7 @@
 package com.hzgc.service.dynperson.service;
 
+import com.hzgc.common.collect.facedis.FtpRegisterClient;
+import com.hzgc.common.collect.util.ConverFtpurl;
 import com.hzgc.common.service.facedynrepo.PersonTable;
 import com.hzgc.common.util.basic.UuidUtil;
 import com.hzgc.jniface.PersonAttributes;
@@ -11,15 +13,20 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class DynpersonHistoryService {
+
+    @Autowired
+    private FtpRegisterClient ftpRegisterClient;
 
     @Autowired
     @SuppressWarnings("unused")
@@ -29,6 +36,8 @@ public class DynpersonHistoryService {
     @SuppressWarnings("unused")
     private  DypersonServiceHelper dypersonServiceHelper;
 
+    @Value("${ftp.port}")
+    private String ftpPort;
     public SingleResults getCaptureHistory(CaptureOption captureOption) {
         String sortParam = EsSearchParam.DESC;
         List<Integer> sortList = captureOption.getSort();
@@ -60,13 +69,15 @@ public class DynpersonHistoryService {
         List<Pictures> picturesList = new ArrayList<>();
             for (SearchHit hit : searchHits) {
                 Pictures pictures = new Pictures();
-                String surl = (String) hit.getSource().get(PersonTable.SURL);
-                String burl = (String) hit.getSource().get(PersonTable.BURL);
+                String sabsolutepath = (String) hit.getSource().get(PersonTable.SABSOLUTEPATH);
+                String babsolutepath = (String) hit.getSource().get(PersonTable.BABSOLUTEPATH);
                 String ipcid = (String) hit.getSource().get(PersonTable.IPCID);
-                String ip = (String) hit.getSource().get(PersonTable.IP);
                 String timestamp = (String) hit.getSource().get(PersonTable.TIMESTAMP);
-                pictures.setSurl(dypersonServiceHelper.getFtpUrl(surl, ip));
-                pictures.setBurl(dypersonServiceHelper.getFtpUrl(burl, ip));
+                String hostname = (String) hit.getSource().get(PersonTable.HOSTNAME);
+                Map <String, String> ftpIpMapping = ftpRegisterClient.getFtpIpMapping();
+                String ip = ftpIpMapping.get(hostname);
+                pictures.setSabsolutepath(ConverFtpurl.toHttpPath(ip,ftpPort,sabsolutepath));
+                pictures.setBabsolutepath(ConverFtpurl.toHttpPath(ip,ftpPort,babsolutepath));
                 pictures.setDeviceId(ipcid);
                 pictures.setDeviceName(captureOption.getIpcMappingDevice().get(ipcid).getName());
                 pictures.setTime(timestamp);
@@ -94,13 +105,15 @@ public class DynpersonHistoryService {
         if (hits.length > 0) {
             for (SearchHit hit : hits) {
                 pictures = new Pictures();
-                String surl = (String) hit.getSource().get(PersonTable.SURL);
-                String burl = (String) hit.getSource().get(PersonTable.BURL);
+                String sabsolutepath = (String) hit.getSource().get(PersonTable.SABSOLUTEPATH);
+                String babsolutepath = (String) hit.getSource().get(PersonTable.BABSOLUTEPATH);
                 String ipc = (String) hit.getSource().get(PersonTable.IPCID);
-                String ip = (String) hit.getSource().get(PersonTable.IP);
                 String timestamp = (String) hit.getSource().get(PersonTable.TIMESTAMP);
-                pictures.setSurl(dypersonServiceHelper.getFtpUrl(surl, ip));
-                pictures.setBurl(dypersonServiceHelper.getFtpUrl(burl, ip));
+                String hostname = (String) hit.getSource().get(PersonTable.HOSTNAME);
+                Map <String, String> ftpIpMapping = ftpRegisterClient.getFtpIpMapping();
+                String ip = ftpIpMapping.get(hostname);
+                pictures.setSabsolutepath(ConverFtpurl.toHttpPath(ip,ftpPort,sabsolutepath));
+                pictures.setBabsolutepath(ConverFtpurl.toHttpPath(ip,ftpPort,babsolutepath));
                 pictures.setDeviceId(captureOption.getIpcMappingDevice().get(ipc).getId());
                 pictures.setDeviceName(captureOption.getIpcMappingDevice().get(ipc).getName());
                 pictures.setTime(timestamp);
@@ -129,13 +142,15 @@ public class DynpersonHistoryService {
             if (totalCount > 0) {
                 for (SearchHit hit : searchHits) {
                     pictures = new Pictures();
-                    String surl = (String) hit.getSource().get(PersonTable.SURL);
-                    String burl = (String) hit.getSource().get(PersonTable.BURL);
+                    String sabsolutepath = (String) hit.getSource().get(PersonTable.SABSOLUTEPATH);
+                    String babsolutepath = (String) hit.getSource().get(PersonTable.BABSOLUTEPATH);
                     String ipc = (String) hit.getSource().get(PersonTable.IPCID);
-                    String ip = (String) hit.getSource().get(PersonTable.IP);
                     String timestamp = (String) hit.getSource().get(PersonTable.TIMESTAMP);
-                    pictures.setSurl(dypersonServiceHelper.getFtpUrl(surl, ip));
-                    pictures.setBurl(dypersonServiceHelper.getFtpUrl(burl, ip));
+                    String hostname = (String) hit.getSource().get(PersonTable.HOSTNAME);
+                    Map <String, String> ftpIpMapping = ftpRegisterClient.getFtpIpMapping();
+                    String ip = ftpIpMapping.get(hostname);
+                    pictures.setSabsolutepath(ConverFtpurl.toHttpPath(ip,ftpPort,sabsolutepath));
+                    pictures.setBabsolutepath(ConverFtpurl.toHttpPath(ip,ftpPort,babsolutepath));
                     if (null!=captureOption.getIpcMappingDevice().get(ipc)){
                         pictures.setDeviceId(captureOption.getIpcMappingDevice().get(ipc).getId());
                         pictures.setDeviceName(captureOption.getIpcMappingDevice().get(ipc).getName());
@@ -175,7 +190,7 @@ public class DynpersonHistoryService {
         personAttribute.setBag((String) hit.getSource().get(PersonTable.BAG));
         personAttribute.setBottomColor((String) hit.getSource().get(PersonTable.BOTTOMCOLOR));
         personAttribute.setBottomType((String) hit.getSource().get(PersonTable.BOTTOMTYPE));
-        personAttribute.setCarType((String) hit.getSource().get(PersonTable.CTYPE));
+        personAttribute.setCarType((String) hit.getSource().get(PersonTable.CARTYPE));
         personAttribute.setHat((String) hit.getSource().get(PersonTable.HAT));
         personAttribute.setKnapSack((String) hit.getSource().get(PersonTable.KNAPSACK));
         personAttribute.setMessengerBag((String) hit.getSource().get(PersonTable.MESSENGERBAG));

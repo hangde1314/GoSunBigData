@@ -100,7 +100,7 @@ public class ElasticSearchDao {
             String start_ts = String.valueOf(start_sj * 100 / 60 + start_sj % 60);
             int end_sj = temp.getEnd();
             String end_ts = String.valueOf(end_sj * 100 / 60 + end_sj % 60);
-            timeInQB.should(QueryBuilders.rangeQuery(FaceTable.TIMESLOT).gte(start_ts).lte(end_ts));
+            timeInQB.should(QueryBuilders.rangeQuery(FaceTable.TIMESTAMP).gte(start_ts).lte(end_ts));
             totalBQ.must(timeInQB);
         }
     }

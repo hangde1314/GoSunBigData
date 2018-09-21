@@ -11,9 +11,9 @@ public class PersonTable implements Serializable {
     //es类型
     public static final String PERSON_INDEX_TYPE = "person";
     //图片的小图ftp地址 xxx/xxx/xxx/
-    public static final String SURL = "sftpurl";
+    public static final String SFTPURL = "sftpurl";
     //图片的大图ftp地址 xxx/xxx/xxx/
-    public static final String BURL = "bftpurl";
+    public static final String BFTPURL = "bftpurl";
     //float特征值
     public static final String FEAUTRE = "feature";
     //比特特征值

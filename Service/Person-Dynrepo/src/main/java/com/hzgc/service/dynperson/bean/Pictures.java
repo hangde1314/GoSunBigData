@@ -9,16 +9,20 @@ import java.util.List;
 @Data
 public class Pictures implements Serializable {
 
-    private String burl;
+    private String babsolutepath;
 
     private String deviceId;
 
     private String deviceName;
 
-    private String surl;
+    private String sabsolutepath;
 
     private String time;
 
     private List<PersonAttributes> personAttributes;
+
+    private String bHttpPath;
+
+    private String sHttpPath;
 
 }

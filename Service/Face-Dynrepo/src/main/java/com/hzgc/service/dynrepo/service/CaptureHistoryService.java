@@ -1,5 +1,7 @@
 package com.hzgc.service.dynrepo.service;
 
+import com.hzgc.common.collect.facedis.FtpRegisterClient;
+import com.hzgc.common.collect.util.ConverFtpurl;
 import com.hzgc.common.service.facedynrepo.FaceTable;
 import com.hzgc.common.util.json.JacksonUtil;
 import com.hzgc.service.dynrepo.bean.CaptureOption;
@@ -13,16 +15,21 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class CaptureHistoryService {
+
+    @Autowired
+    private FtpRegisterClient ftpRegisterClient;
     @Autowired
     @SuppressWarnings("unused")
     private ElasticSearchDao elasticSearchDao;
@@ -32,6 +39,8 @@ public class CaptureHistoryService {
     @Autowired
     @SuppressWarnings("unused")
     private CaptureServiceHelper captureServiceHelper;
+    @Value(value = "${ftp.port}")
+    private String ftpPort;
 
     public List<SingleCaptureResult> getCaptureHistory(CaptureOption option) {
         String sortParam = EsSearchParam.DESC;
@@ -69,12 +78,15 @@ public class CaptureHistoryService {
         if (hits.length > 0) {
             for (SearchHit hit : hits) {
                 capturePicture = new CapturedPicture();
-                String surl = hit.getId();
-                String burl = captureServiceHelper.surlToBurl(surl);
+                String sabsolutepath = (String) hit.getSource().get(FaceTable.SABSOLUTEPATH);
+                String babsolutepath = (String) hit.getSource().get(FaceTable.BABSOLUTEPATH);
                 String ipcid = (String) hit.getSource().get(FaceTable.IPCID);
                 String timestamp = (String) hit.getSource().get(FaceTable.TIMESTAMP);
-                capturePicture.setSurl(captureServiceHelper.getFtpUrl(surl));
-                capturePicture.setBurl(captureServiceHelper.getFtpUrl(burl));
+                String hostname = (String) hit.getSource().get(FaceTable.HOSTNAME);
+                Map <String, String> ftpIpMapping = ftpRegisterClient.getFtpIpMapping();
+                String ip = ftpIpMapping.get(ftpIpMapping.get(hostname));
+                capturePicture.setSabsolutepath(ConverFtpurl.toHttpPath(ip,ftpPort,sabsolutepath));
+                capturePicture.setBabsolutepath(ConverFtpurl.toHttpPath(ip,ftpPort,babsolutepath));
                 capturePicture.setDeviceId(ipcid);
                 capturePicture.setTimeStamp(timestamp);
                 persons.add(capturePicture);
@@ -99,12 +111,15 @@ public class CaptureHistoryService {
             if (hits.length > 0) {
                 for (SearchHit hit : hits) {
                     capturePicture = new CapturedPicture();
-                    String surl = hit.getId();
-                    String burl = captureServiceHelper.surlToBurl(surl);
+                    String sabsolutepath = (String) hit.getSource().get(FaceTable.SABSOLUTEPATH);
+                    String babsolutepath = (String) hit.getSource().get(FaceTable.BABSOLUTEPATH);
                     String ipc = (String) hit.getSource().get(FaceTable.IPCID);
                     String timestamp = (String) hit.getSource().get(FaceTable.TIMESTAMP);
-                    capturePicture.setSurl(captureServiceHelper.getFtpUrl(surl));
-                    capturePicture.setBurl(captureServiceHelper.getFtpUrl(burl));
+                    String hostname = (String) hit.getSource().get(FaceTable.HOSTNAME);
+                    Map <String, String> ftpIpMapping = ftpRegisterClient.getFtpIpMapping();
+                    String ip = ftpIpMapping.get(hostname);
+                    capturePicture.setSabsolutepath(ConverFtpurl.toHttpPath(ip,ftpPort,sabsolutepath));
+                    capturePicture.setBabsolutepath(ConverFtpurl.toHttpPath(ip,ftpPort,babsolutepath));
                     capturePicture.setDeviceId(option.getIpcMappingDevice().get(ipc).getId());
                     capturePicture.setDeviceName(option.getIpcMappingDevice().get(ipc).getName());
                     capturePicture.setTimeStamp(timestamp);
@@ -138,12 +153,15 @@ public class CaptureHistoryService {
         if (hits.length > 0) {
             for (SearchHit hit : hits) {
                 capturePicture = new CapturedPicture();
-                String surl = hit.getId();
-                String burl = captureServiceHelper.surlToBurl(surl);
+                String sabsolutepath = (String) hit.getSource().get(FaceTable.SABSOLUTEPATH);
+                String babsolutepath = (String) hit.getSource().get(FaceTable.BABSOLUTEPATH);
                 String ipc = (String) hit.getSource().get(FaceTable.IPCID);
                 String timestamp = (String) hit.getSource().get(FaceTable.TIMESTAMP);
-                capturePicture.setSurl(captureServiceHelper.getFtpUrl(surl));
-                capturePicture.setBurl(captureServiceHelper.getFtpUrl(burl));
+                String hostname = (String) hit.getSource().get(FaceTable.HOSTNAME);
+                Map <String, String> ftpIpMapping = ftpRegisterClient.getFtpIpMapping();
+                String ip = ftpIpMapping.get(hostname);
+                capturePicture.setSabsolutepath(ConverFtpurl.toHttpPath(ip,ftpPort,sabsolutepath));
+                capturePicture.setBabsolutepath(ConverFtpurl.toHttpPath(ip,ftpPort,babsolutepath));
                 capturePicture.setDeviceId(ipc);
                 capturePicture.setTimeStamp(timestamp);
                 capturePicture.setDeviceId(option.getIpcMappingDevice().get(ipc).getId());

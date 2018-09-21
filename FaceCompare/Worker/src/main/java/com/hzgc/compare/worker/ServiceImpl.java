@@ -28,8 +28,8 @@ public class ServiceImpl implements Service {
     private static final Logger logger = LoggerFactory.getLogger(ServiceImpl.class);
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     private ExecutorService pool;
-    private int daysPerThread = 2; //分割成的时间段
-    private int daysToComapreMax = 10; //不使用多线程对比的最大时间段
+    private int daysPerThread = 4; //分割成的时间段
+    private int daysToComapreMax = 8; //不使用多线程对比的最大时间段
 
     public ServiceImpl(){
         pool = Executors.newFixedThreadPool(Config.WORKER_EXECUTORS_TO_COMPARE);

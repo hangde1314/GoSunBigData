@@ -1,7 +1,7 @@
 package com.hzgc.compare.worker.util;
 
 import com.google.gson.Gson;
-import com.hzgc.compare.FaceObject;
+import com.hzgc.common.collect.bean.FaceObject;
 
 public class FaceObjectUtil {
     private static Gson gson;

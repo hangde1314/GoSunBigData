@@ -35,6 +35,9 @@ public class Config {
     public static int DELETE_OPEN;
     public static String CLUSTER_NAME ;
     public static String TRACKER_GROUP;
+    public static String ES_CLUSTER_NAME;
+    public static String ES_HOST;
+    public static int ES_CLUSTER_PORT;
 
     static {
         Properties prop = PropertiesUtil.getProperties();
@@ -58,5 +61,8 @@ public class Config {
         DELETE_OPEN = Integer.parseInt(prop.getProperty("delete.open"));
         CLUSTER_NAME = prop.getProperty("cluster.name");
         TRACKER_GROUP = prop.getProperty("tasktracker.group");
+        ES_CLUSTER_NAME = prop.getProperty("es.cluster.name");
+        ES_HOST = prop.getProperty("es.hosts");
+        ES_CLUSTER_PORT = Integer.parseInt(prop.getProperty("es.cluster.port"));
     }
 }

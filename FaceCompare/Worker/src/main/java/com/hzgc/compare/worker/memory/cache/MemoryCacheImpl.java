@@ -1,6 +1,6 @@
 package com.hzgc.compare.worker.memory.cache;
 
-import com.hzgc.compare.FaceObject;
+import com.hzgc.common.collect.bean.FaceObject;
 import com.hzgc.compare.worker.common.collects.BatchBufferQueue;
 import com.hzgc.compare.worker.common.collects.CustomizeArrayList;
 import com.hzgc.compare.worker.common.collects.DoubleBufferQueue;
@@ -123,16 +123,18 @@ public class MemoryCacheImpl{
     private void check() {
         logger.info("To check The Buferr if it is to be flushed.");
         if(buffer.getWriteListSize() >= bufferSizeMax){
-            TaskToHandleQueue.getTaskQueue().addTask(new FlushTask(buffer.getWithoutRemove()));
-            moveToCacheRecords(buffer.get());
+            List<Triplet<String, String, byte[]>> records = buffer.get();
+            TaskToHandleQueue.getTaskQueue().addTask(new FlushTask(records));
+            moveToCacheRecords(records);
         }
     }
 
     public void flush(){
         if(buffer.getWriteListSize() > 0) {
             logger.info("To flush the buffer.");
-            TaskToHandleQueue.getTaskQueue().addTask(new FlushTask(buffer.getWithoutRemove()));
-            moveToCacheRecords(buffer.get());
+            List<Triplet<String, String, byte[]>> records = buffer.get();
+            TaskToHandleQueue.getTaskQueue().addTask(new FlushTask(records));
+            moveToCacheRecords(records);
         }
     }
 

@@ -1,7 +1,7 @@
 package com.hzgc.compare.worker.comsumer;
 
-
-import com.hzgc.compare.FaceObject;
+import com.hzgc.common.collect.bean.FaceObject;
+import com.hzgc.compare.worker.common.tuple.Triplet;
 import com.hzgc.compare.worker.conf.Config;
 import com.hzgc.compare.worker.memory.cache.MemoryCacheImpl;
 import com.hzgc.compare.worker.util.FaceObjectUtil;
@@ -47,13 +47,16 @@ public class Comsumer extends Thread{
         while(true){
             ConsumerRecords<String, String> records =
                     comsumer.poll(Config.KAFKA_MAXIMUM_TIME);
-            List<FaceObject> objList = new ArrayList<>();
+//            List<FaceObject> objList = new ArrayList<>();
+            List<Triplet<String, String, byte[]>> list = new ArrayList<>();
             for(ConsumerRecord<String, String> record : records){
                 FaceObject obj = FaceObjectUtil.jsonToObject(record.value());
-                objList.add(obj);
+                list.add(new Triplet<>(obj.getTimeStamp().split(" ")[0], obj.getId(), obj.getAttribute().getBitFeature()));
+//                objList.add(obj);
                 logger.debug(record.value());
             }
-            memoryCache.addFaceObjects(objList);
+//            memoryCache.addFaceObjects(objList);
+            memoryCache.addBuffer(list);
 //            logger.info("Push records from kafka to memory , the size is : " + objList.size());
         }
     }

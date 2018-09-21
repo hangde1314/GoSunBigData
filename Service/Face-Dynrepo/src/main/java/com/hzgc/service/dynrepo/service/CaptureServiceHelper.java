@@ -1,14 +1,15 @@
 package com.hzgc.service.dynrepo.service;
 
 import com.hzgc.common.collect.facedis.FtpRegisterClient;
+import com.hzgc.common.collect.util.ConverFtpurl;
 import com.hzgc.common.service.facedynrepo.FaceTable;
 import com.hzgc.common.service.api.bean.DeviceDTO;
 import com.hzgc.common.service.api.service.DeviceQueryService;
 import com.hzgc.common.util.basic.IsEmpty;
-import com.hzgc.jniface.PictureData;
 import com.hzgc.service.dynrepo.bean.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -36,12 +37,18 @@ public class CaptureServiceHelper {
     private Environment environment;
 
     @Autowired
+    FtpRegisterClient ftpRegisterClient;
+
+    @Autowired
     @SuppressWarnings("unused")
     private DeviceQueryService queryService;
 
     @Autowired
     @SuppressWarnings("unused")
     private FtpRegisterClient register;
+
+    @Value("${ftp.port}")
+    private String ftpPort;
 
     /**
      * 通过排序参数进行排序
@@ -155,7 +162,7 @@ public class CaptureServiceHelper {
         try {
             while (resultSet.next()) {
                 //小图ftpurl
-                String surl = resultSet.getString(FaceTable.FTPURL);
+                String surl = resultSet.getString(FaceTable.SABSOLUTEPATH);
                 //设备id
                 String ipcid = resultSet.getString(FaceTable.IPCID);
                 //相似度
@@ -163,11 +170,14 @@ public class CaptureServiceHelper {
                 //时间戳
                 Timestamp timestamp = resultSet.getTimestamp(FaceTable.TIMESTAMP);
                 //大图ftpurl
-                String burl = surlToBurl(surl);
+                String burl = resultSet.getString(FaceTable.BABSOLUTEPATH);
+                String hostname = resultSet.getString(FaceTable.HOSTNAME);
+                Map <String, String> ftpIpMapping = ftpRegisterClient.getFtpIpMapping();
+                String ip = ftpIpMapping.get(hostname);
                 //图片对象
                 CapturedPicture capturedPicture = new CapturedPicture();
-                capturedPicture.setSurl(getFtpUrl(surl));
-                capturedPicture.setBurl(getFtpUrl(burl));
+                capturedPicture.setSabsolutepath(ConverFtpurl.toHttpPath(ip,ftpPort,surl));
+                capturedPicture.setBabsolutepath(ConverFtpurl.toHttpPath(ip,ftpPort,burl));
                 capturedPicture.setDeviceId(option.getIpcMappingDevice().get(ipcid).getId());
                 capturedPicture.setDeviceName(option.getIpcMappingDevice().get(ipcid).getName());
                 capturedPicture.setTimeStamp(format.format(timestamp));
@@ -191,53 +201,34 @@ public class CaptureServiceHelper {
 
     SearchResult parseResultNotOnePerson(ResultSet resultSet, SearchOption option, String searchId) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Map<String, List<CapturedPicture>> mapSet = new HashMap<>();
         SearchResult searchResult = new SearchResult();
         List<SingleSearchResult> singleResultList = new ArrayList<>();
         try {
             while (resultSet.next()) {
                 //小图ftpurl
-                String surl = resultSet.getString(FaceTable.FTPURL);
+                String surl = resultSet.getString(FaceTable.SABSOLUTEPATH);
                 //设备id
                 String ipcid = resultSet.getString(FaceTable.IPCID);
                 //相似度
                 Float similaritys = resultSet.getFloat(FaceTable.SIMILARITY);
                 //时间戳
                 Timestamp timestamp = resultSet.getTimestamp(FaceTable.TIMESTAMP);
-                //group id
-                String id = resultSet.getString(FaceTable.GROUP_FIELD);
                 //大图ftpurl
-                String burl = surlToBurl(surl);
+                String burl = resultSet.getString(FaceTable.BABSOLUTEPATH);
+                //hostname
+                String hostname = resultSet.getString(FaceTable.HOSTNAME);
+                Map <String, String> ftpIpMapping = ftpRegisterClient.getFtpIpMapping();
+                String ip = ftpIpMapping.get(hostname);
                 //图片对象
                 CapturedPicture capturedPicture = new CapturedPicture();
-                capturedPicture.setSurl(getFtpUrl(surl));
-                capturedPicture.setBurl(getFtpUrl(burl));
+                capturedPicture.setSabsolutepath(ConverFtpurl.toHttpPath(ip,ftpPort,surl));
+                capturedPicture.setBabsolutepath(ConverFtpurl.toHttpPath(ip,ftpPort,burl));
                 capturedPicture.setDeviceId(option.getIpcMappingDevice().get(ipcid).getId());
                 capturedPicture.setDeviceName(option.getIpcMappingDevice().get(ipcid).getName());
                 capturedPicture.setTimeStamp(format.format(timestamp));
                 capturedPicture.setSimilarity(similaritys);
-                if (mapSet.containsKey(id)) {
-                    mapSet.get(id).add(capturedPicture);
-                } else {
-                    List<CapturedPicture> pictureList = new ArrayList<>();
-                    pictureList.add(capturedPicture);
-                    mapSet.put(id, pictureList);
-                }
             }
             searchResult.setSearchId(searchId);
-            for (int i = 0; i < option.getImages().size(); i++) {
-                SingleSearchResult singleSearchResult = new SingleSearchResult();
-                String picId = option.getImages().get(i).getImageID();
-                if (mapSet.containsKey(picId)) {
-                    singleSearchResult.setPictures(mapSet.get(picId));
-                    singleSearchResult.setTotal(mapSet.get(picId).size());
-                    List<PictureData> list = new ArrayList<>();
-                    list.add(option.getImages().get(i));
-                    singleSearchResult.setPictureDatas(list);
-                    singleSearchResult.setSearchId(picId);
-                    singleResultList.add(singleSearchResult);
-                }
-            }
             searchResult.setSingleResults(singleResultList);
         } catch (SQLException e) {
             e.printStackTrace();

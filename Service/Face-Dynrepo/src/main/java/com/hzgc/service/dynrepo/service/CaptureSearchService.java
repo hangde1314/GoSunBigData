@@ -114,14 +114,14 @@ public class CaptureSearchService {
                         if (singleSearchResult.getDevicePictures() != null) {
                             for (GroupByIpc groupByIpc : singleSearchResult.getDevicePictures()) {
                                 for (CapturedPicture capturedPicture : groupByIpc.getPictures()) {
-                                    capturedPicture.setSurl(captureServiceHelper.getFtpUrl(capturedPicture.getSurl()));
-                                    capturedPicture.setBurl(captureServiceHelper.getFtpUrl(capturedPicture.getBurl()));
+                                    capturedPicture.setSabsolutepath(capturedPicture.getSabsolutepath());
+                                    capturedPicture.setBabsolutepath(capturedPicture.getBabsolutepath());
                                 }
                             }
                         } else {
                             for (CapturedPicture capturedPicture : singleSearchResult.getPictures()) {
-                                capturedPicture.setSurl(captureServiceHelper.getFtpUrl(capturedPicture.getSurl()));
-                                capturedPicture.setBurl(captureServiceHelper.getFtpUrl(capturedPicture.getBurl()));
+                                capturedPicture.setSabsolutepath(capturedPicture.getSabsolutepath());
+                                capturedPicture.setBabsolutepath(capturedPicture.getBabsolutepath());
                             }
                         }
                     }
@@ -131,8 +131,8 @@ public class CaptureSearchService {
                     }
                     for (SingleSearchResult singleSearchResult : searchResult.getSingleResults()) {
                         for (CapturedPicture capturedPicture : singleSearchResult.getPictures()) {
-                            capturedPicture.setSurl(captureServiceHelper.getFtpUrl(capturedPicture.getSurl()));
-                            capturedPicture.setBurl(captureServiceHelper.getFtpUrl(capturedPicture.getBurl()));
+                            capturedPicture.setSabsolutepath(capturedPicture.getSabsolutepath());
+                            capturedPicture.setBabsolutepath(capturedPicture.getBabsolutepath());
                         }
                     }
                 }

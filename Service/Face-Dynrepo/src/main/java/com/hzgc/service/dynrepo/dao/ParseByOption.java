@@ -4,6 +4,7 @@ import com.hzgc.common.service.faceattribute.bean.Attribute;
 import com.hzgc.common.service.faceattribute.bean.Logistic;
 import com.hzgc.common.service.facedynrepo.FaceTable;
 import com.hzgc.common.util.basic.IsEmpty;
+import com.hzgc.jniface.FaceFunction;
 import com.hzgc.jniface.FaceJNI;
 import com.hzgc.service.dynrepo.bean.SearchOption;
 import com.hzgc.service.dynrepo.bean.SortParam;
@@ -21,20 +22,14 @@ class ParseByOption {
     private static String MID_FIELD = null;
 
     static {
-        MID_FIELD = FaceTable.FTPURL +
+        MID_FIELD = FaceTable.IPCID +
                 ", " +
-                FaceTable.IPCID +
-                ", " +
-                FaceTable.TIMESLOT +
-                ", " +
-                FaceTable.TIMESTAMP +
-                ", " +
-                FaceTable.DATE;
+                FaceTable.TIMESTAMP;
     }
 
     static String getFinalSQLwithOption(SearchOption option, boolean printSql) throws SQLException {
         if (option.getImages().size() == 1) {
-            String feature = FaceJNI.
+            String feature = FaceFunction.
                     floatArray2string(option.getImages().get(0).getFeature().getFeature());
             return getNotOnePersonSQL(option, feature, printSql);
         } else if (!option.isSinglePerson()) {
@@ -119,15 +114,13 @@ class ParseByOption {
                 if (printSql) {
                     feature = "";
                 } else {
-                    feature = FaceJNI.floatArray2string(option.getImages().get(i).getFeature().getFeature());
+                    feature = FaceFunction.floatArray2string(option.getImages().get(i).getFeature().getFeature());
                 }
                 StringBuilder strBuilder = new StringBuilder();
                 strBuilder.append("(select ")
                         .append("'")
                         .append(option.getImages().get(i).getImageID())
-                        .append("' as ")
-                        .append(FaceTable.GROUP_FIELD)
-                        .append(", ")
+                        .append("', ")
                         .append(MID_FIELD)
                         .append(", ")
                         .append(getAttributes(option))
@@ -162,7 +155,7 @@ class ParseByOption {
      */
     private static void getSortParams(StringBuilder finalSql, SearchOption option) {
         finalSql.append(" order by ");
-        List<SortParam> sortParamList = option.getSort()
+        List <SortParam> sortParamList = option.getSort()
                 .stream().map(param -> SortParam.values()[param]).collect(Collectors.toList());
         for (int i = 0; i < option.getSort().size(); i++) {
             switch (sortParamList.get(i)) {
@@ -242,52 +235,6 @@ class ParseByOption {
                 .append("'")
                 .append(option.getEndTime())
                 .append("'");
-        //判断日期分区 数据格式 年-月-日
-        finalSql
-                .append(" and ")
-                .append(FaceTable.DATE)
-                .append(" between ")
-                .append("'")
-                .append(Date.valueOf(option.getStartTime().split(" ")[0]))
-                .append("'")
-                .append(" and ")
-                .append("'")
-                .append(Date.valueOf(option.getEndTime().split(" ")[0]))
-                .append("'");
-    }
-
-    /**
-     * 拼装查询时间段范围
-     * 判断一个或多个时间区间 数据格式 小时+分钟 例如:1122
-     *
-     * @param finalSql 最终的SQL语句
-     * @param option   搜索参数
-     */
-    private static void getIntervals(StringBuilder finalSql, SearchOption option) {
-        finalSql.append(" and (");
-        for (int i = 0; option.getPeriodTimes().size() > i; i++) {
-            int start_sj = option.getPeriodTimes().get(i).getStart();
-            int start_st = (start_sj / 60) * 100 + start_sj % 60;
-            int end_sj = option.getPeriodTimes().get(i).getEnd();
-            int end_st = (end_sj / 60) * 100 + end_sj % 60;
-            if (option.getPeriodTimes().size() - 1 > i) {
-                finalSql
-                        .append(FaceTable.TIMESLOT)
-                        .append(" between ")
-                        .append(start_st)
-                        .append(" and ")
-                        .append(end_st)
-                        .append(" or ");
-            } else {
-                finalSql
-                        .append(FaceTable.TIMESLOT)
-                        .append(" between ")
-                        .append(start_st)
-                        .append(" and ")
-                        .append(end_st);
-            }
-        }
-        finalSql.append(")");
     }
 
     /**
@@ -392,7 +339,7 @@ class ParseByOption {
             if (printSql) {
                 feature = "";
             } else {
-                feature = FaceJNI.
+                feature = FaceFunction.
                         floatArray2string(option.getImages().get(i).getFeature().getFeature());
             }
             prefix.append(FaceTable.FUNCTION_NAME)
@@ -422,9 +369,6 @@ class ParseByOption {
                 .append(">=")
                 .append(option.getSimilarity())
                 .append(getAttributesAndValues(option));
-        if (IsEmpty.listIsRight(option.getPeriodTimes())) {
-            getIntervals(finalSql, option);
-        }
         if (option.getStartTime() != null && option.getEndTime() != null) {
             getData(finalSql, option);
         }
@@ -433,18 +377,10 @@ class ParseByOption {
             getDeviceIpcId(finalSql, option);
         }
 
-        if (option.isClean()) {
-            getClean(finalSql);
-        }
-
         if (option.getSort() != null && option.getSort().size() > 0) {
             getSortParams(finalSql, option);
         }
         finalSql.append(" limit 1000");
         return finalSql.toString();
-    }
-
-    private static void getClean(StringBuilder finalSql) {
-        finalSql.append(" and ").append(FaceTable.SHARPNESS).append(" = 0 ");
     }
 }

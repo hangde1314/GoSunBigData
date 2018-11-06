@@ -27,7 +27,7 @@ public interface PeopleMapper {
 
     List<People> searchPeople(FilterField field);
 
-    List<Long> searchCommunityIdsByRegionId(Long region);
+    List<Long> getCommunityIdsById(List<Long> communityIds);
 
     int countCommunityPeople(Long community);
 

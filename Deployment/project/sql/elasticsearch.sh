@@ -58,6 +58,9 @@ curl -XPUT 's100:9200/dynamicface?pretty' -H 'Content-Type: application/json' -d
          			"huzi": {
          				"type": "keyword"
          			},
+         			"sharpness": {
+         			    "type": "keyword"
+         			},
          			"feature": {
          			    "type": "keyword"
          			},

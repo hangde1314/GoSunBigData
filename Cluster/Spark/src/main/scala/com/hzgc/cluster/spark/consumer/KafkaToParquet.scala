@@ -27,11 +27,11 @@ object KafkaToParquet {
 
   case class Face(id: String, sftpurl: String, bftpurl: String, timestamp: Timestamp, date: String, ipcid: String, hostname: String,
                   babsolutepath: String, sabsolutepath: String, eyeglasses: Int, gender: Int, age: Int, mask: Int,
-                  huzi: Int, feature: Array[Float], bitfeature: String) {
+                  huzi: Int,sharpness: Int, feature: Array[Float], bitfeature: String) {
     def toEsMap: Map[String, Any] = Map("id" -> id, "sftpurl" -> sftpurl, "bftpurl" -> bftpurl,
       "timestamp" -> sqlTimeStamp2FormatString(timestamp),
       "ipcid" -> ipcid, "hostname" -> hostname, "babsolutepath" -> babsolutepath, "sabsolutepath" -> sabsolutepath,
-      "eyeglasses" -> eyeglasses, "gender" -> gender, "age" -> age, "mask" -> mask, "huzi" -> huzi,
+      "eyeglasses" -> eyeglasses, "gender" -> gender, "age" -> age, "mask" -> mask, "huzi" -> huzi, "sharpness" ->sharpness,
       "feature" -> FaceUtil.floatFeature2Base64Str(feature), "bitfeature" -> bitfeature)
     def sqlTimeStamp2FormatString(timestamp: Timestamp): String = {
       val dataFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
@@ -120,7 +120,7 @@ object KafkaToParquet {
           faceobject._2.getIpcId, faceobject._2.getHostname, faceobject._2.getbAbsolutePath(),
           faceobject._2.getsAbsolutePath(), faceobject._2.getAttribute.getEyeglasses,
           faceobject._2.getAttribute.getGender, faceobject._2.getAttribute.getAge, faceobject._2.getAttribute.getMask,
-          faceobject._2.getAttribute.getHuzi, faceobject._2.getAttribute.getFeature,
+          faceobject._2.getAttribute.getHuzi, faceobject._2.getAttribute.getSharpness, faceobject._2.getAttribute.getFeature,
           Base64.getEncoder.encodeToString(faceobject._2.getAttribute.getBitFeature))
       })
     kafkaDF.foreachRDD(rdd => {

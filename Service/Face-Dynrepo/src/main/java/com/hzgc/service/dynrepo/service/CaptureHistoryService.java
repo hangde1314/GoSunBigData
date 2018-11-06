@@ -142,11 +142,13 @@ public class CaptureHistoryService {
                 int mask = (int) hit.getSource().get(FaceTable.MASK);
                 int huzi = (int) hit.getSource().get(FaceTable.HUZI);
                 int eyeglasses = (int) hit.getSource().get(FaceTable.EYEGLASSES);
+                int sharpness = (int) hit.getSource().get(FaceTable.SHARPNESS);
                 capturePicture.setAge(age);
                 capturePicture.setGender(gender);
                 capturePicture.setMask(mask);
                 capturePicture.setHuzi(huzi);
                 capturePicture.setEyeglasses(eyeglasses);
+                capturePicture.setSharpness(sharpness);
                 capturePicture.setSabsolutepath(CollectUrlUtil.toHttpPath(urlInfo.getIp(), urlInfo.getPort(), sabsolutepath));
                 capturePicture.setBabsolutepath(CollectUrlUtil.toHttpPath(urlInfo.getIp(), urlInfo.getPort(), babsolutepath));
                 capturePicture.setLocation(getLocation(ipc));

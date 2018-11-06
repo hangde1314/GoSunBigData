@@ -57,6 +57,7 @@ public class PutDataToEs implements Serializable {
             map.put(FaceTable.EYEGLASSES, faceObject.getAttribute().getEyeglasses());
             map.put(FaceTable.GENDER, faceObject.getAttribute().getGender());
             map.put(FaceTable.HUZI, faceObject.getAttribute().getHuzi());
+            map.put(FaceTable.SHARPNESS,faceObject.getAttribute().getSharpness());
             indexResponse = esClient.prepareIndex(FaceTable.DYNAMIC_INDEX,
                     FaceTable.PERSON_INDEX_TYPE, faceObject.getId()).setSource(map).get();
         }

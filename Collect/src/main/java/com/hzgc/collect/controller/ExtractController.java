@@ -14,6 +14,7 @@ import com.hzgc.common.service.personattribute.service.PersonAttributeService;
 import com.hzgc.common.service.response.ResponseResult;
 import com.hzgc.common.service.rest.BigDataPath;
 import com.hzgc.jniface.*;
+import com.hzgc.seemmo.util.BASE64Util;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -199,10 +200,34 @@ public class ExtractController {
         }
     }
 
+    //车辆base64提取特征
+    @RequestMapping(value = BigDataPath.CAR_FEATURE_CHECK_BASE64, method = RequestMethod.POST)
+    public ResponseEntity <BigCarPictureData> carFeatureExtract_base64(@RequestBody String baseStr) {
+        if (null != baseStr && baseStr.length() > 0) {
+            byte[] imageBin = BASE64Util.base64Str2BinArry(baseStr);
+            BigCarPictureData bigCarPictureData = carExtractService.carExtractByImage(imageBin);
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8).body(bigCarPictureData);
+        }
+        log.info("Car basestr is null");
+        return null;
+    }
+
+    //行人base64提取特征
+    @RequestMapping(value = BigDataPath.PERSON_FEATURE_CHECK_BASE64, method = RequestMethod.POST)
+    public ResponseEntity <BigPersonPictureData> personFeatureExtract_base64(@RequestBody String baseStr) {
+        if (null != baseStr && baseStr.length() > 0) {
+            byte[] imageBin = BASE64Util.base64Str2BinArry(baseStr);
+            BigPersonPictureData bigPersonPictureData = personExtractService.featureExtractByImage(imageBin);
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8).body(bigPersonPictureData);
+        }
+        log.info("Person basestr is null");
+        return null;
+    }
+
 //    @ApiIgnore(value = "内部调用的人脸提特征接口,入参为图片的Base64字符串")
     @RequestMapping(value = BigDataPath.FEATURE_EXTRACT_BASE64, method = RequestMethod.POST)
-    public ResponseEntity <PictureData> faceFeatureExtract_base64(String baseStr) {
-        PictureData pictureData = faceExtractService.featureExtractByImage(baseStr);
+    public ResponseEntity <BigPictureData> faceFeatureExtract_base64(@RequestBody String baseStr) {
+        BigPictureData pictureData = faceExtractService.featureExtractByImage(baseStr);
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8).body(pictureData);
     }
 

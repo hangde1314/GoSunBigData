@@ -1,5 +1,7 @@
 package com.hzgc.cluster.peoman.worker.service;
 
+import com.hzgc.cluster.peoman.worker.dao.PictureMapper;
+import com.hzgc.cluster.peoman.worker.model.Picture;
 import com.hzgc.common.service.peoman.SyncPeopleManager;
 import com.hzgc.common.util.json.JacksonUtil;
 import com.hzgc.jniface.FaceUtil;
@@ -21,6 +23,10 @@ import java.util.Properties;
 @Slf4j
 @Component
 public class InnerConsumer implements Runnable {
+    @Autowired
+    @SuppressWarnings("unused")
+    private PictureMapper pictureMapper;
+
     @Autowired
     @SuppressWarnings("unused")
     private MemeoryCache memeoryCache;
@@ -64,9 +70,13 @@ public class InnerConsumer implements Runnable {
             List<SyncPeopleManager> managers = new ArrayList<>();
             for (ConsumerRecord<String, String> record : records) {
                 SyncPeopleManager message = JacksonUtil.toObject(record.value(), SyncPeopleManager.class);
+                log.info("PeoMan-Inner message : " + JacksonUtil.toJson(message));
                 String type = message.getType();
                 switch (type) {
                     case "2":
+                        managers.add(message);
+                        break;
+                    case "3":
                         managers.add(message);
                         break;
                 }
@@ -81,17 +91,25 @@ public class InnerConsumer implements Runnable {
      * @param managerList 消息对象
      */
     private void addPerson(List<SyncPeopleManager> managerList) {
-        List<ComparePicture> newComparePicture = new ArrayList<>();
-        for (SyncPeopleManager message : managerList) {
-            List<ComparePicture> comparePictureList = memeoryCache.getPeople(message.getPersonid());
-            if (comparePictureList != null) {
-                ComparePicture comparePicture = new ComparePicture();
-                comparePicture.setPeopleId(message.getPersonid());
-                comparePicture.setBitFeature(FaceUtil.base64Str2BitFeature(message.getBitFeature()));
-                comparePicture.setId(message.getPictureId());
-                newComparePicture.add(comparePicture);
+        if (managerList != null && managerList.size() > 0) {
+            memeoryCache.delData(managerList);
+            List<ComparePicture> newComparePicture = new ArrayList<>();
+            for (SyncPeopleManager message : managerList) {
+                List<Picture> pictureList = pictureMapper.selectByPeopleId(message.getPersonid());
+                if (pictureList != null) {
+                    for (Picture picture : pictureList) {
+                        ComparePicture comparePicture = new ComparePicture();
+                        comparePicture.setId(picture.getId());
+                        comparePicture.setPeopleId(picture.getPeopleId());
+                        comparePicture.setBitFeature(FaceUtil.base64Str2BitFeature(picture.getBitFeature()));
+                        comparePicture.setFlagId(picture.getFlagId());
+                        comparePicture.setName(picture.getName());
+                        newComparePicture.add(comparePicture);
+                    }
+                }
             }
+
+            memeoryCache.putData(newComparePicture);
         }
-        memeoryCache.putData(newComparePicture);
     }
 }

@@ -75,18 +75,7 @@ public class DispatchService {
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private void sendKafka(String key, Object data) {
-        try {
-            ListenableFuture <SendResult <String, String>> resultFuture =
-                    kafkaTemplate.send(kafkaTopic, key, JacksonUtil.toJson(data));
-            RecordMetadata metaData = resultFuture.get().getRecordMetadata();
-            ProducerRecord <String, String> producerRecord = resultFuture.get().getProducerRecord();
-            if (metaData != null) {
-                log.info("Send Kafka successfully! message:[topic:{}, key:{}, data:{}]",
-                        metaData.topic(), key, JacksonUtil.toJson(data));
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            log.error(e.getMessage());
-        }
+        kafkaTemplate.send(kafkaTopic, key, JacksonUtil.toJson(data));
     }
 
     //布控告警历史查询
@@ -126,11 +115,17 @@ public class DispatchService {
         PageInfo info = new PageInfo(page.getResult());
         int total = (int) info.getTotal();
         vo.setTotal(total);
+        Map<String, Long> regionMap = platformService.getAllRegionId();
         List <DispatchVO> list = new ArrayList <>();
         for (Dispatch dispatch : dispatchList) {
             DispatchVO dispatchVO = new DispatchVO();
             dispatchVO.setId(dispatch.getId());
             dispatchVO.setRegionId(dispatch.getRegion());
+            for(Map.Entry entry : regionMap.entrySet()) {
+                if (dispatch.getRegion().equals(entry.getValue())) {
+                    dispatchVO.setRegionName((String) entry.getKey());
+                }
+            }
             dispatchVO.setName(dispatch.getName());
             dispatchVO.setIdCard(dispatch.getIdcard());
             dispatchVO.setThreshold(dispatch.getThreshold());

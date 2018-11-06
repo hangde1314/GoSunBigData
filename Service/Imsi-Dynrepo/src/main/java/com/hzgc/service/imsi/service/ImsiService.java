@@ -14,8 +14,8 @@ public class ImsiService {
     @Autowired
     private ImsiDao imsiDao;
 
-    public ResponseResult<List <ImsiInfo>> queryByTime(Long time) {
+    public List <ImsiInfo> queryByTime(Long time) {
         List <ImsiInfo> imsiInfos = imsiDao.queryByTime(time);
-        return ResponseResult.init(imsiInfos);
+        return imsiInfos;
     }
 }

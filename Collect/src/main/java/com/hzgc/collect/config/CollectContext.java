@@ -26,6 +26,8 @@ import java.net.UnknownHostException;
 public class CollectContext implements Serializable {
     @Autowired
     private Environment environment;
+    @Autowired
+    private PlateCheck plateCheck;
 
     @Value("${receive.queue.capacity}")
     @NotNull

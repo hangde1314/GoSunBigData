@@ -30,7 +30,7 @@
                 type = #{searchType,jdbcType=INTEGER}
             </if>
             <if test="searchType != null and searchType == 1">
-                and type = 1 or type = 2
+                and type in(1,2)
             </if>
             <if test="startTime != null and endTime != null">
                 and create_time between #{startTime,jdbcType=TIMESTAMP} and #{endTime,jdbcType=TIMESTAMP}

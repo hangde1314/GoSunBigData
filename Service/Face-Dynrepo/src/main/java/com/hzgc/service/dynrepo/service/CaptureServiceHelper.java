@@ -179,6 +179,7 @@ public class CaptureServiceHelper {
                 int huzi = resultSet.getInt(FaceTable.HUZI);
                 int mask = resultSet.getInt(FaceTable.MASK);
                 int eyeglasses = resultSet.getInt(FaceTable.EYEGLASSES);
+                int sharpness = resultSet.getInt(FaceTable.SHARPNESS);
                 //图片对象
                 CapturedPicture capturedPicture = new CapturedPicture();
                 UrlInfo urlInfo = innerService.hostName2Ip(hostname);
@@ -200,6 +201,7 @@ public class CaptureServiceHelper {
                 capturedPicture.setHuzi(huzi);
                 capturedPicture.setMask(mask);
                 capturedPicture.setEyeglasses(eyeglasses);
+                capturedPicture.setSharpness(sharpness);
                 capturedPictureList.add(capturedPicture);
             }
 
@@ -242,6 +244,7 @@ public class CaptureServiceHelper {
                 int huzi = resultSet.getInt(FaceTable.HUZI);
                 int mask = resultSet.getInt(FaceTable.MASK);
                 int eyeglasses = resultSet.getInt(FaceTable.EYEGLASSES);
+                int sharpness = resultSet.getInt(FaceTable.SHARPNESS);
                 //图片对象
                 CapturedPicture capturedPicture = new CapturedPicture();
                 UrlInfo urlInfo = innerService.hostName2Ip(hostname);
@@ -264,6 +267,7 @@ public class CaptureServiceHelper {
                 capturedPicture.setHuzi(huzi);
                 capturedPicture.setMask(mask);
                 capturedPicture.setEyeglasses(eyeglasses);
+                capturedPicture.setSharpness(sharpness);
                 if (mapSet.containsKey(picid)) {
                     mapSet.get(picid).add(capturedPicture);
                 } else {

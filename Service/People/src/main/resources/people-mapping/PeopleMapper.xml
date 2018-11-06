@@ -141,9 +141,13 @@
     <select id="countCommunityPeople" resultType="java.lang.Integer" parameterType="java.lang.Long">
         select count(*) from t_people where community = #{community,jdbcType=BIGINT}
     </select>
-    <!--统计单个区域下所有小区列表-->
-    <select id="searchCommunityIdsByRegionId" resultType="java.lang.Long" parameterType="java.lang.Long">
-        select distinct community from t_people where region = #{region,jdbcType=BIGINT} and community is not null
+    <!--统计单个范围（省市区）下所有实有小区列表-->
+    <select id="getCommunityIdsById" resultType="java.lang.Long" parameterType="java.lang.Long">
+        select distinct community from t_people where community in
+        <foreach collection="list" item="model" open="(" close=")" separator=",">
+            #{model}
+        </foreach>
+        and community is not null
     </select>
     <!--小区重点人口数量统计-->
     <select id="countImportantPeople" resultType="java.lang.Integer" parameterType="java.lang.Long">

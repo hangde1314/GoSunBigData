@@ -22,4 +22,9 @@
     <select id="selectByPictureId" resultMap="BaseResultMap" parameterType="java.lang.Long">
         select feature from t_picture where id = #{id,jdbcType=BIGINT}
     </select>
+    <select id="selectByPeopleId" resultMap="BaseResultMap" parameterType="java.lang.String">
+        select
+        <include refid="Base_Column_List" />
+        from t_picture join t_people on t_picture.peopleid=t_people.id and t_picture.peopleid=#{peopleid, jdbcType=VARCHAR} left join t_flag on t_picture.peopleid=t_flag.peopleid
+    </select>
 </mapper>

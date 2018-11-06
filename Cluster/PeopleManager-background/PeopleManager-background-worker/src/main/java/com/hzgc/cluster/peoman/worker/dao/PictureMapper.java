@@ -10,4 +10,5 @@ import java.util.List;
 public interface PictureMapper {
     List<Picture> selectByPrimaryKey(@Param("offset") int offset, @Param("limit") int limit);
     Picture selectByPictureId(Long id);
+    List<Picture> selectByPeopleId(String peopleId);
 }

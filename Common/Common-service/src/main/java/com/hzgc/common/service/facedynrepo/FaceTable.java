@@ -34,6 +34,8 @@ public class FaceTable implements Serializable {
     public static final String MASK = "mask";
     //人脸属性-胡子类型
     public static final String HUZI = "huzi";
+    //人脸清晰度
+    public static final String SHARPNESS = "sharpness";
     //小文件合并后数据表
     public static final String PERSON_TABLE = "person_table";
     //小文件合并前数据表

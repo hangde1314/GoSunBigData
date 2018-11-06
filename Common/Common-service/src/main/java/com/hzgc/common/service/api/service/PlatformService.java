@@ -112,16 +112,16 @@ public class PlatformService {
     }
 
     /**
-     * 获取社区ID列表
+     * 获取省/市/区范围内的所有社区ID列表
      *
-     * @param regionId 区域ID
+     * @param id 省/市/区 ID
      * @return 社区ID列表
      */
-    public List<Long> getCommunityIdsByRegionId(Long regionId) {
-        if (regionId != null) {
-            log.debug("Method:getCommunityIdsByRegionId, regionId:" + regionId);
+    public List<Long> getCommunityIdsById(Long id) {
+        if (id != null) {
+            log.debug("Method:getCommunityIdsById, id:" + id);
             AreaCriteria criteria = new AreaCriteria();
-            criteria.setId(regionId);
+            criteria.setId(id);
             criteria.setLevel("region");
             AreaSDTO areaSDTO = restTemplate.postForObject(
                     "http://platform:8888/api/v1/region/internal/region/all/query_region_info",
@@ -136,10 +136,10 @@ public class PlatformService {
                 }
                 return communityIds;
             } else {
-                log.info("Get community ids by region id failed, because result is null");
+                log.info("Get community ids by id failed, because result is null");
             }
         } else {
-            log.error("Method:getCommunityIdsByRegionId, regionId is null");
+            log.error("Method:getCommunityIdsById, regionId is null");
         }
         return null;
     }

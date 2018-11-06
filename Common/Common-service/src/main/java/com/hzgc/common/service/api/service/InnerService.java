@@ -3,6 +3,7 @@ package com.hzgc.common.service.api.service;
 import com.hzgc.common.service.api.bean.UrlInfo;
 import com.hzgc.common.service.rest.BigDataPath;
 import com.hzgc.common.util.basic.StopWatch;
+import com.hzgc.jniface.BigPictureData;
 import com.hzgc.jniface.PictureData;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -87,10 +88,10 @@ public class InnerService {
         if (base64Str != null && !"".equals(base64Str)) {
             StopWatch stopWatch = new StopWatch();
             stopWatch.start();
-            ParameterizedTypeReference<PictureData> parameterizedTypeReference =
-                    new ParameterizedTypeReference<PictureData>() {
+            ParameterizedTypeReference<BigPictureData> parameterizedTypeReference =
+                    new ParameterizedTypeReference<BigPictureData>() {
                     };
-            ResponseEntity<PictureData> data = restTemplate.exchange("http://collect-ftp" +
+            ResponseEntity<BigPictureData> data = restTemplate.exchange("http://collect-ftp" +
                             BigDataPath.FEATURE_EXTRACT_BASE64, HttpMethod.POST,
                     new HttpEntity<>(base64Str), parameterizedTypeReference);
             stopWatch.stop();

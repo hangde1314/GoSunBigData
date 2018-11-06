@@ -126,6 +126,7 @@ public class ElasticSearchClient {
             attribute.setGender((Integer) hit.getSource().get(FaceTable.GENDER));
             attribute.setHuzi((Integer) hit.getSource().get(FaceTable.HUZI));
             attribute.setMask((Integer) hit.getSource().get(FaceTable.MASK));
+            attribute.setSharpness((Integer) hit.getSource().get(FaceTable.SHARPNESS));
             faceObject.setAttribute(attribute);
             res.add(faceObject);
         }

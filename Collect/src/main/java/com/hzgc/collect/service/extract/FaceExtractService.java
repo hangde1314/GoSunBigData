@@ -64,7 +64,7 @@ public class FaceExtractService {
         return null;
     }
 
-    public PictureData featureExtractByImage(String base64Str) {
+    public BigPictureData featureExtractByImage(String base64Str) {
         byte[] imageBin = BASE64Util.base64Str2BinArry(base64Str);
         return featureExtractByImage(imageBin);
     }

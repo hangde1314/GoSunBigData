@@ -1,5 +1,6 @@
 package com.hzgc.collect.controller;
 
+import com.hzgc.collect.bean.Base64Bean;
 import com.hzgc.collect.bean.ImageDTO;
 import com.hzgc.collect.service.extract.CarExtractService;
 import com.hzgc.collect.service.extract.FaceExtractService;
@@ -201,34 +202,56 @@ public class ExtractController {
     }
 
     //车辆base64提取特征
+    @ApiOperation(value = "车辆图片base64提取特征", response = BigPictureData.class)
     @RequestMapping(value = BigDataPath.CAR_FEATURE_CHECK_BASE64, method = RequestMethod.POST)
-    public ResponseEntity <BigCarPictureData> carFeatureExtract_base64(@RequestBody String baseStr) {
-        if (null != baseStr && baseStr.length() > 0) {
-            byte[] imageBin = BASE64Util.base64Str2BinArry(baseStr);
-            BigCarPictureData bigCarPictureData = carExtractService.carExtractByImage(imageBin);
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8).body(bigCarPictureData);
+    public ResponseEntity <BigCarPictureData> carFeatureExtract_base64(@RequestBody Base64Bean base64Bean) {
+        if (null != base64Bean) {
+            String baseStr  = base64Bean.getBase64String();
+            if (null != baseStr && baseStr.length() > 0) {
+                byte[] imageBin = BASE64Util.base64Str2BinArry(baseStr);
+                BigCarPictureData bigCarPictureData = carExtractService.carExtractByImage(imageBin);
+                return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8).body(bigCarPictureData);
+            }
         }
-        log.info("Car basestr is null");
+        log.info("Car base64 is null");
         return null;
     }
 
     //行人base64提取特征
+    @ApiOperation(value = "行人图片base64提取特征", response = BigPictureData.class)
     @RequestMapping(value = BigDataPath.PERSON_FEATURE_CHECK_BASE64, method = RequestMethod.POST)
-    public ResponseEntity <BigPersonPictureData> personFeatureExtract_base64(@RequestBody String baseStr) {
-        if (null != baseStr && baseStr.length() > 0) {
-            byte[] imageBin = BASE64Util.base64Str2BinArry(baseStr);
-            BigPersonPictureData bigPersonPictureData = personExtractService.featureExtractByImage(imageBin);
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8).body(bigPersonPictureData);
+    public ResponseEntity <BigPersonPictureData> personFeatureExtract_base64(@RequestBody Base64Bean base64Bean) {
+        if (null != base64Bean) {
+            String baseStr = base64Bean.getBase64String();
+            if (null != baseStr && baseStr.length() > 0) {
+                byte[] imageBin = BASE64Util.base64Str2BinArry(baseStr);
+                BigPersonPictureData bigPersonPictureData = personExtractService.featureExtractByImage(imageBin);
+                return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8).body(bigPersonPictureData);
+            }
         }
         log.info("Person basestr is null");
         return null;
     }
 
-//    @ApiIgnore(value = "内部调用的人脸提特征接口,入参为图片的Base64字符串")
+    @ApiIgnore(value = "内部调用的人脸提特征接口,入参为图片的Base64字符串")
     @RequestMapping(value = BigDataPath.FEATURE_EXTRACT_BASE64, method = RequestMethod.POST)
-    public ResponseEntity <BigPictureData> faceFeatureExtract_base64(@RequestBody String baseStr) {
-        BigPictureData pictureData = faceExtractService.featureExtractByImage(baseStr);
+    public ResponseEntity <PictureData> faceFeatureExtract_base64(@RequestBody String baseStr) {
+        PictureData pictureData = faceExtractService.featureExtractBySamllImage(baseStr);
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8).body(pictureData);
+    }
+
+    @ApiOperation(value = "人脸图片base64提取特征", response = BigPictureData.class)
+    @RequestMapping(value = BigDataPath.FACE_FEATURE_EXTRACT_BASE64, method = RequestMethod.POST)
+    public ResponseEntity <BigPictureData> faceFeatureExtract_base64(@RequestBody Base64Bean base64Bean) {
+        if (null != base64Bean) {
+            String baseStr = base64Bean.getBase64String();
+            if (null != baseStr && baseStr.length() > 0) {
+                BigPictureData pictureData = faceExtractService.featureExtractByImage( BASE64Util.base64Str2BinArry(baseStr));
+                return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8).body(pictureData);
+            }
+        }
+        log.info("Face basestr is null");
+        return null;
     }
 
     @ApiIgnore(value = "内部调用的人脸检测接口,入参为图片的Base64字符串")

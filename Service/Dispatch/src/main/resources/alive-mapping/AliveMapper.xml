@@ -5,8 +5,8 @@
         <id column="id" property="id" jdbcType="VARCHAR"/>
         <result column="name" property="name" jdbcType="VARCHAR"/>
         <result column="organization" property="organization" jdbcType="VARCHAR"/>
-        <result column="start_time" property="startTime" jdbcType="TIMESTAMP"/>
-        <result column="end_time" property="endTime" jdbcType="TIMESTAMP"/>
+        <result column="start_time" property="startTime" jdbcType="VARCHAR"/>
+        <result column="end_time" property="endTime" jdbcType="VARCHAR"/>
         <result column="status" property="status" jdbcType="INTEGER"/>
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
     </resultMap>
@@ -33,7 +33,7 @@
         ,
         <include refid="Blob_Column_List"/>
         from t_dispatch_alive
-        <if test="name != null ">
+        <if test="name != null and name.length() > 0">
             where name like "%" #{name,jdbcType=VARCHAR} "%"
         </if>
     </select>
@@ -46,7 +46,7 @@
         start_time, end_time, status,
         create_time, devices)
         values (#{id,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{organization,jdbcType=VARCHAR},
-        #{startTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP}, #{status,jdbcType=INTEGER},
+        #{startTime,jdbcType=VARCHAR}, #{endTime,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER},
         #{createTime,jdbcType=TIMESTAMP}, #{devices,jdbcType=LONGVARCHAR})
     </insert>
     <insert id="insertSelective" parameterType="com.hzgc.service.alive.model.Alive">
@@ -88,10 +88,10 @@
                 #{organization,jdbcType=VARCHAR},
             </if>
             <if test="startTime != null">
-                #{startTime,jdbcType=TIMESTAMP},
+                #{startTime,jdbcType=VARCHAR},
             </if>
             <if test="endTime != null">
-                #{endTime,jdbcType=TIMESTAMP},
+                #{endTime,jdbcType=VARCHAR},
             </if>
             <if test="status != null">
                 #{status,jdbcType=INTEGER},
@@ -114,10 +114,10 @@
                 organization = #{organization,jdbcType=VARCHAR},
             </if>
             <if test="startTime != null">
-                start_time = #{startTime,jdbcType=TIMESTAMP},
+                start_time = #{startTime,jdbcType=VARCHAR},
             </if>
             <if test="endTime != null">
-                end_time = #{endTime,jdbcType=TIMESTAMP},
+                end_time = #{endTime,jdbcType=VARCHAR},
             </if>
             <if test="status != null">
                 status = #{status,jdbcType=INTEGER},
@@ -135,8 +135,8 @@
         update t_dispatch_alive
         set name = #{name,jdbcType=VARCHAR},
         organization = #{organization,jdbcType=VARCHAR},
-        start_time = #{startTime,jdbcType=TIMESTAMP},
-        end_time = #{endTime,jdbcType=TIMESTAMP},
+        start_time = #{startTime,jdbcType=VARCHAR},
+        end_time = #{endTime,jdbcType=VARCHAR},
         status = #{status,jdbcType=INTEGER},
         create_time = #{createTime,jdbcType=TIMESTAMP},
         devices = #{devices,jdbcType=LONGVARCHAR}
@@ -146,8 +146,8 @@
         update t_dispatch_alive
         set name = #{name,jdbcType=VARCHAR},
         organization = #{organization,jdbcType=VARCHAR},
-        start_time = #{startTime,jdbcType=TIMESTAMP},
-        end_time = #{endTime,jdbcType=TIMESTAMP},
+        start_time = #{startTime,jdbcType=VARCHAR},
+        end_time = #{endTime,jdbcType=VARCHAR},
         status = #{status,jdbcType=INTEGER},
         create_time = #{createTime,jdbcType=TIMESTAMP}
         where id = #{id,jdbcType=VARCHAR}

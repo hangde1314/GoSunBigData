@@ -30,6 +30,11 @@
     from t_dispatch_whiteinfo
     where white_id = #{whiteid,jdbcType=BIGINT}
   </select>
+  <select id="selectPictureById" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
+    select picture
+    from t_dispatch_whiteinfo
+    where id = #{id,jdbcType=BIGINT}
+  </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
     delete from t_dispatch_whiteinfo
     where id = #{id,jdbcType=BIGINT}

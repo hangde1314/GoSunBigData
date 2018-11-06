@@ -199,9 +199,9 @@ public class ExtractController {
         }
     }
 
-    @ApiIgnore(value = "内部调用的人脸提特征接口,入参为图片的Base64字符串")
+//    @ApiIgnore(value = "内部调用的人脸提特征接口,入参为图片的Base64字符串")
     @RequestMapping(value = BigDataPath.FEATURE_EXTRACT_BASE64, method = RequestMethod.POST)
-    public ResponseEntity <PictureData> faceFeatureExtract_base64(@RequestBody String baseStr) {
+    public ResponseEntity <PictureData> faceFeatureExtract_base64(String baseStr) {
         PictureData pictureData = faceExtractService.featureExtractByImage(baseStr);
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8).body(pictureData);
     }

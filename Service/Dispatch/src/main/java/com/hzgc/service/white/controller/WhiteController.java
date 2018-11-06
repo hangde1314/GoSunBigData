@@ -7,6 +7,7 @@ import com.hzgc.common.util.json.JacksonUtil;
 import com.hzgc.service.white.param.SearchWhiteDTO;
 import com.hzgc.service.white.param.SearchWhiteVO;
 import com.hzgc.service.white.param.WhiteDTO;
+import com.hzgc.service.white.param.WhiteIdObject;
 import com.hzgc.service.white.service.WhiteService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -14,11 +15,13 @@ import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @Slf4j
-@Api(value = "/white", tags = "布控库服务")
+@Api(value = "/white", tags = "白名单服务")
 public class WhiteController {
     @Autowired
     private WhiteService whiteService;
@@ -59,13 +62,13 @@ public class WhiteController {
 
     @ApiOperation(value = "删除白名单信息", response = Integer.class)
     @RequestMapping(value = BigDataPath.DISPATCH_DELETE_WHITE, method = RequestMethod.DELETE)
-    public ResponseResult<Integer> deleteWhiteInfo(@ApiParam(value = "ID", required = true) @RequestParam String id) {
-        if (StringUtils.isBlank(id)) {
+    public ResponseResult<Integer> deleteWhiteInfo(@ApiParam(value = "ID", required = true) @RequestBody WhiteIdObject idObject) {
+        if (idObject == null || StringUtils.isBlank(idObject.getId())) {
             log.error("Start delete white info, but id is null");
             return ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT, "删除ID为空,请检查");
         }
-        log.info("Start delete white info, id is:" + id);
-        Integer status = whiteService.deleteWhiteInfo(id);
+        log.info("Start delete white info, id is:" + idObject.getId());
+        Integer status = whiteService.deleteWhiteInfo(idObject.getId());
         if (status == 1) {
             log.info("Delete white info successfully");
             return ResponseResult.init(1);
@@ -143,10 +146,6 @@ public class WhiteController {
             log.error("Start search white info , but dto is null");
             return ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT, "查询参数为空，请检查!");
         }
-        if (StringUtils.isBlank(dto.getName())){
-            log.error("Start search white info, but search name is null");
-            return ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT, "查询名称为空，请检查!");
-        }
         if (dto.getStart() < 0) {
             log.error("Start search info, but start < 0");
             return ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT, "起始行数不能小于0,请检查！");
@@ -157,7 +156,29 @@ public class WhiteController {
         }
         log.info("Start search dispatch, search dispatch:" + JacksonUtil.toJson(dto));
         SearchWhiteVO vo = whiteService.searchWhiteInfo(dto);
-        log.info("Search search dispatch successfully, result:" + JacksonUtil.toJson(vo));
+        log.info("Search search dispatch successfully");
         return ResponseResult.init(vo, vo != null ? vo.getTotal() : 0);
     }
+
+    /**
+     * @param id （布控人员ID）
+     */
+    @ApiOperation(value = "根据白名单人员ID获取布控人照片", response = byte[].class)
+    @RequestMapping(value = BigDataPath.DISPATCH_GET_PICTURE, method = RequestMethod.GET)
+    public ResponseEntity <byte[]> getPicture(@ApiParam(name = "人员ID", required = true) @RequestParam Long id) {
+        if (id < 0) {
+            log.error("Start get face, but id is error");
+            ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body("查询ID参数错误，请检查");
+        }
+        log.info("Start get face, search dispatch:" + id);
+        byte[] picByte = whiteService.getPicture(id);
+        if (picByte == null || picByte.length == 0) {
+            ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(null);
+        }
+        log.info("Start get face successfully");
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(picByte);
+    }
+
+
+
 }

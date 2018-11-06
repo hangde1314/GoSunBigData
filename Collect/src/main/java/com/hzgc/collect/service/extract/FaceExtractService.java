@@ -73,4 +73,9 @@ public class FaceExtractService {
         byte[] imageBin = BASE64Util.base64Str2BinArry(base64Str);
         return featureCheckByImage(imageBin);
     }
+
+    public static void main(String[] args) {
+        String imageStr = BASE64Util.getImageStr("C:\\Users\\Administrator\\Desktop\\111.jpg");
+        System.out.println(imageStr);
+    }
 }

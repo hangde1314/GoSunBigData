@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 @EnableInnerService
 @EnableKafka
-@MapperScan(value = "com.hzgc.service.dispatch.dao")
+@MapperScan(value = "com.hzgc.service.*.dao")
 public class DispatchApplication {
     public static void main(String[] args) {
         SpringApplication.run(DispatchApplication.class, args);

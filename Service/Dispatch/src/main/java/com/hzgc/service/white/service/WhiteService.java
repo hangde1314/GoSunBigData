@@ -9,6 +9,7 @@ import com.hzgc.common.util.basic.UuidUtil;
 import com.hzgc.common.util.json.JacksonUtil;
 import com.hzgc.jniface.FaceAttribute;
 import com.hzgc.jniface.FaceUtil;
+import com.hzgc.seemmo.util.BASE64Util;
 import com.hzgc.service.dispatch.param.KafkaMessage;
 import com.hzgc.service.white.dao.WhiteInfoMapper;
 import com.hzgc.service.white.dao.WhiteMapper;
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.concurrent.ListenableFuture;
 
 import java.text.SimpleDateFormat;
@@ -54,7 +56,7 @@ public class WhiteService {
     @SuppressWarnings("unused")
     private KafkaTemplate<String, String> kafkaTemplate;
 
-    private static final String TOPIC = "";
+    private static final String TOPIC = "dispatch";
 
     private static final String ADD = "ADD";
 
@@ -68,6 +70,7 @@ public class WhiteService {
         kafkaTemplate.send(TOPIC, key, JacksonUtil.toJson(data));
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public Integer insertWhiteInfo(WhiteDTO dto) {
         White white = new White();
         if (StringUtils.isBlank(dto.getId())){
@@ -120,10 +123,10 @@ public class WhiteService {
         this.sendKafka(DELETE, id);
         return status;
     }
-
+    @Transactional(rollbackFor = Exception.class)
     public Integer updateWhiteInfo(WhiteDTO dto) {
         int status_delete = whiteMapper.deleteByPrimaryKey(dto.getId());
-        if (status_delete !=1){
+        if (status_delete != 1){
             log.info("Delete t_dispatch_white failed, id is:" + dto.getId());
             return 0;
         }
@@ -184,12 +187,22 @@ public class WhiteService {
                 infoVO.setId(whiteInfo.getId());
                 infoVO.setWhiteId(whiteInfo.getWhiteId());
                 infoVO.setName(whiteInfo.getName());
+                System.out.println(JacksonUtil.toJson(whiteInfo.getName())+"+++++++++========");
                 whiteInfoVOS.add(infoVO);
             }
             whiteVO.setWhiteInfoVOS(whiteInfoVOS);
             dispatchWhiteVOS.add(whiteVO);
         }
         vo.setWhiteVOS(dispatchWhiteVOS);
+        System.out.println(JacksonUtil.toJson(vo)+ "+++++++++++++++++++");
         return vo;
+    }
+
+    public byte[] getPicture(Long id) {
+        WhiteInfo whiteInfo = whiteInfoMapper.selectPictureById(id);
+        if (whiteInfo != null){
+            return whiteInfo.getPicture();
+        }
+        return null;
     }
 }

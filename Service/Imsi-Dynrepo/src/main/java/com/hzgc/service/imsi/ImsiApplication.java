@@ -1,5 +1,6 @@
 package com.hzgc.service.imsi;
 
+import com.hzgc.common.service.api.config.EnableInnerService;
 import com.hzgc.service.imsi.service.ImsiProducer;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @MapperScan(value = "com.hzgc.service.imsi.dao")
 @EnableTransactionManagement
 @EnableKafka
+@EnableInnerService
 public class ImsiApplication {
 
     public static void main(String[] args) {

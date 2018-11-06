@@ -145,7 +145,6 @@ public class CaptureHistoryService {
             for (SearchHit hit : hits) {
                 capturePicture = new CapturedPicture();
                 String sabsolutepath = (String) hit.getSource().get(VehicleTable.SABSOLUTEPATH);
-                log.info("sabsolutepath : " + sabsolutepath);
                 String babsolutepath = (String) hit.getSource().get(VehicleTable.BABSOLUTEPATH);
                 String ipc = (String) hit.getSource().get(VehicleTable.IPCID);
                 String timestamp = (String) hit.getSource().get(VehicleTable.TIMESTAMP);
@@ -169,7 +168,6 @@ public class CaptureHistoryService {
         singleSearchResult.setPictures(captureList);
         singleSearchResult.setSearchId(UuidUtil.getUuid());
         searchResult.setSingleSearchResult(singleSearchResult);
-        log.info("**************" + JacksonUtil.toJson(searchResult));
         return searchResult;
     }
 

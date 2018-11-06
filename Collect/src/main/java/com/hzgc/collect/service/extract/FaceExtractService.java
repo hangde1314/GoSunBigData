@@ -50,6 +50,18 @@ public class FaceExtractService {
         return null;
     }
 
+    public PictureData featureExtractBySmallImage(byte[] imageBytes){
+        FaceAttribute faceAttribute = FaceFunction.faceFeatureExtract(imageBytes, PictureFormat.JPG);
+        if (null == faceAttribute) {
+            log.info("Face extract failed, faceAttribute is null");
+        }
+        PictureData pictureData = new PictureData();
+        pictureData.setImageID(UuidUtil.getUuid());
+        pictureData.setFeature(faceAttribute);
+        pictureData.setImageData(imageBytes);
+        return pictureData;
+    }
+
     private PictureData featureCheckByImage(byte[] imageBytes) {
         PictureData pictureData = new PictureData();
         pictureData.setImageID(UuidUtil.getUuid());
@@ -64,9 +76,9 @@ public class FaceExtractService {
         return null;
     }
 
-    public BigPictureData featureExtractByImage(String base64Str) {
+    public PictureData featureExtractBySamllImage(String base64Str) {
         byte[] imageBin = BASE64Util.base64Str2BinArry(base64Str);
-        return featureExtractByImage(imageBin);
+        return featureExtractBySmallImage(imageBin);
     }
 
     public PictureData featureCheckByImage(String base64Str) {

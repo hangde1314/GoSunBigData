@@ -63,6 +63,10 @@ public class PeopleCompare {
     @SuppressWarnings("unused")
     private float featureThreshold;
 
+    @Value("${filter.interval.time}")
+    @SuppressWarnings("unused")
+    private int filterTime;
+
     @Value("${face.float.compare.open}")
     @SuppressWarnings("unused")
     private boolean isOpen;
@@ -188,6 +192,7 @@ public class PeopleCompare {
         peopleRecognize.setBurl(CollectUrlUtil.toHttpPath(faceObject.getHostname(), "2573", faceObject.getbAbsolutePath()));
         peopleRecognize.setFlag(1);
         peopleRecognize.setSimilarity(comparePicture.getSimilarity());
+        peopleRecognize.setFilterTime(filterTime);
         log.info("insert people recognize value=" + JacksonUtil.toJson(peopleRecognize));
         try {
             peopleRecognizeMapper.insertUpdate(peopleRecognize);
@@ -217,10 +222,11 @@ public class PeopleCompare {
             peopleRecognize.setCommunity(communityId);
             peopleRecognize.setFlag(compareRes.getFlag());
             peopleRecognize.setSimilarity(compareRes.getSimilarity());
+            peopleRecognize.setFilterTime(filterTime);
             log.info("insert new add people recognize value=" + JacksonUtil.toJson(peopleRecognize));
             if(compareRes.getFlag() == 10) {
                 try {
-                    peopleRecognizeMapper.insertSelective(peopleRecognize);
+                    peopleRecognizeMapper.insert(peopleRecognize);
                 } catch (Exception e) {
                     bitFeatureList.removeLast();
                     floatFeatureList.removeLast();
@@ -230,7 +236,7 @@ public class PeopleCompare {
                 }
             } else {
                 try {
-                    peopleRecognizeMapper.insertSelective(peopleRecognize);
+                    peopleRecognizeMapper.insert(peopleRecognize);
                 } catch (Exception e) {
                     log.info("PeopelCompare flag=2 insert new add people recognize failed !!!");
                     log.error(e.getMessage());

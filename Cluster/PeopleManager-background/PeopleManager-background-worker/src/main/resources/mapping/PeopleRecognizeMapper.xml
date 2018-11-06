@@ -12,6 +12,7 @@
     <result column="burl" property="burl" jdbcType="VARCHAR" />
     <result column="flag" property="flag" jdbcType="INTEGER" />
     <result column="similarity" property="similarity" jdbcType="FLOAT" />
+    <result column="filterTime" property="filterTime" jdbcType="INTEGER" />
   </resultMap>
   <sql id="Base_Column_List" >
     id, peopleid, community, pictureid, deviceid, capturetime, surl, burl, flag, similarity
@@ -30,20 +31,19 @@
     insert into t_people_recognize (id, peopleid, community, 
       pictureid, deviceid, capturetime, 
       surl, burl, flag, similarity)
-    values (#{id,jdbcType=VARCHAR}, #{peopleid,jdbcType=VARCHAR}, #{community,jdbcType=BIGINT},
+    select #{id,jdbcType=VARCHAR}, #{peopleid,jdbcType=VARCHAR}, #{community,jdbcType=BIGINT},
       #{pictureid,jdbcType=BIGINT}, #{deviceid,jdbcType=VARCHAR}, #{capturetime,jdbcType=TIMESTAMP}, 
-      #{surl,jdbcType=VARCHAR}, #{burl,jdbcType=VARCHAR}, #{flag,jdbcType=INTEGER}, #{similarity,jdbcType=FLOAT})
+      #{surl,jdbcType=VARCHAR}, #{burl,jdbcType=VARCHAR}, #{flag,jdbcType=INTEGER}, #{similarity,jdbcType=FLOAT} from dual where not exists
+      (select 1 from t_people_recognize where peopleid=#{peopleid,jdbcType=VARCHAR} and deviceid=#{deviceid,jdbcType=VARCHAR} and unix_timestamp(capturetime)>unix_timestamp(now())-#{filterTime,jdbcType=INTEGER})
   </insert>
   <insert id="insertUpdate" parameterType="com.hzgc.cluster.peoman.worker.model.PeopleRecognize" >
-    insert into t_people_recognize (id, peopleid, community,
+    replace into t_people_recognize (id, peopleid, community,
       pictureid, deviceid, capturetime,
       surl, burl, flag, similarity)
-    values (#{id,jdbcType=VARCHAR}, #{peopleid,jdbcType=VARCHAR}, #{community,jdbcType=BIGINT},
+    select #{id,jdbcType=VARCHAR}, #{peopleid,jdbcType=VARCHAR}, #{community,jdbcType=BIGINT},
       #{pictureid,jdbcType=BIGINT}, #{deviceid,jdbcType=VARCHAR}, #{capturetime,jdbcType=TIMESTAMP},
-      #{surl,jdbcType=VARCHAR}, #{burl,jdbcType=VARCHAR}, #{flag,jdbcType=INTEGER}, #{similarity,jdbcType=FLOAT})
-    ON DUPLICATE KEY UPDATE peopleid=#{peopleid,jdbcType=VARCHAR}, community=#{community,jdbcType=BIGINT},
-    pictureid=#{pictureid,jdbcType=BIGINT}, deviceid=#{deviceid,jdbcType=VARCHAR}, capturetime=#{capturetime,jdbcType=TIMESTAMP},
-    surl=#{surl,jdbcType=VARCHAR}, burl=#{burl,jdbcType=VARCHAR}, flag=#{flag,jdbcType=INTEGER}, similarity=#{similarity,jdbcType=FLOAT}
+      #{surl,jdbcType=VARCHAR}, #{burl,jdbcType=VARCHAR}, #{flag,jdbcType=INTEGER}, #{similarity,jdbcType=FLOAT} from dual where not exists
+      (select 1 from t_people_recognize where peopleid=#{peopleid,jdbcType=VARCHAR} and deviceid=#{deviceid,jdbcType=VARCHAR} and unix_timestamp(capturetime)>unix_timestamp(now())-#{filterTime,jdbcType=INTEGER})
   </insert>
   <insert id="insertSelective" parameterType="com.hzgc.cluster.peoman.worker.model.PeopleRecognize" >
     insert into t_people_recognize

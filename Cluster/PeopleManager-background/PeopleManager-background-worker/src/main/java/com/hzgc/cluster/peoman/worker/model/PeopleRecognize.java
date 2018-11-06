@@ -16,4 +16,5 @@ public class PeopleRecognize {
     private String burl;
     private Integer flag;
     private Float similarity;
+    private Integer filterTime;
 }

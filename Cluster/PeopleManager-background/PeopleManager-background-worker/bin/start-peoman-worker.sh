@@ -28,6 +28,7 @@ WORKER_ID=1
 BIT_THRESHOLD=90
 FLOAT_THRESHOLD=90
 FLAT_COMPARE_OPEN=true
+FILTER_INTERVAL_TIME=3600
 MQ_NAMESERVER=172.18.18.102:9876
 ZK_ADDRESS=172.18.18.100
 MYSQL_HOST=172.18.18.119:4000
@@ -56,6 +57,7 @@ function start_springCloud()
       --bit.threshold=${BIT_THRESHOLD} \
       --float.threshold=${FLOAT_THRESHOLD} \
       --flat.compare.open=${FLAT_COMPARE_OPEN} \
+      --filter.interval.time=${FILTER_INTERVAL_TIME} \
       --mq.nameserver=${MQ_NAMESERVER} \
       --mysql.host=${MYSQL_HOST} \
       --spring.cloud.config.enabled=false  2>&1 &

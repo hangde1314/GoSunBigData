@@ -22,10 +22,11 @@ public class FtpService implements Serializable {
 
     @Autowired
     private FtpSubscribeClient subscribe;
-    @Autowired
+//    @Autowired
     private FtpInfo ftpInfo;
     private String getIPAddress(String hostname) {
-        String ip = ftpInfo.getFtpHome();
+        String ip = register.getFtpIpMapping().get(hostname);
+//        String ip = ftpInfo.getFtpHome();
             if (ip != null) {
                 return ip;
             } else {

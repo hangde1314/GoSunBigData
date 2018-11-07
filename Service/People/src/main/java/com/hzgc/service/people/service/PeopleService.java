@@ -706,8 +706,10 @@ public class PeopleService {
         return vo;
     }
 
-    public List<Long> searchCommunityIdsByRegionId(Long regionId) {
-        return peopleMapper.searchCommunityIdsByRegionId(regionId);
+    public List<Long> searchCommunityIdsById(Long id) {
+        List<Long> communityIds = platformService.getCommunityIdsById(id);
+        log.info("Search platform service, community id list:" + JacksonUtil.toJson(communityIds));
+        return peopleMapper.getCommunityIdsById(communityIds);
     }
 
     public PeopleVO searchPeopleByIdCard(String idCard) {

@@ -225,15 +225,15 @@ public class PeopleController {
         return ResponseResult.init(vo, vo != null ? vo.getTotal() : 0);
     }
 
-    @ApiOperation(value = "统计单个区域下所有小区列表", response = List.class)
+    @ApiOperation(value = "统计单个范围（省市区）下所有实有小区列表", response = List.class)
     @RequestMapping(value = BigDataPath.PEOPLE_SELECT_COMMUNITY, method = RequestMethod.GET)
-    public ResponseResult<List<Long>> searchCommunityIdsByRegionId(Long regionId) {
+    public ResponseResult<List<Long>> searchCommunityIdsById(Long regionId) {
         if (regionId == null) {
-            log.info("Start search community id list, but region is null");
-            ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT, "查询参数为空,请检查!");
+            log.info("Start search community id list, but id is null");
+            ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT, "查询范围为空,请检查!");
         }
-        log.info("Start search community id list, region is:" + regionId);
-        List<Long> communityIds = peopleService.searchCommunityIdsByRegionId(regionId);
+        log.info("Start search community id list, id is:" + regionId);
+        List<Long> communityIds = peopleService.searchCommunityIdsById(regionId);
         log.info("Search community id list successfully, result:" + JacksonUtil.toJson(communityIds));
         return ResponseResult.init(communityIds);
     }

@@ -94,7 +94,6 @@ public class WhiteService {
             whiteInfo.setName(people.getName());
             if (people.getPicture() != null) {
                 byte[] bytes = FaceUtil.base64Str2BitFeature(people.getPicture());
-                System.out.println(people.getPicture());
                 FaceAttribute faceAttribute = innerService.faceFeautreCheck(people.getPicture()).getFeature();
                 if (faceAttribute == null || faceAttribute.getFeature() == null || faceAttribute.getBitFeature() == null) {
                     log.error("Face feature extract failed, insert t_dispatch_white failed");
@@ -126,14 +125,14 @@ public class WhiteService {
         this.sendKafka(DELETE, id);
         return status;
     }
+
     @Transactional(rollbackFor = Exception.class)
     public Integer updateWhiteInfo(WhiteDTO dto) {
         int status_delete = whiteMapper.deleteByPrimaryKey(dto.getId());
         int delete_whiteInfo = whiteInfoMapper.deleteInfo(dto.getId());
-        System.out.println((dto.getId())+"++++++++++++++===========");
-        if (status_delete != 1){
+        if (status_delete != 1 && delete_whiteInfo !=1){
             log.info("Delete t_dispatch_white failed, id is:" + dto.getId());
-            return 0;
+            throw new RuntimeException();
         }
         int status = this.insertWhiteInfo(dto);
         if (status != 1){
@@ -197,7 +196,6 @@ public class WhiteService {
             dispatchWhiteVOS.add(whiteVO);
         }
         vo.setWhiteVOS(dispatchWhiteVOS);
-        System.out.println(JacksonUtil.toJson(vo)+"++++++++++++++++=================");
         return vo;
     }
 

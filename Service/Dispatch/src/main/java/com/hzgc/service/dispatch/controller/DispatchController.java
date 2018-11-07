@@ -46,8 +46,6 @@ public class DispatchController {
             return ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT, "添加布控信息为空,请检查 !");
         }
         if (dto.getRegionId() == null) {
-            System.out.println(dto.getRegionId()+"++++++++++++++===========" +
-                    "");
             log.error("Start insert dispatch info, but region is null ");
             return ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT, "布控区域为空,请检查 ! ");
         }

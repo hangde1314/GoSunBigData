@@ -156,10 +156,6 @@ public class AliveService {
             list.add(aliveInfo);
         }
         vo.setAliveInfoVOS(list);
-        System.out.println(JacksonUtil.toJson(vo)+"======================");
         return vo;
     }
-
-
-
 }

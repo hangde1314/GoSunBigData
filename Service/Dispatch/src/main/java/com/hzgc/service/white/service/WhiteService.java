@@ -7,8 +7,10 @@ import com.hzgc.common.service.api.service.InnerService;
 import com.hzgc.common.service.api.service.PlatformService;
 import com.hzgc.common.util.basic.UuidUtil;
 import com.hzgc.common.util.json.JacksonUtil;
+import com.hzgc.jniface.BigPictureData;
 import com.hzgc.jniface.FaceAttribute;
 import com.hzgc.jniface.FaceUtil;
+import com.hzgc.jniface.PictureData;
 import com.hzgc.seemmo.util.BASE64Util;
 import com.hzgc.service.dispatch.param.KafkaMessage;
 import com.hzgc.service.white.dao.WhiteInfoMapper;
@@ -92,7 +94,8 @@ public class WhiteService {
             whiteInfo.setName(people.getName());
             if (people.getPicture() != null) {
                 byte[] bytes = FaceUtil.base64Str2BitFeature(people.getPicture());
-                FaceAttribute faceAttribute = innerService.faceFeautreExtract(people.getPicture()).getFeature();
+                System.out.println(people.getPicture());
+                FaceAttribute faceAttribute = innerService.faceFeautreCheck(people.getPicture()).getFeature();
                 if (faceAttribute == null || faceAttribute.getFeature() == null || faceAttribute.getBitFeature() == null) {
                     log.error("Face feature extract failed, insert t_dispatch_white failed");
                     throw new RuntimeException("Face feature extract failed, insert t_dispatch_white failed");
@@ -126,6 +129,8 @@ public class WhiteService {
     @Transactional(rollbackFor = Exception.class)
     public Integer updateWhiteInfo(WhiteDTO dto) {
         int status_delete = whiteMapper.deleteByPrimaryKey(dto.getId());
+        int delete_whiteInfo = whiteInfoMapper.deleteInfo(dto.getId());
+        System.out.println((dto.getId())+"++++++++++++++===========");
         if (status_delete != 1){
             log.info("Delete t_dispatch_white failed, id is:" + dto.getId());
             return 0;
@@ -157,7 +162,6 @@ public class WhiteService {
         return 1;
     }
 
-
     public SearchWhiteVO searchWhiteInfo(SearchWhiteDTO dto) {
         SearchWhiteVO vo = new SearchWhiteVO();
         Page page = PageHelper.offsetPage(dto.getStart(), dto.getLimit(), true);
@@ -187,14 +191,13 @@ public class WhiteService {
                 infoVO.setId(whiteInfo.getId());
                 infoVO.setWhiteId(whiteInfo.getWhiteId());
                 infoVO.setName(whiteInfo.getName());
-                System.out.println(JacksonUtil.toJson(whiteInfo.getName())+"+++++++++========");
                 whiteInfoVOS.add(infoVO);
             }
             whiteVO.setWhiteInfoVOS(whiteInfoVOS);
             dispatchWhiteVOS.add(whiteVO);
         }
         vo.setWhiteVOS(dispatchWhiteVOS);
-        System.out.println(JacksonUtil.toJson(vo)+ "+++++++++++++++++++");
+        System.out.println(JacksonUtil.toJson(vo)+"++++++++++++++++=================");
         return vo;
     }
 

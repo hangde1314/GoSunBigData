@@ -26,7 +26,7 @@
     where id = #{id,jdbcType=BIGINT}
   </select>
   <select id="selectByWhiteId" resultMap="BaseResultMap" parameterType="java.lang.String" >
-    select id, white_id, name
+    select id, white_id, name, picture
     from t_dispatch_whiteinfo
     where white_id = #{whiteid,jdbcType=BIGINT}
   </select>
@@ -38,6 +38,10 @@
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
     delete from t_dispatch_whiteinfo
     where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteInfo" parameterType="java.lang.String">
+    delete from t_dispatch_whiteinfo
+    where white_id = #{id,jdbcType=VARCHAR}
   </delete>
   <insert id="insert" parameterType="com.hzgc.service.white.model.WhiteInfo" >
     insert into t_dispatch_whiteinfo (id, white_id, name, 

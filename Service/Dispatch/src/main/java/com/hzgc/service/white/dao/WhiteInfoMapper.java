@@ -22,4 +22,6 @@ public interface WhiteInfoMapper {
     List<WhiteInfo> selectByWhiteId(String whiteid);
 
     WhiteInfo selectPictureById(Long id);
+
+    int deleteInfo(String id);
 }

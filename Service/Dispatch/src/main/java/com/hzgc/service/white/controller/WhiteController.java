@@ -165,7 +165,7 @@ public class WhiteController {
      */
     @ApiOperation(value = "根据白名单人员ID获取布控人照片", response = byte[].class)
     @RequestMapping(value = BigDataPath.DISPATCH_GET_PICTURE, method = RequestMethod.GET)
-    public ResponseEntity <byte[]> getPicture(@ApiParam(name = "人员ID", required = true) @RequestParam Long id) {
+    public ResponseEntity <byte[]> getPicture(@ApiParam(value = "人员ID", required = true) @RequestParam Long id) {
         if (id < 0) {
             log.error("Start get face, but id is error");
             ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body("查询ID参数错误，请检查");

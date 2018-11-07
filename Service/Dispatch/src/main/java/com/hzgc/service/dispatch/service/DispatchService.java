@@ -195,10 +195,11 @@ public class DispatchService {
         dispatch.setCar(dto.getCar());
         dispatch.setMac(dto.getMac());
         dispatch.setNotes(dto.getNotes());
+        dispatch.setThreshold(dto.getThreshold());
         if (dto.getFace() != null) {
             byte[] bytes = FaceUtil.base64Str2BitFeature(dto.getFace());
             FaceAttribute faceAttribute =
-                    innerService.faceFeautreExtract(dto.getFace()) != null ? innerService.faceFeautreExtract(dto.getFace()).getFeature() : null;
+                    innerService.faceFeautreCheck(dto.getFace()) != null ? innerService.faceFeautreCheck(dto.getFace()).getFeature() : null;
             if (faceAttribute == null || faceAttribute.getFeature() == null || faceAttribute.getBitFeature() == null) {
                 log.error("Face feature extract failed, insert t_dispatch failed");
                 throw new RuntimeException("Face feature extract failed, insert  t_dispatch failed");
@@ -244,9 +245,10 @@ public class DispatchService {
         dispatch.setCar(dto.getCar());
         dispatch.setMac(dto.getMac());
         dispatch.setNotes(dto.getNotes());
+        dispatch.setThreshold(dto.getThreshold());
         if (dto.getFace() != null) {
             byte[] bytes = FaceUtil.base64Str2BitFeature(dto.getFace());
-            FaceAttribute faceAttribute = innerService.faceFeautreExtract(dto.getFace()).getFeature();
+            FaceAttribute faceAttribute = innerService.faceFeautreCheck(dto.getFace()).getFeature();
             if (faceAttribute == null || faceAttribute.getFeature() == null || faceAttribute.getBitFeature() == null) {
                 log.error("Face feature extract failed, update t_dispatch failed");
                 throw new RuntimeException("Face feature extract failed, update t_dispatch failed");

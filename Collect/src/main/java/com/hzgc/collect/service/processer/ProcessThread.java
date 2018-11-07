@@ -23,6 +23,10 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.util.concurrent.ListenableFuture;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -30,13 +34,15 @@ import java.util.concurrent.ExecutionException;
 
 @Slf4j
 public class ProcessThread implements Runnable {
-    private BlockingQueue<Event> queue;
+    private BlockingQueue <Event> queue;
     private CollectContext collectContext;
     private final static String FACE = "face";
     private final static String PERSON = "person";
     private final static String CAR = "car";
+    private final static Integer WIDTH = 500;
+    private final static Integer HEIGHT = 500;
 
-    public ProcessThread(BlockingQueue<Event> queue, CollectContext collectContext) {
+    public ProcessThread(BlockingQueue <Event> queue, CollectContext collectContext) {
         this.queue = queue;
         this.collectContext = collectContext;
     }
@@ -50,6 +56,17 @@ public class ProcessThread implements Runnable {
                 if (bytes == null) {
                     continue;
                 }
+                try {
+                    ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
+                    BufferedImage read = ImageIO.read(inputStream);
+                    int width = read.getWidth();
+                    int height = read.getHeight();
+                    if (!(width >= WIDTH && height >= HEIGHT)) {
+                        continue;
+                    }
+                } catch (IOException e) {
+                    log.error("Image size is not more than 500 * 500");
+                }
                 Parser parser = event.getParser();
                 //BufferedImage image = ImageIO.read(new ByteArrayInputStream(bytes));
                 //取消分辨率判断
@@ -57,7 +74,7 @@ public class ProcessThread implements Runnable {
                 //log.error("Camera error, This is a small picture, fileName: " + event.getbAbsolutePath());
                 //continue;
                 //}
-                ArrayList<SmallImage> smallImageList = FaceFunction.faceCheck(bytes, PictureFormat.JPG, PictureFormat.LEVEL_WIDTH_1);
+                ArrayList <SmallImage> smallImageList = FaceFunction.faceCheck(bytes, PictureFormat.JPG, PictureFormat.LEVEL_WIDTH_1);
                 if (smallImageList != null && smallImageList.size() > 0) {
                     int index = 1;
                     for (SmallImage smallImage : smallImageList) {
@@ -90,8 +107,8 @@ public class ProcessThread implements Runnable {
                     log.warn("Face check failed, fileName:" + event.getbAbsolutePath());
                 }
 
-                List<Person> personList = null;
-                List<Vehicle> vehicleList = null;
+                List <Person> personList = null;
+                List <Vehicle> vehicleList = null;
                 ImageResult result = ImageToData.getImageResult(collectContext.getSeemmoUrl(), bytes, null);
                 if (result != null) {
                     personList = result.getPersonList();
@@ -163,9 +180,9 @@ public class ProcessThread implements Runnable {
 
     //临时方法
     private boolean tem_person_check(byte[] personStream) {
-        ArrayList<SmallImage> result =
+        ArrayList <SmallImage> result =
                 FaceFunction.faceCheck(personStream, PictureFormat.JPG, PictureFormat.LEVEL_WIDTH_3);
-        return result != null  && result.size() > 0;
+        return result != null && result.size() > 0;
     }
 
     private void sendKafka(Event event, FaceAttribute faceAttribute) {
@@ -184,7 +201,7 @@ public class ProcessThread implements Runnable {
                 .setbRelativePath(event.getbRelativePath())
                 .setId(faceId)
                 .setIp(collectContext.getFtpIp());
-        ListenableFuture<SendResult<String, String>> resultFuture =
+        ListenableFuture <SendResult <String, String>> resultFuture =
                 collectContext.getKafkaTemplate().send(collectContext.getKafkaFaceObjectTopic(),
                         faceId,
                         JacksonUtil.toJson(faceObject));
@@ -217,7 +234,7 @@ public class ProcessThread implements Runnable {
                 .setIp(collectContext.getFtpIp());
 
         try {
-            ListenableFuture<SendResult<String, String>> resultFuture =
+            ListenableFuture <SendResult <String, String>> resultFuture =
                     collectContext.getKafkaTemplate().send(collectContext.getKafkaPersonObjectTopic(),
                             pesonId,
                             JacksonUtil.toJson(personObject));
@@ -234,33 +251,35 @@ public class ProcessThread implements Runnable {
     }
 
     private void sendKafka(Event event, Vehicle vehicle) {
-        vehicle.setVehicle_data(null);
-        String carId = UuidUtil.getUuid();
-        CarObject carObject = CarObject.builder()
-                .setIpcId(event.getIpcId())
-                .setTimeStamp(event.getTimeStamp())
-                .setAttribute(vehicle)
-                .setHostname(event.getHostname())
-                .setbAbsolutePath(event.getbAbsolutePath())
-                .setsAbsolutePath(event.getsAbsolutePath())
-                .setbFtpUrl(event.getbFtpUrl())
-                .setsFtpUrl(event.getsFtpUrl())
-                .setsRelativePath(event.getsRelativePath())
-                .setbRelativePath(event.getbRelativePath())
-                .setId(carId)
-                .setIp(collectContext.getFtpIp());
-        try {
-            ListenableFuture<SendResult<String, String>> resultFuture =
-                    collectContext.getKafkaTemplate().send(collectContext.getKafkaCarObjectTopic(),
-                            carId,
-                            JacksonUtil.toJson(carObject));
-            RecordMetadata metaData = resultFuture.get().getRecordMetadata();
-            if (metaData != null) {
-                log.info("Send Kafka successfully! message:[topic:{}, sAbsolutePath:{}, bAbsolutePath:{}]",
-                        metaData.topic(), event.getsAbsolutePath(), event.getbAbsolutePath());
+        if (collectContext.getPlateCheck().plateCheck(event.getIpcId(), vehicle.getPlate_licence())) {
+            vehicle.setVehicle_data(null);
+            String carId = UuidUtil.getUuid();
+            CarObject carObject = CarObject.builder()
+                    .setIpcId(event.getIpcId())
+                    .setTimeStamp(event.getTimeStamp())
+                    .setAttribute(vehicle)
+                    .setHostname(event.getHostname())
+                    .setbAbsolutePath(event.getbAbsolutePath())
+                    .setsAbsolutePath(event.getsAbsolutePath())
+                    .setbFtpUrl(event.getbFtpUrl())
+                    .setsFtpUrl(event.getsFtpUrl())
+                    .setsRelativePath(event.getsRelativePath())
+                    .setbRelativePath(event.getbRelativePath())
+                    .setId(carId)
+                    .setIp(collectContext.getFtpIp());
+            try {
+                ListenableFuture <SendResult <String, String>> resultFuture =
+                        collectContext.getKafkaTemplate().send(collectContext.getKafkaCarObjectTopic(),
+                                carId,
+                                JacksonUtil.toJson(carObject));
+                RecordMetadata metaData = resultFuture.get().getRecordMetadata();
+                if (metaData != null) {
+                    log.info("Send Kafka successfully! message:[topic:{}, sAbsolutePath:{}, bAbsolutePath:{}]",
+                            metaData.topic(), event.getsAbsolutePath(), event.getbAbsolutePath());
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                log.error(e.getMessage());
             }
-        } catch (InterruptedException | ExecutionException e) {
-            log.error(e.getMessage());
         }
     }
 }

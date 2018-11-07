@@ -793,7 +793,7 @@ public class CommunityService {
     public ImportantRecognizeVO importantPeopleRecognize(ImportantRecognizeDTO param) {
         ImportantRecognizeVO vo = new ImportantRecognizeVO();
         if (param.getSearchType() == 0) {
-            List<Long> communityIds = platformService.getCommunityIdsByRegionId(param.getRegionId());
+            List<Long> communityIds = platformService.getCommunityIdsById(param.getRegionId());
             if (communityIds == null || communityIds.size() == 0) {
                 log.info("Search community ids by region id is null, so return null");
                 return null;

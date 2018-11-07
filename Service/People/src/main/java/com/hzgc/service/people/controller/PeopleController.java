@@ -13,11 +13,16 @@ import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -253,5 +258,22 @@ public class PeopleController {
         }
         log.info("Import excel data successfully");
         return ResponseResult.init(1);
+    }
+
+    /**
+     *  excel表格模板下载
+     */
+    @GetMapping("/excel")
+    @ApiOperation("下载模板")
+    public ResponseEntity<byte[]> downloadExcel() {
+        ClassPathResource cpr = new ClassPathResource("excel/people_excel.xlsx");
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentDispositionFormData("people", "people_excel.xlsx");
+            byte[] bytes = FileCopyUtils.copyToByteArray(cpr.getInputStream());
+            return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
+        } catch (IOException e) {
+            throw new RuntimeException("读取模板文件失败");
+        }
     }
 }

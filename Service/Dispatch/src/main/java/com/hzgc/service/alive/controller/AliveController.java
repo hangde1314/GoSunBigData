@@ -4,6 +4,7 @@ import com.hzgc.common.service.error.RestErrorCode;
 import com.hzgc.common.service.response.ResponseResult;
 import com.hzgc.common.service.rest.BigDataPath;
 import com.hzgc.common.util.json.JacksonUtil;
+import com.hzgc.service.alive.param.AliveIdObject;
 import com.hzgc.service.alive.param.AliveInfoDTO;
 import com.hzgc.service.alive.param.AliveInfoVO;
 import com.hzgc.service.alive.param.SearchAliveInfoDTO;
@@ -26,6 +27,7 @@ public class AliveController {
     @ApiOperation(value = "添加活体名单信息", response = Integer.class)
     @RequestMapping(value = BigDataPath.DISPATCH_INSERT_ALIVE, method = RequestMethod.POST)
     public ResponseResult<Integer> insertAliveInfo(@RequestBody @ApiParam(name = "入参", value = "布控信息") AliveInfoDTO dto) {
+        System.out.println(JacksonUtil.toJson(dto));
         if (dto == null) {
             log.error("Start insert alive info, but dto is null");
             return ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT, "添加白名单信息为空,请检查!");
@@ -72,13 +74,13 @@ public class AliveController {
 
     @ApiOperation(value = "删除活体名单信息", response = Integer.class)
     @RequestMapping(value = BigDataPath.DISPATCH_DELETE_ALIVE, method = RequestMethod.DELETE)
-    public ResponseResult<Integer> deleteAliveInfo(@ApiParam(value = "ID", required = true) @RequestParam String id) {
-        if (StringUtils.isBlank(id)) {
+    public ResponseResult<Integer> deleteAliveInfo(@ApiParam(value = "ID", required = true) @RequestBody AliveIdObject idObject) {
+        if (idObject == null || StringUtils.isBlank(idObject.getId())) {
             log.error("Start delete alive info,but id is null");
             return ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT, "删除id为空,请检查");
         }
-        log.info("Start delete alive info,,id is " + id);
-        Integer status = aliveService.deleteAliveInfo(id);
+        log.info("Start delete alive info,,id is " + idObject.getId());
+        Integer status = aliveService.deleteAliveInfo(idObject.getId());
         if (status == 1) {
             log.info("Delete alive info  successfully");
             return ResponseResult.init(1);

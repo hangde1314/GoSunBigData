@@ -578,6 +578,10 @@ function config_service()
     sed -i "s#^MYSQL_HOST=.*#MYSQL_HOST=${MYSQL_HOST}#g" ${PEOPLE_START_FILE}
     echo "start-people.sh脚本配置数据库host完成......."
 
+    #替换people模块启动脚本中KAFKA_HOST的value
+    sed -i "s#^KAFKA_HOST=.*#KAFKA_HOST=${kafkapro}#g" ${PEOPLE_START_FILE}
+    echo "start-people.sh及哦啊本配置kafka的host完成........."
+
 	#替换people模块启动脚本中MYSQL_USERNAME的value
     #sed -i "s#^MYSQL_USERNAME=.*#MYSQL_USERNAME=${MYSQL_USERNAME}#g" ${PEOPLE_START_FILE}
     #echo "start-people.sh脚本配置数据库username完成"

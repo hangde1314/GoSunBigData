@@ -20,6 +20,7 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
+import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 
 import java.text.ParseException;
@@ -29,7 +30,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-
+@Service
 @Slf4j
 public class AliveService {
     @Autowired
@@ -43,7 +44,7 @@ public class AliveService {
     @SuppressWarnings("unused")
     private KafkaTemplate<String, String> kafkaTemplate;
 
-    private static final String TOPIC = "";
+    private static final String TOPIC = "dispatch";
 
     private static final String ADD = "ADD";
 
@@ -51,9 +52,7 @@ public class AliveService {
 
     private static final String UPDATE = "UPDATE";
 
-    private static final String IMPORT = "IMPORT";
-
-    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 
     private void sendKafka(String key, Object data) {
         kafkaTemplate.send(TOPIC, key, JacksonUtil.toJson(data));
@@ -65,14 +64,8 @@ public class AliveService {
         alive.setName(dto.getName());
         alive.setDevices(StringUtils.join(dto.getDeviceIds().toArray(), ","));
         alive.setOrganization(dto.getOrganization());
-        try {
-            alive.setStartTime(sdf.parse(dto.getStarttime()));
-            alive.setEndTime(sdf.parse(dto.getEndtime()));
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        alive.setStatus(0);
-        alive.setCreateTime(new Date());
+        alive.setStartTime(dto.getStarttime());
+        alive.setEndTime(dto.getEndtime());
         int status = aliveMapper.insertSelective(alive);
         if (status != 1) {
             log.info("Insert info,but insert info to t_dispatch_white failed");
@@ -80,28 +73,24 @@ public class AliveService {
         }
         KafkaMessage message = new KafkaMessage();
         message.setId(alive.getId());
-        this.sendKafka(ADD,message);
+        this.sendKafka(ADD, message);
         log.info("Insert info successfully");
         return 1;
     }
 
     public Integer updateAliveInfo(AliveInfoDTO dto) {
         Alive alive = new Alive();
-        alive.setId(UuidUtil.getUuid());
+        alive.setId(dto.getId());
         alive.setName(dto.getName());
         alive.setDevices(StringUtils.join(dto.getDeviceIds().toArray(), ","));
         alive.setOrganization(dto.getOrganization());
-        try {
-            alive.setStartTime(sdf.parse(dto.getStarttime()));
-            alive.setEndTime(sdf.parse(dto.getEndtime()));
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        alive.setStartTime(dto.getStarttime());
         alive.setStatus(0);
+        alive.setEndTime(dto.getEndtime());
         alive.setCreateTime(new Date());
         int status = aliveMapper.updateByPrimaryKeyWithBLOBs(alive);
         if (status != 1) {
-            log.info("Insert info,but insert info to t_dispatch_white failed");
+            log.info("Insert info,but insert info to t_dispatch_alive failed");
             return 0;
         }
         KafkaMessage message = new KafkaMessage();
@@ -160,8 +149,8 @@ public class AliveService {
             }
             aliveInfo.setDeviceNames(deviceNames);
             aliveInfo.setOrganization(alive.getOrganization());
-            aliveInfo.setStartTime(sdf.format(alive.getStartTime()));
-            aliveInfo.setEndTime(sdf.format(alive.getEndTime()));
+            aliveInfo.setStartTime(alive.getStartTime());
+            aliveInfo.setEndTime(alive.getEndTime());
             aliveInfo.setStatus(alive.getStatus());
             aliveInfo.setCreatetime(sdf.format(alive.getCreateTime()));
             list.add(aliveInfo);
@@ -169,7 +158,4 @@ public class AliveService {
         vo.setAliveInfoVOS(list);
         return vo;
     }
-
-
-
 }

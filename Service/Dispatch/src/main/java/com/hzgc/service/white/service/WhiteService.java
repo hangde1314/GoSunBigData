@@ -7,8 +7,11 @@ import com.hzgc.common.service.api.service.InnerService;
 import com.hzgc.common.service.api.service.PlatformService;
 import com.hzgc.common.util.basic.UuidUtil;
 import com.hzgc.common.util.json.JacksonUtil;
+import com.hzgc.jniface.BigPictureData;
 import com.hzgc.jniface.FaceAttribute;
 import com.hzgc.jniface.FaceUtil;
+import com.hzgc.jniface.PictureData;
+import com.hzgc.seemmo.util.BASE64Util;
 import com.hzgc.service.dispatch.param.KafkaMessage;
 import com.hzgc.service.white.dao.WhiteInfoMapper;
 import com.hzgc.service.white.dao.WhiteMapper;
@@ -23,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.concurrent.ListenableFuture;
 
 import java.text.SimpleDateFormat;
@@ -54,7 +58,7 @@ public class WhiteService {
     @SuppressWarnings("unused")
     private KafkaTemplate<String, String> kafkaTemplate;
 
-    private static final String TOPIC = "";
+    private static final String TOPIC = "dispatch";
 
     private static final String ADD = "ADD";
 
@@ -68,6 +72,7 @@ public class WhiteService {
         kafkaTemplate.send(TOPIC, key, JacksonUtil.toJson(data));
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public Integer insertWhiteInfo(WhiteDTO dto) {
         White white = new White();
         if (StringUtils.isBlank(dto.getId())){
@@ -89,7 +94,7 @@ public class WhiteService {
             whiteInfo.setName(people.getName());
             if (people.getPicture() != null) {
                 byte[] bytes = FaceUtil.base64Str2BitFeature(people.getPicture());
-                FaceAttribute faceAttribute = innerService.faceFeautreExtract(people.getPicture()).getFeature();
+                FaceAttribute faceAttribute = innerService.faceFeautreCheck(people.getPicture()).getFeature();
                 if (faceAttribute == null || faceAttribute.getFeature() == null || faceAttribute.getBitFeature() == null) {
                     log.error("Face feature extract failed, insert t_dispatch_white failed");
                     throw new RuntimeException("Face feature extract failed, insert t_dispatch_white failed");
@@ -121,11 +126,13 @@ public class WhiteService {
         return status;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public Integer updateWhiteInfo(WhiteDTO dto) {
         int status_delete = whiteMapper.deleteByPrimaryKey(dto.getId());
-        if (status_delete !=1){
+        int delete_whiteInfo = whiteInfoMapper.deleteInfo(dto.getId());
+        if (status_delete != 1 && delete_whiteInfo !=1){
             log.info("Delete t_dispatch_white failed, id is:" + dto.getId());
-            return 0;
+            throw new RuntimeException();
         }
         int status = this.insertWhiteInfo(dto);
         if (status != 1){
@@ -153,7 +160,6 @@ public class WhiteService {
         }
         return 1;
     }
-
 
     public SearchWhiteVO searchWhiteInfo(SearchWhiteDTO dto) {
         SearchWhiteVO vo = new SearchWhiteVO();
@@ -191,5 +197,13 @@ public class WhiteService {
         }
         vo.setWhiteVOS(dispatchWhiteVOS);
         return vo;
+    }
+
+    public byte[] getPicture(Long id) {
+        WhiteInfo whiteInfo = whiteInfoMapper.selectPictureById(id);
+        if (whiteInfo != null){
+            return whiteInfo.getPicture();
+        }
+        return null;
     }
 }

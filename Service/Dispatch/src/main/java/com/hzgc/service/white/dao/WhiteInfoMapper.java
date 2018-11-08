@@ -20,4 +20,8 @@ public interface WhiteInfoMapper {
     int updateByPrimaryKey(WhiteInfo record);
 
     List<WhiteInfo> selectByWhiteId(String whiteid);
+
+    WhiteInfo selectPictureById(Long id);
+
+    int deleteInfo(String id);
 }

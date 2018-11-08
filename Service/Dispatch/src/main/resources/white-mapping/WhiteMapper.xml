@@ -11,7 +11,7 @@
     <result column="devices" property="devices" jdbcType="LONGVARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, name, organization, status
+    id, name, organization, status, devices
   </sql>
   <sql id="Blob_Column_List" >
     devices
@@ -24,7 +24,7 @@
     from t_dispatch_white
     where id = #{id,jdbcType=VARCHAR}
   </select>
-  <select id="searchInfo" resultMap="BaseResultMap" parameterType="com.hzgc.service.white.param.SearchDispatchWhiteDTO">
+  <select id="searchInfo" resultMap="BaseResultMap" parameterType="com.hzgc.service.white.param.SearchWhiteDTO">
     select
     <include refid="Base_Column_List"/>
     from t_dispatch_white
@@ -34,7 +34,17 @@
       </if>
     </where>
   </select>
-  <select id="selectByDefid" resultMap="BaseResultMap" parameterType="com.hzgc.service.white.model.white">
+  <select id="searchWhiteInfo" resultMap="ResultMapWithBLOBs" parameterType="com.hzgc.service.white.param.SearchWhiteDTO">
+  select
+    <include refid="Base_Column_List"/>
+    from t_dispatch_white
+    <where>
+      <if test="name != null  and name.length() > 0 ">
+        name like "%" #{name,jdbcType=VARCHAR}"%"
+      </if>
+    </where>
+  </select>
+  <select id="selectByDefid" resultMap="BaseResultMap" parameterType="com.hzgc.service.white.model.White">
     select
     <include refid="Base_Column_List"/>
     from t_dispatch_whiteinfo

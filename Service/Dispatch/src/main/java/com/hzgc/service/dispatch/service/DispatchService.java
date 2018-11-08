@@ -57,7 +57,7 @@ public class DispatchService {
     @Autowired
     @SuppressWarnings("unused")
     //Spring-kafka-template
-    private KafkaTemplate <String, String> kafkaTemplate;
+    private KafkaTemplate<String, String> kafkaTemplate;
 
     @Value("${dispatch.kafka.topic}")
     @NotNull
@@ -75,24 +75,13 @@ public class DispatchService {
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private void sendKafka(String key, Object data) {
-        try {
-            ListenableFuture <SendResult <String, String>> resultFuture =
-                    kafkaTemplate.send(kafkaTopic, key, JacksonUtil.toJson(data));
-            RecordMetadata metaData = resultFuture.get().getRecordMetadata();
-            ProducerRecord <String, String> producerRecord = resultFuture.get().getProducerRecord();
-            if (metaData != null) {
-                log.info("Send Kafka successfully! message:[topic:{}, key:{}, data:{}]",
-                        metaData.topic(), key, JacksonUtil.toJson(data));
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            log.error(e.getMessage());
-        }
+        kafkaTemplate.send(kafkaTopic, key, JacksonUtil.toJson(data));
     }
 
     //布控告警历史查询
-    public ResponseResult <WarnHistoryVO> searchDeployRecognize(DispatchRecognizeDTO dispatchRecognizeDTO) {
-        List <DispatchRecognize> dispatchRecognizeList = dispatchRecognizeMapper.selectSelective(dispatchRecognizeDTO);
-        ArrayList <DispatchRecognizeVO> dispatchRecognizeVOS = new ArrayList <>();
+    public ResponseResult<WarnHistoryVO> searchDeployRecognize(DispatchRecognizeDTO dispatchRecognizeDTO) {
+        List<DispatchRecognize> dispatchRecognizeList = dispatchRecognizeMapper.selectSelective(dispatchRecognizeDTO);
+        ArrayList<DispatchRecognizeVO> dispatchRecognizeVOS = new ArrayList<>();
         if (null != dispatchRecognizeList && dispatchRecognizeList.size() > 0) {
             for (DispatchRecognize dispatchRecognize : dispatchRecognizeList) {
                 DispatchDTO dispatchDTO = new DispatchDTO();
@@ -122,15 +111,21 @@ public class DispatchService {
     public SearchDispatchVO searchDispatch(SearchDispatchDTO searchDispatchDTO) {
         SearchDispatchVO vo = new SearchDispatchVO();
         Page page = PageHelper.offsetPage(searchDispatchDTO.getStart(), searchDispatchDTO.getLimit(), true);
-        List <Dispatch> dispatchList = dispatchMapper.searchDispatch(searchDispatchDTO);
+        List<Dispatch> dispatchList = dispatchMapper.searchDispatch(searchDispatchDTO);
         PageInfo info = new PageInfo(page.getResult());
         int total = (int) info.getTotal();
         vo.setTotal(total);
-        List <DispatchVO> list = new ArrayList <>();
+        Map<String, Long> regionMap = platformService.getAllRegionId();
+        List<DispatchVO> list = new ArrayList<>();
         for (Dispatch dispatch : dispatchList) {
             DispatchVO dispatchVO = new DispatchVO();
             dispatchVO.setId(dispatch.getId());
             dispatchVO.setRegionId(dispatch.getRegion());
+            for (Map.Entry entry : regionMap.entrySet()) {
+                if (dispatch.getRegion().equals(entry.getValue())) {
+                    dispatchVO.setRegionName((String) entry.getKey());
+                }
+            }
             dispatchVO.setName(dispatch.getName());
             dispatchVO.setIdCard(dispatch.getIdcard());
             dispatchVO.setThreshold(dispatch.getThreshold());
@@ -200,10 +195,11 @@ public class DispatchService {
         dispatch.setCar(dto.getCar());
         dispatch.setMac(dto.getMac());
         dispatch.setNotes(dto.getNotes());
+        dispatch.setThreshold(dto.getThreshold());
         if (dto.getFace() != null) {
             byte[] bytes = FaceUtil.base64Str2BitFeature(dto.getFace());
             FaceAttribute faceAttribute =
-                    innerService.faceFeautreExtract(dto.getFace()) != null ? innerService.faceFeautreExtract(dto.getFace()).getFeature() : null;
+                    innerService.faceFeautreCheck(dto.getFace()) != null ? innerService.faceFeautreCheck(dto.getFace()).getFeature() : null;
             if (faceAttribute == null || faceAttribute.getFeature() == null || faceAttribute.getBitFeature() == null) {
                 log.error("Face feature extract failed, insert t_dispatch failed");
                 throw new RuntimeException("Face feature extract failed, insert  t_dispatch failed");
@@ -239,7 +235,6 @@ public class DispatchService {
         return status;
     }
 
-
     public Integer updateDeploy(DispatchDTO dto) {
         Dispatch dispatch = new Dispatch();
         dispatch.setId(dto.getId());
@@ -249,9 +244,10 @@ public class DispatchService {
         dispatch.setCar(dto.getCar());
         dispatch.setMac(dto.getMac());
         dispatch.setNotes(dto.getNotes());
+        dispatch.setThreshold(dto.getThreshold());
         if (dto.getFace() != null) {
             byte[] bytes = FaceUtil.base64Str2BitFeature(dto.getFace());
-            FaceAttribute faceAttribute = innerService.faceFeautreExtract(dto.getFace()).getFeature();
+            FaceAttribute faceAttribute = innerService.faceFeautreCheck(dto.getFace()).getFeature();
             if (faceAttribute == null || faceAttribute.getFeature() == null || faceAttribute.getBitFeature() == null) {
                 log.error("Face feature extract failed, update t_dispatch failed");
                 throw new RuntimeException("Face feature extract failed, update t_dispatch failed");
@@ -298,8 +294,8 @@ public class DispatchService {
     }
 
     //分页
-    private List <DispatchRecognizeVO> getDispatchRecognizeVOByCutPage(DispatchRecognizeDTO dispatchRecognizeDTO,
-                                                                       List <DispatchRecognizeVO> dispatchRecognizeVOS) {
+    private List<DispatchRecognizeVO> getDispatchRecognizeVOByCutPage(DispatchRecognizeDTO dispatchRecognizeDTO,
+                                                                      List<DispatchRecognizeVO> dispatchRecognizeVOS) {
         int start = dispatchRecognizeDTO.getStart();
         int limit = dispatchRecognizeDTO.getLimit();
         if (null != dispatchRecognizeVOS && dispatchRecognizeVOS.size() > 0) {
@@ -315,7 +311,7 @@ public class DispatchService {
     }
 
     //查询外部接口(获取相机名称)
-    private String getDeviceName(String deviceId){
+    private String getDeviceName(String deviceId) {
         String cameraDeviceName = platformService.getCameraDeviceName(deviceId);
         return cameraDeviceName;
     }
@@ -329,7 +325,7 @@ public class DispatchService {
             log.error("Import excel data failed, because read excel error");
             e.printStackTrace();
         }
-        if (excelMap == null || excelMap.size() == 0){
+        if (excelMap == null || excelMap.size() == 0) {
             return 0;
         }
         Map<String, Long> regionMap = platformService.getAllRegionId();
@@ -350,38 +346,38 @@ public class DispatchService {
                 dispatch.setName((String) map.get(1));
             }
             if (map.get(2) != null && !"".equals(map.get(2))) {
-                if (DispatchExcelUtils.isCarNumber(String.valueOf(map.get(2)))){
+                if (DispatchExcelUtils.isCarNumber(String.valueOf(map.get(2)))) {
                     dispatch.setCar(String.valueOf(map.get(2)));
-                }else {
+                } else {
                     log.error("Car is error, please check line: " + i);
                     return 0;
                 }
             }
-            if (map.get(3) != null && !"".equals(map.get(3))){
-                if(DispatchExcelUtils.isMac(String.valueOf(map.get(3)))){
+            if (map.get(3) != null && !"".equals(map.get(3))) {
+                if (DispatchExcelUtils.isMac(String.valueOf(map.get(3)))) {
                     dispatch.setMac(String.valueOf(map.get(3)));
-                }else{
+                } else {
                     log.error("Mac is error, please check line: " + i);
                     return 0;
                 }
             }
-            if (map.get(4) != null && !"".equals(map.get(4))){
-                if (DispatchExcelUtils.isIdCard(String.valueOf(map.get(4)))){
+            if (map.get(4) != null && !"".equals(map.get(4))) {
+                if (DispatchExcelUtils.isIdCard(String.valueOf(map.get(4)))) {
                     dispatch.setIdcard(String.valueOf(map.get(4)));
-                }else {
+                } else {
                     log.error("Idcard is error, please check line: " + i);
                     return 0;
                 }
             }
-            if (map.get(5) != null && !"".equals(map.get(5))){
-                if (DispatchExcelUtils.isThreshold(String.valueOf(map.get(5)))){
+            if (map.get(5) != null && !"".equals(map.get(5))) {
+                if (DispatchExcelUtils.isThreshold(String.valueOf(map.get(5)))) {
                     dispatch.setThreshold(Float.valueOf(String.valueOf(map.get(5))));
-                }else {
+                } else {
                     log.error("Threshold is error, please check line: " + i);
                     return 0;
                 }
             }
-            if (map.get(6) != null && !"".equals(map.get(6))){
+            if (map.get(6) != null && !"".equals(map.get(6))) {
                 dispatch.setNotes(String.valueOf(map.get(6)));
             }
             dispatchList.add(dispatch);
@@ -403,7 +399,7 @@ public class DispatchService {
             if (status != 1) {
                 throw new RuntimeException("Insert into t_dispatch table failed");
             }
-            if (StringUtils.isNotBlank(dispatch.getCar()) && StringUtils.isNotBlank(dispatch.getMac())){
+            if (StringUtils.isNotBlank(dispatch.getCar()) && StringUtils.isNotBlank(dispatch.getMac())) {
                 KafkaMessage message = new KafkaMessage();
                 message.setId(dispatch.getId());
                 message.setRegionId(dispatch.getRegion());

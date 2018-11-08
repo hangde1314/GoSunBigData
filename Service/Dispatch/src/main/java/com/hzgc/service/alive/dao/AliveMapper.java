@@ -1,9 +1,11 @@
 package com.hzgc.service.alive.dao;
 
 import com.hzgc.service.alive.model.Alive;
+import org.apache.ibatis.annotations.CacheNamespace;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
-
+@CacheNamespace
 public interface AliveMapper {
     int deleteByPrimaryKey(String id);
 
@@ -19,5 +21,5 @@ public interface AliveMapper {
 
     int updateByPrimaryKey(Alive record);
 
-    List<Alive> searchAliveInfo(String name);
+    List<Alive> searchAliveInfo(@Param("name") String name);
 }

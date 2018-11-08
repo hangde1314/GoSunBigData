@@ -16,6 +16,9 @@ public class DispatchVO implements Serializable {
     @ApiModelProperty(value = "区域ID")
     @NotNull
     private Long regionId;
+    @ApiModelProperty(value = "区域名字")
+    @NotNull
+    private String regionName;
     @ApiModelProperty(value = "姓名")
     private String name;
     @ApiModelProperty(value = "身份证")

@@ -654,9 +654,24 @@ public class CommunityService {
                 voList.add(vo);
             }
         }
-        this.listSort(voList);
-        // 倒序排列
-        Collections.reverse(voList);
+        voList.sort(new Comparator<PeopleCaptureVO>() {
+            @Override
+            public int compare(PeopleCaptureVO o1, PeopleCaptureVO o2) {
+                try {
+                    Long l1 = sdf.parse(o1.getCaptureTime()).getTime();
+                    Long l2 = sdf.parse(o2.getCaptureTime()).getTime();
+                    if (l2 > l1) {
+                        return 1;
+                    }
+                    if (l1.equals(l2)) {
+                        return 0;
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                return -1;
+            }
+        });
         return ListUtil.pageSplit(voList, param.getStart(), param.getLimit());
     }
 
@@ -682,37 +697,25 @@ public class CommunityService {
                 voList.add(vo);
             }
         }
-        this.listSort(voList);
-        // 倒序排列
-        Collections.reverse(voList);
-        return voList;
-    }
-
-    private void listSort(List<PeopleCaptureVO> voList) {
-        voList.sort((o1, o2) -> {
-            try {
-                if (o1.getCaptureTime() != null && o1.getCaptureTime().length() > 0) {
-                    Date d1 = sdf.parse(o1.getCaptureTime());
-                    if (o2.getCaptureTime() != null && o2.getCaptureTime().length() > 0) {
-                        Date d2 = sdf.parse(o2.getCaptureTime());
-                        return Long.compare(d1.getTime(), d2.getTime());
-                    } else {
-                        return Long.compare(d1.getTime(), 0);
+        voList.sort(new Comparator<PeopleCaptureVO>() {
+            @Override
+            public int compare(PeopleCaptureVO o1, PeopleCaptureVO o2) {
+                try {
+                    Long l1 = sdf.parse(o1.getCaptureTime()).getTime();
+                    Long l2 = sdf.parse(o2.getCaptureTime()).getTime();
+                    if (l1 > l2) {
+                        return 1;
                     }
-                } else {
-                    if (o2.getCaptureTime() != null && o2.getCaptureTime().length() > 0) {
-                        Date d2 = sdf.parse(o2.getCaptureTime());
-                        return Long.compare(0, d2.getTime());
-                    } else {
+                    if (l1.equals(l2)) {
                         return 0;
                     }
+                } catch (ParseException e) {
+                    e.printStackTrace();
                 }
-
-            } catch (ParseException e) {
-                e.printStackTrace();
+                return -1;
             }
-            return 0;
         });
+        return voList;
     }
 
     public List<PeopleCaptureCountVO> countDeviceCaptureNum1Month(String peopleId) {

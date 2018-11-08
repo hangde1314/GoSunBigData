@@ -27,7 +27,7 @@ GROUP BY aaa.peopleid, aaa.community
 ORDER BY peopleid DESC
 
 #实名
-INSERT INTO people.t_people_new (peopleid,month,isconfirm,flag)
+INSERT INTO people.t_people_new (peopleid,community,month,isconfirm,flag)
 SELECT aaa.peopleid,aaa.community,DATE_FORMAT(DATE_SUB(NOW(),INTERVAL 1 MONTH),'%Y%m') ,1 ,t_people_recognize.flag FROM
 (
 	SELECT *,COUNT(community) FROM t_people_recognize

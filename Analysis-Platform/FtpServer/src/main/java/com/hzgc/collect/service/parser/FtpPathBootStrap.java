@@ -12,6 +12,7 @@ public class FtpPathBootStrap {
     private Parser daHuaParser_hf81230E;
     private Parser daHuaParser_itc302_rf2d;
     private Parser hiKvision_ds_2cd2t26fwd_i8s;
+    private Parser hikvision_ds_2df8226xyz_bc;
     private Parser daHuaParser_hf8229F;
 
     public FtpPathBootStrap(CollectContext collectContext) {
@@ -24,6 +25,7 @@ public class FtpPathBootStrap {
         daHuaParser_hf8249f = new DahuaParser_HF8249F(collectContext);
         daHuaParser_itc302_rf2d = new DaHuaParser_ITC302_RF2D(collectContext);
         hiKvision_ds_2cd2t26fwd_i8s = new HikVisionParser_DS_2CD2T26FWD_I8S(collectContext);
+        hikvision_ds_2df8226xyz_bc = new HiKVisionParser_DS_2DF8226XYZ_BC(collectContext);
     }
 
     public Parser getParser(String fileName) {
@@ -41,6 +43,8 @@ public class FtpPathBootStrap {
             return daHuaParser_itc302_rf2d.canParse(fileName) ? daHuaParser_itc302_rf2d : null;
         } else if (fileName.contains(DeviceModel.HIKVISION_DS_2CD2T26FWD_I8S)) {
             return hiKvision_ds_2cd2t26fwd_i8s.canParse(fileName) ? hiKvision_ds_2cd2t26fwd_i8s : null;
+        } else if (fileName.contains(DeviceModel.HIKVISION_DS_2DF8226XYZ_BC)){
+            return hikvision_ds_2df8226xyz_bc.canParse(fileName) ? hikvision_ds_2df8226xyz_bc : null;
         } else if (fileName.contains(DeviceModel.DAHUA_HF8229F)) {
             return daHuaParser_hf8229F.canParse(fileName) ? daHuaParser_hf8229F : null;
         } else if (fileName.contains(DeviceModel.DAHUA_HF8249F)) {

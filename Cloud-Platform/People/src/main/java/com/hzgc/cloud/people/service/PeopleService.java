@@ -502,6 +502,21 @@ public class PeopleService {
     }
 
     /**
+     * 根据精神病手环ID(IMEI)查询人口信息
+     *
+     * @param imeiId 精神病手环ID
+     * @return peopleVO
+     */
+    public PeopleVO selectByImeiId(String imeiId) {
+        PeopleVO peopleVO = new PeopleVO();
+        String peopleId = imeiMapper.selectPeopleIdByImei(imeiId);
+        if (StringUtils.isNotBlank(peopleId)){
+            peopleVO = this.selectByPeopleId(peopleId);
+        }
+        return peopleVO;
+    }
+
+    /**
      * 查询人员对象
      *
      * @param param 查询过滤字段封装

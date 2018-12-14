@@ -49,7 +49,6 @@ public class FaceConsumer implements Runnable{
         properties.put("bootstrap.servers", kafkaHost);
         properties.put("key.deserializer", StringDeserializer.class.getName());
         properties.put("value.deserializer", StringDeserializer.class.getName());
-        properties.put("max.poll.records","50");
         consumer = new KafkaConsumer<>(properties);
         consumer.subscribe(Collections.singletonList(faceTopic));
         log.info("topic="+faceTopic+", groupid="+faceGroupId+",kafkaHost="+kafkaHost);
@@ -73,8 +72,6 @@ public class FaceConsumer implements Runnable{
                     } else {
                         peopleCompare.comparePeople(faceObject);
                     }
-
-
                     log.info("===============================PeopleCompare End=================================");
                 }
             }

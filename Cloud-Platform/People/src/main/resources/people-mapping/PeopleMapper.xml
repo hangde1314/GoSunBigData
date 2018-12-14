@@ -84,7 +84,7 @@
         <result column="count" property="count" jdbcType="INTEGER" />
     </resultMap>
     <sql id="Base_Column_List">
-        id, name, idcard, region, street, gridcode, household, address, sex, politic, edulevel,
+        id, name, idcard, region, household, address, sex, politic, edulevel,
         job, birthplace, community, lasttime, createtime, updatetime
     </sql>
     <!--网格人口数量统计-->

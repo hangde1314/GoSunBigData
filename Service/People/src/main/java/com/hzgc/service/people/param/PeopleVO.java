@@ -54,6 +54,8 @@ public class PeopleVO implements Serializable {
     private List<Flag> flag;
     @ApiModelProperty(value = "IMSI码列表")
     private List<String> imsi;
+    @ApiModelProperty(value = "IMSI码列表(MAC格式的IMSI)")
+    private List<String> imac;
     @ApiModelProperty(value = "电话列表")
     private List<String> phone;
     @ApiModelProperty(value = "房产列表")

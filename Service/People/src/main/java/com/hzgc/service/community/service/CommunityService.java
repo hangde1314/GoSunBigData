@@ -664,7 +664,7 @@ public class CommunityService {
                                     vo.setRecordId(record.getId());
                                     vo.setCaptureTime(sdf.format(record.getCapturetime()));
                                     vo.setImsiDeviceId(platformService.getImsiDeviceName(record.getDeviceid()));
-                                    vo.setImsi(record.getImsi());
+                                    vo.setImsi(ImsiUtil.toMac(record.getImsi()));
                                     break;
                                 case 3:
                                     // 车辆抓拍识别记录
@@ -701,7 +701,7 @@ public class CommunityService {
                                 vo.setRecordId(record.getId());
                                 vo.setCaptureTime(sdf.format(record.getCapturetime()));
                                 vo.setImsiDeviceId(platformService.getImsiDeviceName(record.getDeviceid()));
-                                vo.setImsi(record.getImsi());
+                                vo.setImsi(ImsiUtil.toMac(record.getImsi()));
                                 voList.add(vo);
                             }
                             break;
@@ -917,6 +917,12 @@ public class CommunityService {
                 carList.add(car.getCar());
             }
             importantPeopleRecognize.setCar(carList);
+            List<Imsi> imsis = recognize.getImac();
+            List<String> imsiList = new ArrayList<>();
+            for (Imsi imsi : imsis) {
+                imsiList.add(ImsiUtil.toMac(imsi.getImsi()));
+            }
+            importantPeopleRecognize.setImac(imsiList);
             List<Flag> flags = recognize.getFlag();
             List<com.hzgc.service.people.param.Flag> flagList = new ArrayList<>();
             for (Flag flag : flags) {
@@ -931,7 +937,7 @@ public class CommunityService {
                 importantPeopleRecognize.setSurl(innerService.httpHostNameToIp(recognize.getSurl()).getHttp_ip());
             }
             importantPeopleRecognize.setSimilarity(recognize.getSimilarity());
-            importantPeopleRecognize.setImsi(recognize.getImsi());
+            importantPeopleRecognize.setImsi(ImsiUtil.toMac(recognize.getImsi()));
             importantPeopleRecognize.setMac(recognize.getMac());
             importantPeopleRecognize.setPlate(recognize.getPlate());
             voList.add(importantPeopleRecognize);

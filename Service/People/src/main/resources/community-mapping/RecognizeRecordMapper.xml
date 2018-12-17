@@ -34,6 +34,8 @@
     <result column="plate" property="plate" jdbcType="VARCHAR"/>
     <collection property="flag" ofType="com.hzgc.service.people.model.Flag" column="peopleid"
                 select="com.hzgc.service.people.dao.FlagMapper.selectByPeopleId"/>
+    <collection property="imac" ofType="com.hzgc.service.people.model.Imsi" column="peopleid"
+                select="com.hzgc.service.people.dao.ImsiMapper.selectByPeopleId"/>
     <collection property="car" ofType="com.hzgc.service.people.model.Car" column="peopleid"
                 select="com.hzgc.service.people.dao.CarMapper.selectByPeopleId"/>
   </resultMap>

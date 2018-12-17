@@ -6,6 +6,7 @@ import com.github.pagehelper.PageInfo;
 import com.hzgc.common.service.api.service.InnerService;
 import com.hzgc.common.service.api.service.PlatformService;
 import com.hzgc.common.service.peoman.SyncPeopleManager;
+import com.hzgc.common.util.basic.ImsiUtil;
 import com.hzgc.common.util.basic.UuidUtil;
 import com.hzgc.common.util.json.JacksonUtil;
 import com.hzgc.jniface.FaceAttribute;
@@ -612,10 +613,13 @@ public class PeopleService {
             if (people.getImsi() != null && people.getImsi().size() > 0) {
                 List<Imsi> imsis = people.getImsi();
                 List<String> imsiList = new ArrayList<>();
+                List<String> imacList = new ArrayList<>();
                 for (Imsi imsi : imsis) {
                     imsiList.add(imsi.getImsi());
+                    imacList.add(ImsiUtil.toMac(imsi.getImsi()));
                 }
                 peopleVO.setImsi(imsiList);
+                peopleVO.setImac(imacList);
             }
             if (people.getPhone() != null && people.getPhone().size() > 0) {
                 List<Phone> phones = people.getPhone();

@@ -21,6 +21,8 @@ public class ImportantPeopleRecognizeVO implements Serializable {
     private String idCard;
     @ApiModelProperty(value = "车辆列表")
     private List<String> car;
+    @ApiModelProperty(value = "IMSI列表")
+    private List<String> imac;
     @ApiModelProperty(value = "标签列表")
     private List<Flag> flag;
     @ApiModelProperty(value = "最后抓拍时间")

@@ -15,7 +15,7 @@ public class ImsiUtil {
                     + imsi_32bit.substring(6, 8) + "-"
                     + imsi_32bit.substring(8, 10);
         }catch (Exception e){
-            log.error("IMSI to MAC failed");
+            log.error("IMSI to MAC failed, IMSI is: ");
             return imsi;
         }
         return mac;

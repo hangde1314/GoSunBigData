@@ -1014,7 +1014,7 @@ public class CommunityService {
                 Long picId = pictureMapper.getPictureIdByPeopleId(history.getPeopleId());
                 vo.setPictureId(picId);
             }
-            vo.setImsi(history.getImsi());
+            vo.setImsi(ImsiUtil.toMac(history.getImsi()));
             vo.setPlate(history.getPlate());
             vo.setBurl(innerService.httpHostNameToIp(history.getBurl()).getHttp_ip());
             vo.setSurl(innerService.httpHostNameToIp(history.getSurl()).getHttp_ip());

@@ -230,7 +230,13 @@ public class PeopleController {
             return ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT, "查询手环ID为空，请检查！");
         }
         log.info("Start select people info, IMEI ID is:" + imeiId);
-        PeopleVO peopleVO = peopleService.selectByImeiId(imeiId);
+        String peopleId = peopleService.selectPeopleIdByImeiId(imeiId);
+        if (StringUtils.isBlank(peopleId)){
+            log.error("Start select people info, but get people ID is null");
+            return ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT, "手环信息未在人口库中绑定，请检查！");
+        }
+        log.info("Start select people info, people ID is:" + peopleId);
+        PeopleVO peopleVO = peopleService.selectByPeopleId(peopleId);
         log.info("Select people info successfully, result:" + JacksonUtil.toJson(peopleVO));
         return ResponseResult.init(peopleVO);
     }

@@ -666,18 +666,13 @@ public class PeopleService {
     }
 
     /**
-     * 根据精神病手环ID(IMEI)查询人口信息
+     * 根据精神病手环ID查询peopleId(检测精神病手环ID是否绑定人口信息)
      *
      * @param imeiId 精神病手环ID
-     * @return peopleVO
+     * @return peopleId
      */
-    public PeopleVO selectByImeiId(String imeiId) {
-        PeopleVO peopleVO = new PeopleVO();
-        String peopleId = imeiMapper.selectPeopleIdByImei(imeiId);
-        if (StringUtils.isNotBlank(peopleId)){
-            peopleVO = this.selectByPeopleId(peopleId);
-        }
-        return peopleVO;
+    public String selectPeopleIdByImeiId(String imeiId) {
+        return imeiMapper.selectPeopleIdByImei(imeiId);
     }
 
     /**

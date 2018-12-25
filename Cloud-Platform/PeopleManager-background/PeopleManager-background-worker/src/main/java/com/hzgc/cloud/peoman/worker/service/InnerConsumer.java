@@ -53,10 +53,11 @@ public class InnerConsumer implements Runnable {
 
     private KafkaConsumer<String, String> consumer;
 
-    public void initInnerConsumer() {
+    public void initInnerConsumer(String workId) {
         Properties properties = new Properties();
         properties.put("bootstrap.servers", kafkaHost);
-        properties.put("group.id", groupId);
+//        properties.put("group.id", workId);
+        properties.put("group.id", workId);
         properties.put("key.deserializer", StringDeserializer.class.getName());
         properties.put("value.deserializer", StringDeserializer.class.getName());
         consumer = new KafkaConsumer<>(properties);

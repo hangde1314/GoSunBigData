@@ -1,0 +1,10 @@
+- hosts: peoman
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: stop docker-compose peoman
+    shell: cd {{GosunBigDataServiceDir}}/analysis/peoman; docker-compose down
+    tags:
+    - stop peoman-worker

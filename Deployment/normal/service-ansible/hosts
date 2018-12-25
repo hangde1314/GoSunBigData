@@ -1,8 +1,29 @@
+#collect的节点配置，配置对应的ip
+[collect]
+
+#data-syncer-es的节点配置，配置对应的ip
+[datasynceres]
+
+#dispatch的节点配置，配置对应的ip
+[dispatch]
+
 #ftpserver的节点配置，配置对应的ip
 [ftpserver]
 
 #facecompare的节点配置，配置对应的ip
 [facecompare]
 
+#search的节点配置，配置对应的ip
+[search]
+
+#fusion的节点配置，配置对应的ip
+[fusion]
+
+#imsi的节点配置，配置对应的ip
+[imsi]
+
 #peoman的节点配置，配置对应的ip
 [peoman]
+
+#peiple的节点配置，配置对应的ip
+[people]

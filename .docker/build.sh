@@ -13,7 +13,7 @@ DEFAULT_DOCKER_REPOSTORY_ADDRESS=registry.cn-hangzhou.aliyuncs.com
 DOCKER_REPOSITORY_GOURP=hzgc
 MAKE_RESULT=$SCRIPT_HOME_DIR/make_result
 LOCAL_ENV_DIR=${PROJECT_HOME_DIR}/Distribution/target/GoSunBigDataDeploy/local/envconf
-NORMAL_ENV_DIR=${PROJECT_HOME_DIR}/Distribution/target/GoSunBigDataDeploy/normal/envconf
+NORMAL_ENV_DIR=${PROJECT_HOME_DIR}/Distribution/target/GoSunBigDataDeploy/normal/service-ansible/docker-compose/envconf
 
 function find_make()
 {

@@ -2,16 +2,6 @@ version: '2.3'
 
 services:
 
-  kibana:
-    image: ${DOCKER_REPOSITOR}/hzgc/kibana:5.5.0
-    container_name: kibana
-    restart: always
-    environment:
-    - SERVER_NAME=$DOCKER_HOST_IP
-    - ELASTICSEARCH_URL=http://${ES_HOST}:${ES_PORT}
-    ports:
-    - "5601:5601"
-
   redis:
     image: ${DOCKER_REPOSITOR}/hzgc/redis:5.0.1
     container_name: redis

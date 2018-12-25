@@ -1,0 +1,10 @@
+- hosts: imsi
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: start imsi
+    shell: cd {{GosunBigDataServiceDir}}/cloud/imsi; docker-compose up -d
+    tags:
+    - start imsi

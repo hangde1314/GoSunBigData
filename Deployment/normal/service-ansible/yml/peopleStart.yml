@@ -1,0 +1,10 @@
+- hosts: people
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: start people
+    shell: cd {{GosunBigDataServiceDir}}/cloud/people; docker-compose up -d
+    tags:
+    - start people

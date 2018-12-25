@@ -34,8 +34,11 @@
 #azkaban的节点配置，配置对应的ip
 [azkaban_servers]
 
-#docker的节点配置，配置对应的ip
-[docker_servers]
+#docker的gpu节点配置，配置对应的ip
+[docker_gpu_servers]
+
+#docker的cpu节点配置，配置对应的ip
+[docker_cpu_servers]
 
 #ftpserver的节点配置，配置对应的ip
 [ftpserver]

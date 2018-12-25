@@ -3,8 +3,11 @@
 cd `dirname $0`
 BIN_DIR=`pwd`
 VARS_FILE=${BIN_DIR}/roles/vars/main.yml
+BIGDATADIR=$(grep 'BigdataDir:' ${VARS_FILE} | cut -d ' ' -f2)
+ENV_FILE=${BIN_DIR}/../env_bigdata.sh
 
 sed -i "s#AnsibleDir: .*#AnsibleDir: ${BIN_DIR}#g" ${VARS_FILE}
+sed -i "s#INSTALL_HOME=.*#INSTALL_HOME=${BIGDATADIR}#g" ${ENV_FILE}
 
 ###### 配置文件路径 ######
 mainyml=./roles/vars/main.yml

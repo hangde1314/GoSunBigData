@@ -1,0 +1,14 @@
+version: '2.3'
+
+services:
+  collect:
+    image: ${DOCKER_REPOSITOR}/hzgc/collect:${COLLECT_VERSION}
+    container_name: collect
+    restart: always
+    environment:
+    - EUREKA_IP=${EUREKA_HOST_IP}
+    - EUREKA_PORT=${EUREKA_HOST_PORT}
+    - ZOOKEEPER_HOST=${ZK_HOST}:${ZK_PORT}
+    network_mode: "host"
+    extra_hosts:
+    - platform:${PLATFORM_HOST}

@@ -1,0 +1,8 @@
+#ftpserver的节点配置，配置对应的ip
+[ftpserver]
+
+#facecompare的节点配置，配置对应的ip
+[facecompare]
+
+#peoman的节点配置，配置对应的ip
+[peoman]

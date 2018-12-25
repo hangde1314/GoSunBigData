@@ -13,7 +13,7 @@ cd `dirname $0`
 ## 脚本所在目录
 ENV_CONF_DIR=`pwd`
 ENV_FILE=${BIN_DIR}/.env
-cd ../..
+cd ../../..
 GOSUN_DIR=`pwd`
 FILE_PATHS=$(find ${GOSUN_DIR} -name "docker-compose.yml")
 i=0

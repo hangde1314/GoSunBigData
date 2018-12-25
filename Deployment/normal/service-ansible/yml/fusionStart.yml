@@ -1,0 +1,10 @@
+- hosts: fusion
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: start fusion
+    shell: cd {{GosunBigDataServiceDir}}/cloud/fusion; docker-compose up -d
+    tags:
+    - start fusion

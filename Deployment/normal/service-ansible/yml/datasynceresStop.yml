@@ -1,0 +1,10 @@
+- hosts: datasynceres
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: stop docker-compose datasynceres
+    shell: cd {{GosunBigDataServiceDir}}/analysis/datasynceres; docker-compose down
+    tags:
+    - stop datasynceres

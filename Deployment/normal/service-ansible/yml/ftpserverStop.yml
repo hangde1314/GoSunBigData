@@ -1,0 +1,10 @@
+- hosts: ftpserver
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: stop docker-compose ftpserver
+    shell: cd {{GosunBigDataServiceDir}}/analysis/ftpserver; docker-compose down
+    tags:
+    - stop docker-compose

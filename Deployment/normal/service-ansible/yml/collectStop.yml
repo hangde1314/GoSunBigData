@@ -1,0 +1,10 @@
+- hosts: collect
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: stop docker-compose collect
+    shell: cd {{GosunBigDataServiceDir}}/analysis/basis; docker-compose down
+    tags:
+    - stop collect

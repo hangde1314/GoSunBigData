@@ -77,6 +77,14 @@
     tags:
     - stop azkaban
 
+- hosts: kibana_servers
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: stop kibana
+    shell: cd {{GosunBigDataModuleDir}}/module; docker-compose down
 
 - hosts: es_servers
   remote_user: root

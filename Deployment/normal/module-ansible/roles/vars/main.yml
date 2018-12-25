@@ -19,4 +19,4 @@ tidb_hostname: 172.18.18.203
 tidb_password: Hzgc@123
 tidb_port: 4000
 AnsibleDir: /opt/ansible
-GosunBigDataDir: /opt/GoSunBigDataDeploy/docker-compose
+GosunBigDataModuleDir: /opt/GoSunBigDataDeploy/module-ansible

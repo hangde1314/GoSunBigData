@@ -1,0 +1,10 @@
+- hosts: search
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: start search
+    shell: cd {{GosunBigDataServiceDir}}/analysis/search; docker-compose up -d
+    tags:
+    - start search

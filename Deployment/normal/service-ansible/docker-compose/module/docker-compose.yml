@@ -15,8 +15,6 @@ services:
   redis:
     image: ${DOCKER_REPOSITOR}/hzgc/redis:5.0.1
     container_name: redis
-    depends_on:
-    - esearch
     restart: always
     hostname: redis
     ports:

@@ -4,6 +4,8 @@
   - roles
 
   tasks:
+    - name: start docker-compose module
+      shell: cd {{GosunBigDataDir}}/module; docker-compose up -d
     - name: start docker-compose basis
       shell: cd {{GosunBigDataDir}}/analysis/basis; docker-compose up -d
     - name: start docker-compose dispatch

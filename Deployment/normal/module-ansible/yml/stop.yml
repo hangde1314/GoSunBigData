@@ -14,8 +14,6 @@
      - stop hadoop
 
 
-
-
 - hosts: spark_servers
   remote_user: root
   roles:
@@ -30,8 +28,6 @@
      shell: sh {{BigdataDir}}/spark/sbin/stop-all.sh
      tags:
      - stop spark
-
-
 
 
 - hosts: kafka_servers
@@ -50,8 +46,6 @@
      - stop kafka
 
 
-
-
 - hosts: zk_servers
   remote_user: root
   roles:
@@ -68,7 +62,20 @@
      - stop zookeeper
 
 
+- hosts: azkaban_servers
+  remote_user: root
+  roles:
+  - roles
 
+  tasks:
+  - name: start webserver
+    shell: source /etc/profile; cd {{BigdataDir}}/azkaban/webserver/; nohup bin/azkaban-web-shutdown.sh &
+    run_once: true
+  - name: change executor dir
+    shell: source /etc/profile; cd {{BigdataDir}}/azkaban/executor/; nohup bin/azkaban-executor-shutdown.sh &
+    run_once: true
+    tags:
+    - stop azkaban
 
 
 - hosts: es_servers

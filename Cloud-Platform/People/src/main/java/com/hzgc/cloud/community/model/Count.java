@@ -1,23 +1,17 @@
 package com.hzgc.cloud.community.model;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
 import java.io.Serializable;
 
-@ApiModel(value = "网格人口数量统计出参")
 public class Count implements Serializable {
-    @ApiModelProperty(value = "标签")
-    private String flag;
-    @ApiModelProperty(value = "人数")
+    private int flagid;
     private int count;
 
-    public String getFlag() {
-        return flag;
+    public int getFlagid() {
+        return flagid;
     }
 
-    public void setFlag(String flag) {
-        this.flag = flag;
+    public void setFlagid(int flagid) {
+        this.flagid = flagid;
     }
 
     public int getCount() {

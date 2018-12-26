@@ -1,0 +1,10 @@
+- hosts: datasynceres
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: start docker-compose datasynceres
+    shell: cd {{GosunBigDataServiceDir}}/analysis/datasynceres; docker-compose up -d
+    tags:
+    - start datasynceres

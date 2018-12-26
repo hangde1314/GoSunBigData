@@ -376,16 +376,23 @@
         <fileSet>
             <directory>../Deployment/normal</directory>
             <includes>
-                <include>version.properties</include>
+                <include>env_bigdata.sh</include>
             </includes>
             <outputDirectory>normal</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>../Deployment/normal/ansible</directory>
+            <directory>../Deployment/normal/module-ansible</directory>
             <includes>
                 <include>**</include>
             </includes>
-            <outputDirectory>normal/ansible</outputDirectory>
+            <outputDirectory>normal/module-ansible</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>../Deployment/normal/service-ansible</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <outputDirectory>normal/service-ansible</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>../Deployment/normal/envconf</directory>

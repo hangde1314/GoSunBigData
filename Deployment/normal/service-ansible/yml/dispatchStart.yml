@@ -1,0 +1,10 @@
+- hosts: dispatch
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: start docker-compose dispatch
+    shell: cd {{GosunBigDataServiceDir}}/analysis/dispatch; docker-compose up -d
+    tags:
+    - start dispatch

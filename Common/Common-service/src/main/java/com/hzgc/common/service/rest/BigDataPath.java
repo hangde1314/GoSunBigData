@@ -63,7 +63,6 @@ public class BigDataPath {
 
     public static final String COMMUNITY_COUNT = "/count_people";
     public static final String GRID_COUNT = "/count_grid";
-    public static final String GRID_COUNT_FLAG = "/count_grid_flag";
     public static final String COMMUNITY_PEOPLE = "/people";
     public static final String COMMUNITY_PEOPLE_IMPORTANT = "/people_important";
     public static final String COMMUNITY_PEOPLE_CARE = "/people_care";

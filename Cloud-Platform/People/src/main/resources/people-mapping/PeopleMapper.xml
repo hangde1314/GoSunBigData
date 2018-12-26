@@ -80,19 +80,20 @@
         <result column="pid" property="pictureId" jdbcType="BIGINT"/>
     </resultMap>
     <resultMap id="CountMap" type="com.hzgc.cloud.community.model.Count" >
-        <result column="flag" property="flag" jdbcType="VARCHAR"/>
+        <result column="flagid" property="flagid" jdbcType="INTEGER"/>
         <result column="count" property="count" jdbcType="INTEGER" />
     </resultMap>
     <sql id="Base_Column_List">
         id, name, idcard, region, street, gridcode, household, address, sex, politic, edulevel,
         job, birthplace, community, lasttime, createtime, updatetime
     </sql>
-    <!--小区实有人口数量统计-->
+    <!--网格人口数量统计-->
     <select id="countGridPeople" resultType="java.lang.Integer" parameterType="java.lang.Long">
         select count(*) from t_people where gridcode = #{gridCode,jdbcType=BIGINT}
     </select>
+    <!--网格标签人口数量统计-->
     <select id="countFlagPeople" resultMap="CountMap" parameterType="java.lang.Long">
-        select f.flag, count(f.flag) as count
+        select f.flagid, count(f.flagid) as count
         from (
         select p.id, p.gridcode from t_people p, t_picture i
         where p.gridcode = #{gridCode,jdbcType=BIGINT} and p.id = i.peopleid group by p.id

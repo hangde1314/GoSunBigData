@@ -1,6 +1,7 @@
 package com.hzgc.datasyncer.service;
 
 import com.hzgc.datasyncer.bean.EsFaceObject;
+import com.hzgc.datasyncer.esearch.CustomElasticsearchTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
@@ -17,7 +18,7 @@ public class EsIndexHelper {
 
     @Autowired
     @SuppressWarnings("unused")
-    private ElasticsearchTemplate elasticsearchTemplate;
+    private CustomElasticsearchTemplate elasticsearchTemplate;
 
     public void bulkIndexFace(List<EsFaceObject> dataList, String indexName, String type, int patchSize) {
         int counter = 0;

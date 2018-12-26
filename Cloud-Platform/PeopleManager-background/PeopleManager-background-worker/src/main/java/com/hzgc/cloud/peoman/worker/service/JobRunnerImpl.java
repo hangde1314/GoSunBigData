@@ -45,17 +45,17 @@ public class JobRunnerImpl implements ApplicationRunner {
         List<String> nodes = workerRegister.getParenNode();
         log.info("========================Start run worker, zkAddress={}, nodes={}", zkAddress, StringUtils.join(nodes, ","));
         int offset = 0;
-        int limit = 3000000;
+        int limit = 1500000000;
         String workId = "0";
         if (nodes != null && nodes.size() > 0) {
             String lastNode = nodes.get(nodes.size() -1);
             if (lastNode.equals(String.valueOf(nodes.size() -1))) {
-                offset = nodes.size() * limit;
+//                offset = nodes.size() * limit;
                 workId = String.valueOf(nodes.size());
             } else {
                 for (int i=0; i<nodes.size(); i++) {
                     if (! nodes.contains(String.valueOf(i))) {
-                        offset = i * limit;
+//                        offset = i * limit;
                         workId = String.valueOf(i);
                         break;
                     }
@@ -65,9 +65,9 @@ public class JobRunnerImpl implements ApplicationRunner {
         workerRegister.regist(workId, "["+offset+","+(offset+limit)+")");
         log.info("========================Start run worker, worker id is {} ", workId);
         loadDataFromTiDB.load(offset, limit);
-        innerConsumer.initInnerConsumer();
+        innerConsumer.initInnerConsumer(workId);
         new Thread(innerConsumer).start();
-        faceConsumer.initFaceConsumer(workId);
+        faceConsumer.initFaceConsumer();
         new Thread(faceConsumer).start();
         carConsumer.initCarConsumer();
         new Thread(carConsumer).start();

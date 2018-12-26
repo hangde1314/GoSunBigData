@@ -4,10 +4,9 @@ import com.github.pagehelper.PageHelper;
 import com.hzgc.cloud.community.dao.NewPeopleMapper;
 import com.hzgc.cloud.community.dao.OutPeopleMapper;
 import com.hzgc.cloud.community.model.Count;
-import com.hzgc.cloud.community.param.PeopleCountVO;
-import com.hzgc.cloud.community.param.PeopleDTO;
-import com.hzgc.cloud.community.param.PeopleVO;
+import com.hzgc.cloud.community.param.*;
 import com.hzgc.cloud.people.dao.PeopleMapper;
+import com.hzgc.cloud.people.fields.Flag;
 import com.hzgc.cloud.people.model.People;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,13 +45,57 @@ public class PeopleCountService {
         return vo;
     }
 
-    public int countGridPeople(Long gridCode) {
-        return peopleMapper.countGridPeople(gridCode);
-    }
-
-    public List<Count> countGridFlagPeople(Long gridCode) {
+    public GridPeopleCount countGridPeople(Long gridCode) {
+        GridPeopleCount gridPeopleCount = new GridPeopleCount();
+        int count = peopleMapper.countGridPeople(gridCode);
+        gridPeopleCount.setPeopleCount(count);
+        List<GridFlagCount> counts = new ArrayList<>();
+        GridFlagCount flag_0 = new GridFlagCount();
+        flag_0.setFlag("矫正人员");
+        counts.add(flag_0);
+        GridFlagCount flag_1 = new GridFlagCount();
+        flag_1.setFlag("刑释解戒");
+        counts.add(flag_1);
+        GridFlagCount flag_2 = new GridFlagCount();
+        flag_2.setFlag("精神病人");
+        counts.add(flag_2);
+        GridFlagCount flag_3 = new GridFlagCount();
+        flag_3.setFlag("吸毒人员");
+        counts.add(flag_3);
+        GridFlagCount flag_4 = new GridFlagCount();
+        flag_4.setFlag("境外人员");
+        counts.add(flag_4);
+        GridFlagCount flag_5 = new GridFlagCount();
+        flag_5.setFlag("艾滋病人");
+        counts.add(flag_5);
+        GridFlagCount flag_6 = new GridFlagCount();
+        flag_6.setFlag("重点青少年");
+        counts.add(flag_6);
+        GridFlagCount flag_7 = new GridFlagCount();
+        flag_7.setFlag("留守人员");
+        counts.add(flag_7);
+        GridFlagCount flag_8 = new GridFlagCount();
+        flag_8.setFlag("涉军人员");
+        counts.add(flag_8);
+        GridFlagCount flag_9 = new GridFlagCount();
+        flag_9.setFlag("信访人员");
+        counts.add(flag_9);
+        GridFlagCount flag_10 = new GridFlagCount();
+        flag_10.setFlag("邪教人员");
+        counts.add(flag_10);
         // 人员统计条件：1.当前网格；2.符合当前标签；3.此人员须有照片
-        return peopleMapper.countFlagPeople(gridCode);
+        List<Count> flagCount = peopleMapper.countFlagPeople(gridCode);
+        if (flagCount != null && flagCount.size() > 0){
+            for (Count c : flagCount){
+                for (GridFlagCount gridFlagCount : counts){
+                    if (Flag.getFlag(c.getFlagid()).equals(gridFlagCount.getFlag())){
+                        gridFlagCount.setCount(c.getCount());
+                    }
+                }
+            }
+        }
+        gridPeopleCount.setFlagCount(counts);
+        return gridPeopleCount;
     }
 
     public List<PeopleVO> searchCommunityPeople(PeopleDTO param) {

@@ -1,0 +1,131 @@
+- hosts: collect
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: stop docker-compose collect
+    shell: cd {{GosunBigDataServiceDir}}/analysis/basis; docker-compose down
+    tags:
+     - stop collect
+
+
+- hosts: datesynceres
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: stop docker-compose redis
+    shell: cd {{GosunBigDataServiceDir}}/module; docker-compose down
+    tags:
+     - stop redis
+
+
+- hosts: dispatch
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: stop docker-compose dispatch
+    shell: cd {{GosunBigDataServiceDir}}/analysis/dispatch; docker-compose down
+    tags:
+     - stop dispatch
+
+
+- hosts: datasynceres
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: stop docker-compose datasynceres
+    shell: cd {{GosunBigDataServiceDir}}/analysis/datasynceres; docker-compose down
+    tags:
+     - stop datasynceres
+
+
+- hosts: ftpserver
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: stop docker-compose ftpserver
+    shell: cd {{GosunBigDataServiceDir}}/analysis/ftpserver; docker-compose down
+    tags:
+     - stop docker-compose
+
+
+- hosts: facecompare
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: stop docker-compose facecompare
+    shell: cd {{GosunBigDataServiceDir}}/analysis/facecompare; docker-compose down
+    tags:
+     - stop docker-compose
+
+
+- hosts: search
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: stop search
+    shell: cd {{GosunBigDataServiceDir}}/analysis/search; docker-compose down
+    tags:
+     - stop search
+
+
+- hosts: fusion
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: stop fusion
+    shell: cd {{GosunBigDataServiceDir}}/cloud/fusion; docker-compose down
+    tags:
+     - stop fusion
+
+
+- hosts: imsi
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: stop imsi
+    shell: cd {{GosunBigDataServiceDir}}/cloud/imsi; docker-compose down
+    tags:
+     - stop imsi
+
+
+
+- hosts: peoman
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: stop docker-compose peoman
+    shell: cd {{GosunBigDataServiceDir}}/analysis/peoman; docker-compose down
+    tags:
+     - stop peoman-worker
+
+
+- hosts: people
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: stop people
+    shell: cd {{GosunBigDataServiceDir}}/cloud/people; docker-compose down
+    tags:
+     - stop people

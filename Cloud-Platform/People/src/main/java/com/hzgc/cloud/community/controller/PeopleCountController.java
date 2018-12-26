@@ -1,6 +1,6 @@
 package com.hzgc.cloud.community.controller;
 
-import com.hzgc.cloud.community.model.Count;
+import com.hzgc.cloud.community.param.GridPeopleCount;
 import com.hzgc.cloud.community.param.PeopleCountVO;
 import com.hzgc.cloud.community.param.PeopleDTO;
 import com.hzgc.cloud.community.param.PeopleVO;
@@ -40,30 +40,17 @@ public class PeopleCountController {
         return ResponseResult.init(peopleCountVO);
     }
 
-    @ApiOperation(value = "单个网格下总人口数量统计", response = Integer.class)
+    @ApiOperation(value = "网格人口数量统计", response = GridPeopleCount.class)
     @RequestMapping(value = BigDataPath.GRID_COUNT, method = RequestMethod.GET)
-    public ResponseResult<Integer> countGridPeople(Long gridCode) {
+    public ResponseResult<GridPeopleCount> countGridPeople(Long gridCode) {
         if (gridCode == null) {
             log.error("Start count grid people info, but gridCode is null");
             return ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT, "网格ID不能为空，请检查！");
         }
         log.info("Start count grid people info, gridCode is:" + gridCode);
-        int count = peopleCountService.countGridPeople(gridCode);
+        GridPeopleCount count = peopleCountService.countGridPeople(gridCode);
         log.info("Count grid people info successfully");
         return ResponseResult.init(count);
-    }
-
-    @ApiOperation(value = "单个网格下所有标签人口数量统计", response = Count.class)
-    @RequestMapping(value = BigDataPath.GRID_COUNT_FLAG, method = RequestMethod.GET)
-    public ResponseResult<List<Count>> countGridFlagPeople(Long gridCode) {
-        if (gridCode == null) {
-            log.error("Start count grid people info, but gridCode is null");
-            return ResponseResult.error(RestErrorCode.ILLEGAL_ARGUMENT, "网格ID不能为空，请检查！");
-        }
-        log.info("Start count grid people info, gridCode is:" + gridCode);
-        List<Count> counts = peopleCountService.countGridFlagPeople(gridCode);
-        log.info("Count grid people info successfully");
-        return ResponseResult.init(counts);
     }
 
     @ApiOperation(value = "小区实有人口查询", response = PeopleVO.class)

@@ -1,0 +1,18 @@
+- hosts: docker_cpu_servers
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: nvidia mashion install docker
+    unarchive: src={{AnsibleDir}}/roles/files/docker-cpu.tar.gz dest={{BigdataDir}}
+  - name: install docker
+    shell: sh {{BigdataDir}}/docker-cpu/bin/docker-ce.sh
+  - name: start docker
+    shell: systemctl start docker
+    tags:
+    - start docker
+  - name: install docker-compose
+    shell: mv {{AnsibleDir}}/roles/files/docker-compose  /usr/local/bin
+    tags:
+    - start docker-compose

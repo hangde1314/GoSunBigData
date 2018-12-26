@@ -1,0 +1,59 @@
+#ssh的节点参数配置，如： ip  ansible_ssh_user=root ansible_ssh_pass=123456
+[ssh]
+172.18.18.203 ansible_ssh_user=root ansible_ssh_pass=123456
+172.18.18.100 ansible_ssh_user=root ansible_ssh_pass=123456
+172.18.18.101 ansible_ssh_user=root ansible_ssh_pass=123456
+172.18.18.102 ansible_ssh_user=root ansible_ssh_pass=123456
+
+#zookeeper的节点配置，ip加上myid,如： ip myid=1  ps：myid是递增的
+[zk_servers]
+172.18.18.203 myid=1
+172.18.18.100 myid=2
+172.18.18.101 myid=3
+
+#es的节点配置，配置对应的ip
+[es_servers]
+
+#kibana的节点配置，配置对应的ip
+[kibana_servers]
+
+#kafka的节点配置，配置对应的ip加broker_id,如： ip broker_id=1  ps：broker_id是递增的
+[kafka_servers]
+172.18.18.203 broker_id=1
+172.18.18.100 broker_id=2
+172.18.18.101 broker_id=3
+172.18.18.102 broker_id=4
+
+#hadoop的节点配置，配置对应的ip加hadoop配置，如：ip namenode_active=true namenode_standby=false datanode=true
+[hadoop_servers]
+172.18.18.203 namenode_active=true namenode_standby=false datanode=true
+172.18.18.100 namenode_active=false namenode_standby=true datanode=true
+172.18.18.101 namenode_active=false namenode_standby=false datanode=true
+172.18.18.102 namenode_active=false namenode_standby=false datanode=true
+
+#spark的节点配置，配置对应的ip
+[spark_servers]
+
+#azkaban的节点配置，配置对应的ip
+[azkaban_servers]
+
+#docker的gpu节点配置，配置对应的ip
+[docker_gpu_servers]
+
+#docker的cpu节点配置，配置对应的ip
+[docker_cpu_servers]
+
+#ftpserver的节点配置，配置对应的ip
+[ftpserver]
+
+#facecompare的节点配置，配置对应的ip
+[facecompare]
+
+#peoman的节点配置，配置对应的ip
+[peoman]
+
+#master的节点配置，配置主节点的ip
+[master]
+
+#follower的节点配置，配置从节点的ip
+[follower]

@@ -1,0 +1,99 @@
+- hosts: zk_servers
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+    - name: start zookeeper
+      shell: source /etc/profile; sh {{BigdataDir}}/zookeeper/bin/zkServer.sh start
+      tags:
+      - start zookeeper
+
+
+
+- hosts: kafka_servers
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+    - name: chmod permission
+      shell: chmod +x {{BigdataDir}}/kafka/bin/*
+    - name: start kafka
+      shell: source /etc/profile; sh {{BigdataDir}}/kafka/bin/kafka-server-start.sh -daemon {{BigdataDir}}/kafka/config/server.properties &
+      tags:
+      - start kafka
+
+
+
+- hosts: es_servers
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+   - name: change owner and group
+     file: path={{BigdataDir}}/elastic owner=elsearch group=elsearch recurse=yes
+   - name: source env
+     shell: source /etc/profile
+   - name: make elastic permission
+     shell: su - elsearch  -c 'chmod +x {{BigdataDir}}/elastic/bin/*'
+   - name: start es
+     remote_user: root
+     shell: su - elsearch  -c '{{BigdataDir}}/elastic/bin/elasticsearch -d'
+     tags:
+     - start elasticsearch
+
+
+- hosts: spark_servers
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+   - name: start spark cluster
+     shell: source /etc/profile; sh {{BigdataDir}}/spark/sbin/start-all.sh
+     tags:
+      - start spark
+
+
+- hosts: hadoop_servers
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+   - name: start namenode
+     shell: source /etc/profile; sh {{BigdataDir}}/hadoop/sbin/start-dfs.sh
+     become: true
+     become_method: su
+     become_user: root
+     when: namenode_active == "true"
+     tags:
+      - start hadoop
+
+
+- hosts: azkaban_servers
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: start webserver
+    shell: source /etc/profile; cd {{BigdataDir}}/azkaban/webserver/; nohup bin/azkaban-web-start.sh &
+    run_once: true
+  - name: change executor dir
+    shell: source /etc/profile; cd {{BigdataDir}}/azkaban/executor/; nohup bin/azkaban-executor-start.sh &
+    run_once: true
+    tags:
+    - start azkaban
+
+- hosts: kibana_servers
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: start kibana
+    shell: cd {{GosunBigDataModuleDir}}/module; docker-compose up -d
+

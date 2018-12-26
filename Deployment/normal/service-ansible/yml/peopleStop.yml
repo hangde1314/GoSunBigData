@@ -1,0 +1,10 @@
+- hosts: people
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: stop people
+    shell: cd {{GosunBigDataServiceDir}}/cloud/people; docker-compose down
+    tags:
+    - stop people

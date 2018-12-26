@@ -1,0 +1,10 @@
+- hosts: ftpserver
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: start docker-compose ftpserver
+    shell: cd {{GosunBigDataServiceDir}}/analysis/ftpserver; docker-compose up -d
+    tags:
+    - start docker-compose

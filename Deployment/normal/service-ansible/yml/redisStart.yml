@@ -1,0 +1,10 @@
+- hosts: datesynceres
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: start docker-compose redis
+    shell: cd {{GosunBigDataServiceDir}}/module; docker-compose up -d
+    tags:
+    - start redis

@@ -29,6 +29,10 @@ public class FaceConsumer implements Runnable{
     @SuppressWarnings("unused")
     private String faceTopic;
 
+    @Value("${kafka.face.groupId}")
+    @SuppressWarnings("unused")
+    private String faceGroupId;
+
     @Value("${kafka.face.topic.polltime}")
     @SuppressWarnings("unused")
     private Long pollTime;
@@ -39,16 +43,16 @@ public class FaceConsumer implements Runnable{
 
     private KafkaConsumer<String, String> consumer;
 
-    public void initFaceConsumer(String groupId) {
+    public void initFaceConsumer() {
         Properties properties = new Properties();
-        properties.put("group.id", groupId);
+        properties.put("group.id", faceGroupId);
         properties.put("bootstrap.servers", kafkaHost);
         properties.put("key.deserializer", StringDeserializer.class.getName());
         properties.put("value.deserializer", StringDeserializer.class.getName());
         properties.put("max.poll.records","50");
         consumer = new KafkaConsumer<>(properties);
         consumer.subscribe(Collections.singletonList(faceTopic));
-        log.info("topic="+faceTopic+", groupid="+groupId+",kafkaHost="+kafkaHost);
+        log.info("topic="+faceTopic+", groupid="+faceGroupId+",kafkaHost="+kafkaHost);
     }
 
     @Override

@@ -1,0 +1,20 @@
+version: '2.3'
+
+services:
+
+  imsi-dynrepo:
+    image: ${DOCKER_REPOSITOR}/hzgc/imsi-dynrepo:${IMSI_DYNREPO_VERSION}
+    container_name: imsi-dynrepo
+    network_mode: "host"
+    environment:
+    - EUREKA_IP=${EUREKA_HOST_IP}
+    - EUREKA_PORT=${EUREKA_HOST_PORT}
+    - MYSQL_HOST=${MYSQL_HOST}:${MYSQL_PORT}
+    - MYSQL_USERNAME=${MYSQL_USERNAME}
+    - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    - KAFKA_HOST=${KAFKA_HOST}:${KAFKA_PORT}
+    - ZOOKEEPER_HOST=${ZK_HOST}:${ZK_PORT}
+    - QUERY_TIME=30
+    - TAG=1
+    extra_hosts:
+    - platform:${PLATFORM_HOST}

@@ -1,0 +1,10 @@
+- hosts: collect
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: start docker-compose collect
+    shell: cd {{GosunBigDataServiceDir}}/analysis/basis; docker-compose up -d
+    tags:
+    - start collect

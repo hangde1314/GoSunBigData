@@ -16,8 +16,6 @@ services:
     extra_hosts:
     - platform:${PLATFORM_HOST}
     network_mode: "host"
-    volumes:
-    - ${DOCKER_HOME}/people/log:/log
 
   imsi-dynrepo:
     image: ${DOCKER_REPOSITOR}/hzgc/imsi-dynrepo:${IMSI_DYNREPO_VERSION}
@@ -35,8 +33,6 @@ services:
     - TAG=1
     extra_hosts:
     - platform:${PLATFORM_HOST}
-    volumes:
-    - ${DOCKER_HOME}/imsi-dynrepo/log:/log
 
   fusion:
     image: ${DOCKER_REPOSITOR}/hzgc/fusion:${FUSION_VERSION}
@@ -52,8 +48,6 @@ services:
     network_mode: "host"
     extra_hosts:
     - platform:${PLATFORM_HOST}
-    volumes:
-    - ${DOCKER_HOME}/fusion/log:/log
     
   peoman-worker:
     image: ${DOCKER_REPOSITOR}/hzgc/peoman-worker:${PEOMAN_WORKER_VERSION}
@@ -79,4 +73,3 @@ services:
     - platform:${PLATFORM_HOST}
     volumes:
     - /opt/GsFaceLib:/opt/GsFaceLib
-    - ${DOCKER_HOME}/peoman-worker/log:/log

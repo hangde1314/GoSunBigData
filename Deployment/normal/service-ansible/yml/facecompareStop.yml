@@ -1,0 +1,10 @@
+- hosts: facecompare
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: stop docker-compose facecompare
+    shell: cd {{GosunBigDataServiceDir}}/analysis/facecompare; docker-compose down
+    tags:
+    - stop docker-compose

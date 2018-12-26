@@ -1,0 +1,273 @@
+- hosts: es_servers
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+   - name: mkdir jdk directory
+     file: path={{BigdataDir}} state=directory mode=0755
+   - name: copy and unzip jdk
+     unarchive: src={{AnsibleDir}}/roles/files/jdk.tar.gz dest={{BigdataDir}}
+   - name: set env
+     lineinfile: dest=/etc/profile insertafter="{{item.position}}" line="{{item.value}}" state=present
+     with_items:
+     - {position: EOF, value: "export JAVA_HOME={{BigdataDir}}/jdk"}
+     - {position: EOF, value: "export PATH=$JAVA_HOME/bin:$PATH"}
+   - name: chmod bin
+     file: dest={{BigdataDir}}/jdk/bin mode=0755 recurse=yes
+   - name: enforce env
+     shell: source /etc/profile
+
+
+
+
+- hosts: es_servers
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+   - name: mkdir scala directory
+     file: path={{BigdataDir}} state=directory mode=0755
+   - name: copy and unzip scala
+     unarchive: src={{AnsibleDir}}/roles/files/scala.tar.gz dest={{BigdataDir}}
+   - name: set env
+     lineinfile: dest=/etc/profile insertafter="{{item.position}}" line="{{item.value}}" state=present
+     with_items:
+     - {position: EOF, value: "export SCALA_HOME={{BigdataDir}}/scala"}
+     - {position: EOF, value: "export PATH=$SCALA_HOME/bin:$PATH"}
+   - name: chmod bin
+     file: dest={{BigdataDir}}/scala/bin mode=0755 recurse=yes
+   - name: enforce env
+     shell: source /etc/profile
+
+
+
+
+- hosts: zk_servers
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+    - name: mkdir directory for bigdata data
+      file: dest={{BigdataDir}} mode=0755 state=directory
+    - name: install zookeeper
+      unarchive: src={{AnsibleDir}}/roles/files/zookeeper-3.4.10.tar.gz dest={{BigdataDir}}
+    - name: install configuration file for zookeeper
+      template: src={{AnsibleDir}}/roles/templates/zoo.cfg.j2 dest={{BigdataDir}}/zookeeper/conf/zoo.cfg
+    - name: create log directory
+      file: dest={{BigdataDir}}/zookeeper/dataLogDir mode=0755 state=directory
+    - name: add myid file
+      shell: echo {{ myid }} > {{BigdataDir}}/zookeeper/dataDir/myid
+    - name: start zookeeper
+      shell: source /etc/profile; sh {{BigdataDir}}/zookeeper/bin/zkServer.sh start
+      tags:
+      - start zookeeper
+
+- hosts: kafka_servers
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+    - name: copy and unzip kafka
+      unarchive: src={{AnsibleDir}}/roles/files/kafka.tar.gz dest={{BigdataDir}}
+    - name: mkdir dir for kafka logs
+      file: dest={{BigdataDir}}/kafka/logs mode=0755 state=directory
+    - name: install configuration file for kafka
+      template: src={{AnsibleDir}}/roles/templates/server.properties.j2 dest={{BigdataDir}}/kafka/config/server.properties
+    - name: install configuration file producer.properties for kafka
+      template: src={{AnsibleDir}}/roles/templates/producer.properties.j2 dest={{BigdataDir}}/kafka/config/producer.properties
+      tags:
+      - install kafka
+
+
+- hosts: es_servers
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+   - name: create elsearch user
+     user: name=elsearch password={{password}}
+     vars:
+       password: 123456
+   - name: copy /etc/sysctl.conf
+     template: src=/etc/sysctl.conf dest=/etc/sysctl.conf
+   - name: reload sysctl.conf
+     shell: sysctl -p /etc/sysctl.conf
+   - name: copy /etc/security/limits.conf
+     template: src=/etc/security/limits.conf dest=/etc/security/limits.conf
+   - name: copy and unzip es
+     unarchive: src={{AnsibleDir}}/roles/files/elasticsearch.tar.gz dest={{BigdataDir}}
+   - name: mkdir ditectory for logs data
+     file: dest={{BigdataDir}}/elastic/logs mode=0755 state=directory owner=elsearch group=elsearch
+   - name: install memory configuration file for es
+     template: src={{AnsibleDir}}/roles/templates/elasticsearch.in.sh.j2 dest={{BigdataDir}}/elastic/bin/elasticsearch.in.sh
+   - name: install configuration file for es
+     template: src={{AnsibleDir}}/roles/templates/elasticsearch.yml.j2 dest={{BigdataDir}}/elastic/config/elasticsearch.yml
+     tags:
+     - install elasticsearch
+
+
+- hosts: azkaban_servers
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+   - name: copy and unzip azkaban
+     unarchive: src=/opt/ansible/roles/files/azkaban.tar.gz dest={{BigdataDir}}
+     run_once: true
+   - name: copy azkaban.webserver.properties
+     template: src=/opt/ansible/roles/templates/azkaban.webserver.properties dest={{BigdataDir}}/azkaban/webserver/conf/azkaban.properties
+     run_once: true
+   - name: copy azkaban.executor.properties
+     template: src=/opt/ansible/roles/templates/azkaban.executor.properties dest={{BigdataDir}}/azkaban/executor/conf/azkaban.properties
+     run_once: true
+   - name: create database
+     shell: /usr/bin/mysql -uroot -h {{tidb_hostname}} -P 4000 -p{{tidb_password}} -e "source {{BigdataDir}}/azkaban/sql/create-all-sql-2.5.0.sql"
+     run_once: true
+   - name: delete keystore
+     file: path={{BigdataDir}}/azkaban/webserver/keystore state=absent
+     run_once: true
+   - name: create ssl keystore
+     shell: cd {{BigdataDir}}/jdk/bin/; ./keytool -keystore {{BigdataDir}}/azkaban/webserver/keystore -alias jetty -genkey -keyalg RSA -dname "CN=, OU=, O=, L=, ST=, C=CN" -keypass {{tidb_password}} -storepass {{tidb_password}}
+     run_once: true
+     tags:
+     - install azkaban
+
+
+- hosts: spark_servers
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+   - name: copy and unzip spark
+     unarchive: src={{AnsibleDir}}/roles/files/spark.tar.gz dest={{BigdataDir}}
+   - name: install configuration file slaves for spark
+     template: src={{AnsibleDir}}/roles/templates/slaves.spark.j2 dest={{BigdataDir}}/spark/conf/slaves
+   - name: install configuration file spark-env for spark
+     template: src={{AnsibleDir}}/roles/templates/spark-env.sh.j2 dest={{BigdataDir}}/spark/conf/spark-env.sh
+   - name: change sbin file
+     file: dest={{BigdataDir}}/spark/sbin mode=0755 recurse=yes
+   - name: change bin file
+     file: dest={{BigdataDir}}/spark/bin mode=0755 recurse=yes
+     tags:
+      - install spark
+
+- hosts: hadoop_servers
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+   - name: install dependency package
+     yum: name={{ item }} state=present
+     with_items:
+     - openssh
+     - rsync
+   - name: delete {{BigdataDir}}/hadoop
+     file: path={{BigdataDir}}/hadoop/ state=absent
+   - name: copy and unzip hadoop
+     unarchive: src={{AnsibleDir}}/roles/files/hadoop.tar.gz dest={{BigdataDir}}
+   - name: create hadoop logs directory
+     file: dest={{BigdataDir}}/hadoop/logs mode=0775 state=directory
+   - name: install configuration file hadoop-env.sh.j2 for hadoop
+     template: src={{AnsibleDir}}/roles/templates/hadoop-env.sh.j2 dest={{BigdataDir}}/hadoop/etc/hadoop/hadoop-env.sh
+   - name: install configuration file core-site.xml.j2 for hadoop
+     template: src={{AnsibleDir}}/roles/templates/core-site.xml.j2 dest={{BigdataDir}}/hadoop/etc/hadoop/core-site.xml
+   - name: install configuration file hdfs-site.xml.j2 for hadoop
+     template: src={{AnsibleDir}}/roles/templates/hdfs-site.xml.j2 dest={{BigdataDir}}/hadoop/etc/hadoop/hdfs-site.xml
+   - name: install configuration file slaves.j2 for hadoop
+     template: src={{AnsibleDir}}/roles/templates/slaves.hadoop.j2 dest={{BigdataDir}}/hadoop/etc/hadoop/slaves
+   - name: change shell sbin file
+     file: dest={{BigdataDir}}/hadoop/sbin mode=0755 recurse=yes
+   - name: change shell bin file
+     file: dest={{BigdataDir}}/hadoop/bin mode=0755 recurse=yes
+   - name: start journalnode
+     shell: source /etc/profile; sh {{BigdataDir}}/hadoop/sbin/hadoop-daemon.sh start journalnode
+     become: true
+     become_method: su
+     become_user: root
+     when: datanode == "true"
+   - wait_for: port=8485 state=started
+   - name: format active namenode hdfs
+     shell: sh {{BigdataDir}}/hadoop/bin/hdfs namenode -format -force
+     become: true
+     become_method: su
+     become_user: root
+     when: namenode_active == "true"
+   - name: start active namenode hdfs
+     shell: sh {{BigdataDir}}/hadoop/sbin/hadoop-daemon.sh start namenode
+     become: true
+     become_method: su
+     become_user: root
+     when: namenode_active == "true"
+   - name: format standby namenode hdfs
+     shell: sh {{BigdataDir}}/hadoop/bin/hdfs namenode -bootstrapStandby -force
+     become: true
+     become_method: su
+     become_user: root
+     when: namenode_standby == "true"
+   - name: stop active namenode hdfs
+     shell: sh {{BigdataDir}}/hadoop/sbin/hadoop-daemon.sh stop namenode
+     become: true
+     become_method: su
+     become_user: root
+     when: namenode_active == "true"
+   - name: format ZKFC
+     shell: sh {{BigdataDir}}/hadoop/bin/hdfs zkfc -formatZK -force
+     become: true
+     become_method: su
+     become_user: root
+     when: namenode_active == "true"
+   - name: stop journalnode
+     shell: sh {{BigdataDir}}/hadoop/sbin/hadoop-daemon.sh stop journalnode
+     become: true
+     become_method: su
+     become_user: root
+     when: datanode == "true"
+     tags:
+      - format hadoop
+
+- hosts: docker_cpu_servers
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: nvidia mashion install docker
+    unarchive: src={{AnsibleDir}}/roles/files/docker-cpu.tar.gz dest={{BigdataDir}}
+  - name: install docker
+    shell: sh {{BigdataDir}}/docker-cpu/bin/docker-ce.sh
+  - name: start docker
+    shell: systemctl start docker
+    tags:
+    - start docker
+  - name: install docker-compose
+    shell: mv {{AnsibleDir}}/roles/files/docker-compose  /usr/local/bin
+    tags:
+    - start docker-compose
+
+
+- hosts: docker_gpu_servers
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: nvidia mashion install docker
+    unarchive: src={{AnsibleDir}}/roles/files/docker-gpu.tar.gz dest={{BigdataDir}}
+  - name: install docker
+    shell: sh {{BigdataDir}}/docker-gpu/bin/docker-ce.sh
+  - name: start docker
+    shell: systemctl start docker
+    tags:
+    - start docker
+  - name: install docker-compose
+    shell: mv {{AnsibleDir}}/roles/files/docker-compose  /usr/local/bin
+    tags:
+    - start docker-compose

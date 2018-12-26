@@ -1,0 +1,143 @@
+- hosts: collect
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+    - name: start docker-compose collect
+      shell: cd {{GosunBigDataServiceDir}}/analysis/basis; docker-compose up -d
+      tags:
+       - start collect
+
+
+- hosts: datesynceres
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+    - name: start docker-compose redis
+      shell: cd {{GosunBigDataServiceDir}}/module; docker-compose up -d redis
+      tags:
+       - start redis
+
+
+- hosts: kibana
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+    - name: start docker-compose kibana
+      shell: cd {{GosunBigDataServiceDir}}/module; docker-compose up -d kibana
+      tags:
+      - start kibana
+
+
+- hosts: dispatch
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+    - name: start docker-compose dispatch
+      shell: cd {{GosunBigDataServiceDir}}/analysis/dispatch; docker-compose up -d
+      tags:
+       - start dispatch
+
+
+- hosts: datasynceres
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: start docker-compose datasynceres
+    shell: cd {{GosunBigDataServiceDir}}/analysis/datasynceres; docker-compose up -d
+    tags:
+     - start datasynceres
+
+
+- hosts: ftpserver
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: start docker-compose ftpserver
+    shell: cd {{GosunBigDataServiceDir}}/analysis/ftpserver; docker-compose up -d
+    tags:
+     - start docker-compose
+
+
+- hosts: facecompare
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: start docker-compose facecompare
+    shell: cd {{GosunBigDataServiceDir}}/analysis/facecompare; docker-compose up -d
+    tags:
+     - start docker-compose
+
+
+- hosts: search
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: start search
+    shell: cd {{GosunBigDataServiceDir}}/analysis/search; docker-compose up -d
+    tags:
+     - start search
+
+
+- hosts: fusion
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: start fusion
+    shell: cd {{GosunBigDataServiceDir}}/cloud/fusion; docker-compose up -d
+    tags:
+     - start fusion
+
+
+- hosts: imsi
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+    - name: start imsi
+      shell: cd {{GosunBigDataServiceDir}}/cloud/imsi; docker-compose up -d
+      tags:
+       - start imsi
+
+
+
+- hosts: peoman
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: start docker-compose peoman
+    shell: cd {{GosunBigDataServiceDir}}/analysis/peoman; docker-compose up -d
+    tags:
+     - start peoman-worker
+
+
+- hosts: people
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+    - name: start people
+      shell: cd {{GosunBigDataServiceDir}}/cloud/people; docker-compose up -d
+      tags:
+       - start people

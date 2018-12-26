@@ -1,0 +1,28 @@
+version: '2.3'
+
+services:
+
+  peoman-worker:
+    image: ${DOCKER_REPOSITOR}/hzgc/peoman-worker:${PEOMAN_WORKER_VERSION}
+    container_name: peoman-worker
+    network_mode: "host"
+    environment:
+    - EUREKA_IP=${EUREKA_HOST_IP}
+    - EUREKA_PORT=${EUREKA_HOST_PORT}
+    - KAFKA_HOST=${KAFKA_HOST}:${KAFKA_PORT}
+    - ZOOKEEPER_HOST=${ZK_HOST}:${ZK_PORT}
+    - COMPARE_NUMBER=3
+    - BIT_THRESHOLD=10
+    - FLOAT_THRESHOLD=90
+    - FLOAT_NEW_THRESHOLD=73
+    - FILTER_INTERVAL_TIME=10
+    - UPDATE_INNER_FEATURE_TIME=3600
+    - FLOAT_COMPARE_OPEN=true
+    - SHARPNESS_OPEN=true
+    - MYSQL_HOST=${MYSQL_HOST}:${MYSQL_PORT}
+    - MYSQL_USERNAME=${MYSQL_USERNAME}
+    - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    extra_hosts:
+    - platform:${PLATFORM_HOST}
+    volumes:
+    - /opt/GsFaceLib:/opt/GsFaceLib

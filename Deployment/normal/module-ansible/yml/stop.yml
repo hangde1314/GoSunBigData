@@ -1,0 +1,91 @@
+- hosts: hadoop_servers
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+   - name: source env
+     shell: source /etc/profile
+   - name: chmod +x
+     shell: chmod +x {{BigdataDir}}/hadoop/sbin/stop-all.sh
+   - name: stop hadoop
+     shell: sh {{BigdataDir}}/hadoop/sbin/stop-all.sh
+     tags:
+     - stop hadoop
+
+
+- hosts: spark_servers
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+   - name: source env
+     shell: source /etc/profile
+   - name: chmod +x
+     shell: chmod +x {{BigdataDir}}/spark/sbin/stop-all.sh
+   - name: stop spark
+     shell: sh {{BigdataDir}}/spark/sbin/stop-all.sh
+     tags:
+     - stop spark
+
+
+- hosts: kafka_servers
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+   - name: source env
+     shell: source /etc/profile
+   - name: chmod +x
+     shell: chmod +x {{BigdataDir}}/kafka/bin/*
+   - name: stop kafka
+     shell: sh {{BigdataDir}}/kafka/bin/kafka-server-stop.sh
+     tags:
+     - stop kafka
+
+
+- hosts: zk_servers
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+   - name: source env
+     shell: source /etc/profile
+   - name: chmod +x
+     shell: chmod +x {{BigdataDir}}/zookeeper/bin/zkServer.sh
+   - name: stop zookeeper
+     shell: sh {{BigdataDir}}/zookeeper/bin/zkServer.sh stop
+     tags:
+     - stop zookeeper
+
+
+- hosts: azkaban_servers
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: start webserver
+    shell: source /etc/profile; cd {{BigdataDir}}/azkaban/webserver/; nohup bin/azkaban-web-shutdown.sh &
+    run_once: true
+  - name: change executor dir
+    shell: source /etc/profile; cd {{BigdataDir}}/azkaban/executor/; nohup bin/azkaban-executor-shutdown.sh &
+    run_once: true
+    tags:
+    - stop azkaban
+
+
+- hosts: es_servers
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+   - name: stop es
+     shell: killall -9 java
+     tags:
+     - stop es
+

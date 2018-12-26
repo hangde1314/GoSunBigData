@@ -1,0 +1,150 @@
+version: '2.3'
+
+services:
+  collect:
+    image: ${DOCKER_REPOSITOR}/hzgc/collect:${COLLECT_VERSION}
+    container_name: collect
+    restart: always
+    environment:
+    - EUREKA_IP=${EUREKA_HOST_IP}
+    - EUREKA_PORT=${EUREKA_HOST_PORT}
+    - ZOOKEEPER_HOST=${ZK_HOST}:${ZK_PORT}
+    network_mode: "host"
+    extra_hosts:
+    - platform:${PLATFORM_HOST}
+
+  data-syncer-es:
+    image: ${DOCKER_REPOSITOR}/hzgc/data-syncer-es:${VERSION}
+    container_name: data-syncer-es
+    restart: always
+    environment:
+      - ZK_ADDRESS=${ZK_HOST}:${ZK_PORT}
+      - ES_HOST=${ES_HOST}:${ES_PORT}
+      - KAFKA_HOST=${KAFKA_HOST}:${KAFKA_PORT}
+      - REDIS_IP=${REDIS_IP}
+      - REDIS_PORT=${REDIS_PORT}
+      - EUREKA_IP=${EUREKA_HOST_IP}
+      - EUREKA_PORT=${EUREKA_HOST_PORT}
+    network_mode: "host"
+
+  dispatch-background:
+    image: ${DOCKER_REPOSITOR}/hzgc/dispatch-background:${DISPATCH_BACKGROUND_VERSION}
+    container_name: dispatch-background
+    environment:
+    - EUREKA_IP=${EUREKA_HOST_IP}
+    - EUREKA_PORT=${EUREKA_HOST_PORT}
+    - KAFKA_HOST=${KAFKA_HOST}:${KAFKA_PORT}
+    - MYSQL_HOST=${MYSQL_HOST}:${MYSQL_PORT}
+    - LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/GsFaceLib/face_libs
+    - MYSQL_USERNAME=${MYSQL_USERNAME}
+    - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    extra_hosts:
+    - platform:${PLATFORM_HOST}
+    volumes:
+    - /opt/GsFaceLib:/opt/GsFaceLib
+
+  face-dynrepo:
+    image: ${DOCKER_REPOSITOR}/hzgc/face-dynrepo:${FACE_DYNREPO_VERSION}
+    depends_on:
+    - collect
+    container_name: face-dynrepo
+    restart: always
+    environment:
+    - EUREKA_IP=${EUREKA_HOST_IP}
+    - EUREKA_PORT=${EUREKA_HOST_PORT}
+    - ZOOKEEPER_HOST=${ZK_HOST}:${ZK_PORT}
+    - ES_HOST=${ES_HOST}
+    network_mode: "host"
+    extra_hosts:
+    - platform:${PLATFORM_HOST}
+
+  person-dynrepo:
+    image: ${DOCKER_REPOSITOR}/hzgc/person-dynrepo:${PERSON_DYNREPO_VERSION}
+    depends_on:
+    - collect
+    container_name: person-dynrepo
+    restart: always
+    environment:
+    - EUREKA_IP=${EUREKA_HOST_IP}
+    - EUREKA_PORT=${EUREKA_HOST_PORT}
+    - ZOOKEEPER_HOST=${ZK_HOST}:${ZK_PORT}
+    - ES_HOST=${ES_HOST}
+    network_mode: "host"
+    extra_hosts:
+    - platform:${PLATFORM_HOST}
+
+  vehicle-dynrepo:
+    image: ${DOCKER_REPOSITOR}/hzgc/vehicle-dynrepo:${VEHICLE_DYNREPO_VERSION}
+    depends_on:
+    - collect
+    container_name: vehicle-dynrepo
+    restart: always
+    environment:
+    - EUREKA_IP=${EUREKA_HOST_IP}
+    - EUREKA_PORT=${EUREKA_HOST_PORT}
+    - ZOOKEEPER_HOST=${ZK_HOST}:${ZK_PORT}
+    - ES_HOST=${ES_HOST}
+    network_mode: "host"
+    extra_hosts:
+    - platform:${PLATFORM_HOST}
+
+  dispatch:
+    image: ${DOCKER_REPOSITOR}/hzgc/dispatch:${DISPATCH_VERSION}
+    depends_on:
+    - collect
+    container_name: dispatch
+    network_mode: "host"
+    environment:
+    - EUREKA_IP=${EUREKA_HOST_IP}
+    - EUREKA_PORT=${EUREKA_HOST_PORT}
+    - MYSQL_HOST=${MYSQL_HOST}:${MYSQL_PORT}
+    - MYSQL_USERNAME=${MYSQL_USERNAME}
+    - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    - KAFKA_HOST=${KAFKA_HOST}:${KAFKA_PORT}
+    extra_hosts:
+    - platform:${PLATFORM_HOST}
+
+  collect-ftp:
+    image: ${DOCKER_REPOSITOR}/hzgc/collect-ftp:${COLLECT_FTP_VERSION}
+    container_name: collect-ftp
+    restart: always
+    runtime: nvidia
+    environment:
+    - PROFILES_ACTIVE=local
+    - ZOOKEEPER_HOST=${ZK_HOST}:${ZK_PORT}
+    - HOST_IP=${DOCKER_HOST_IP}
+    - HOST_NAME=${DOCKER_HOST_NAME}
+    - EUREKA_IP=${EUREKA_HOST_IP}
+    - EUREKA_PORT=${EUREKA_HOST_PORT}
+    - KAFKA_HOST=${KAFKA_HOST}:${KAFKA_PORT}
+    - SEEMMO_URL=http://${SEEMO_URL}:7000/ImgProcService/Recognize
+    - HOME_DIR=${FTP_HOME}
+    network_mode: "host"
+    volumes:
+    - ${FTP_HOME}:${FTP_HOME}
+
+  facecompare:
+    image: ${DOCKER_REPOSITOR}/hzgc/facecompare:${FACECOMPARE_VERSION}
+    container_name: facecompare
+    restart: always
+    environment:
+    - ZK_ADDRESS=${ZK_HOST}:${ZK_PORT}
+    - ES_HOST=${ES_HOST}
+    - KAFKA_SERVERS=${KAFKA_HOST}:${KAFKA_PORT}
+    - WORK_ID=0
+    network_mode: "host"
+    volumes:
+    - ${DOCKER_HOME}/facecompare/log:/worker/log
+    - ${DOCKER_HOME}/facecompare/data:/worker/matedata
+
+  ftpmonitor:
+    image: ${DOCKER_REPOSITOR}/hzgc/ftpmonitor:${VERSION}
+    container_name: ftpmonitor
+    restart: always
+    environment:
+    - ZK_ADDRESS=${ZK_HOST}:${ZK_PORT}
+    - ES_HOST=${ES_HOST}
+    - MYSQL_HOST=${MYSQL_HOST}:${MYSQL_PORT}
+    network_mode: "host"
+    volumes:
+    - ${DOCKER_HOME}/ftpmonitor/log:/monitor/log

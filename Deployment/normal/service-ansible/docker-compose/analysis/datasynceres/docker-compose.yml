@@ -1,0 +1,16 @@
+version: '2.3'
+
+services:
+  data-syncer-es:
+    image: ${DOCKER_REPOSITOR}/hzgc/data-syncer-es:${VERSION}
+    container_name: data-syncer-es
+    restart: always
+    environment:
+      - ZK_ADDRESS=${ZK_HOST}:${ZK_PORT}
+      - ES_HOST=${ES_HOST}:${ES_PORT}
+      - KAFKA_HOST=${KAFKA_HOST}:${KAFKA_PORT}
+      - REDIS_IP=${REDIS_IP}
+      - REDIS_PORT=${REDIS_PORT}
+      - EUREKA_IP=${EUREKA_HOST_IP}
+      - EUREKA_PORT=${EUREKA_HOST_PORT}
+    network_mode: "host"

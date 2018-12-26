@@ -1,0 +1,10 @@
+- hosts: dispatch
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: stop docker-compose dispatch
+    shell: cd {{GosunBigDataServiceDir}}/analysis/dispatch; docker-compose down
+    tags:
+    - stop dispatch

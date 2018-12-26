@@ -3,7 +3,7 @@ FROM registry.cn-hangzhou.aliyuncs.com/hzgc/java-all:8
 
 #操作文件
 COPY docker-entrypoint.sh /
-COPY vehicle-dynrepo.jar /app.jar
+COPY data-syncer.jar /app.jar
 
 #执行命令
 RUN chmod +x /docker-entrypoint.sh && /bin/cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shanghai' >/etc/timezone

@@ -277,7 +277,7 @@ public class PeopleService {
     public Integer updatePeople(PeopleDTO peopleDTO) {
         People people = peopleDTO.peopleDTOShift_update(peopleDTO);
         log.info("Start update t_people, param is:" + JacksonUtil.toJson(people));
-        int status_people_update = peopleMapper.updateByPrimaryKeySelective(people);
+        int status_people_update = peopleMapper.updateByPrimaryKey(people);
         if (status_people_update != 1) {
             log.error("Update people to t_people failed");
             throw new RuntimeException("修改人口信息失败");

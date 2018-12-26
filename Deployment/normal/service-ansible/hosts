@@ -1,3 +1,6 @@
+#kibana的节点配置，配置对应的ip
+[kibana]
+
 #collect的节点配置，配置对应的ip
 [collect]
 

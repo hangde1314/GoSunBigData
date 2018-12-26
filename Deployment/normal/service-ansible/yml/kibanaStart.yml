@@ -1,0 +1,10 @@
+- hosts: kibana
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: start docker-compose kibana
+    shell: cd {{GosunBigDataServiceDir}}/module; docker-compose up -d kibana
+    tags:
+    - start kibana

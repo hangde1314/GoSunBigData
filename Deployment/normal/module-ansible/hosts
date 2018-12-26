@@ -37,6 +37,9 @@
 #azkaban的节点配置，配置对应的ip
 [azkaban_servers]
 
+#docker-compose的节点配置，配置对应的ip
+[docker-compose]
+
 #docker的gpu节点配置，配置对应的ip
 [docker_gpu_servers]
 

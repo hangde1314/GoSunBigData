@@ -9,9 +9,7 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-import org.springframework.web.util.UrlPathHelper;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
@@ -21,7 +19,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class FtpApplication extends WebMvcConfigurerAdapter {
     public static void main(String[] args) {
 
-        System.setProperty("org.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH", "true");
         ConfigurableApplicationContext context =
                 new SpringApplicationBuilder(FtpApplication.class).bannerMode(Banner.Mode.LOG).run(args);
         context.getBean(FTP.class).startFtpServer();
@@ -35,12 +32,5 @@ public class FtpApplication extends WebMvcConfigurerAdapter {
                 .allowedHeaders("*")
                 .allowedOrigins("*")
                 .allowedMethods("*");
-    }
-
-    @Override
-    public void configurePathMatch(PathMatchConfigurer configurer) {
-        UrlPathHelper urlPathHelper = new UrlPathHelper();
-        urlPathHelper.setUrlDecode(false);
-        configurer.setUrlPathHelper(urlPathHelper);
     }
 }

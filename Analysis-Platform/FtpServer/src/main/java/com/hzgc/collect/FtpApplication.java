@@ -21,7 +21,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class FtpApplication extends WebMvcConfigurerAdapter {
     public static void main(String[] args) {
 
-//        System.setProperty("tomcat.util.http.parser.HttpParser.requestTargetAllow", "|,[,]");
         System.setProperty("org.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH", "true");
         ConfigurableApplicationContext context =
                 new SpringApplicationBuilder(FtpApplication.class).bannerMode(Banner.Mode.LOG).run(args);

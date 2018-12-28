@@ -89,8 +89,8 @@ public class CaptureSearchService {
     }
 
     public SearchResult searchPicture2(SearchOption option, String searchId){
-        String startDate = option.getStartTime().split(" ")[0];
-        String endDate = option.getEndTime().split(" ")[0];
+//        String startDate = option.getStartTime().split(" ")[0];
+//        String endDate = option.getEndTime().split(" ")[0];
         List<Feature> features = new ArrayList<>();
         for(PictureData pictureData : option.getImages()){
             String id = pictureData.getImageID();
@@ -101,7 +101,7 @@ public class CaptureSearchService {
         float sim = option.getSimilarity();
         boolean isTheSame = option.isSinglePerson();
         //组合参数
-        CompareParam param = new CompareParam(startDate, endDate, features, sim, 20, isTheSame);
+        CompareParam param = new CompareParam(option.getStartTime(), option.getEndTime(), features, sim, 80, isTheSame);
         param.setSort(option.getSort());
         List<String> ipcIds = new ArrayList<>();
         ipcIds.addAll(option.getIpcMapping().keySet());

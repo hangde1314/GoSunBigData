@@ -229,6 +229,9 @@ public class CaptureServiceHelper {
             CapturedPicture capturedPicture = new CapturedPicture();
             capturedPicture.setSabsolutepath(CollectUrlUtil.toHttpPath(urlInfo.getIp(),urlInfo.getPort(),faceObject.getsAbsolutePath()));
             capturedPicture.setBabsolutepath(CollectUrlUtil.toHttpPath(urlInfo.getIp(),urlInfo.getPort(),faceObject.getbAbsolutePath()));
+            if(option.getIpcMapping().get(faceObject.getIpcId()) == null){
+                continue;
+            }
             String ipcId = option.getIpcMapping().get(faceObject.getIpcId()).getIpc();
             capturedPicture.setDeviceId(ipcId);
             capturedPicture.setDeviceName(option.getIpcMapping().get(faceObject.getIpcId()).getDeviceName());

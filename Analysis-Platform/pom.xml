@@ -23,6 +23,7 @@
         <module>Vehicle-Dynrepo</module>
         <!--<module>FtpServer-Monitor</module>-->
         <module>DataSyncerEs</module>
+        <module>Es-vector-score</module>
     </modules>
 
     <dependencyManagement>

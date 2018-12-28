@@ -479,6 +479,8 @@
         set name = #{name,jdbcType=VARCHAR},
         idcard = #{idcard,jdbcType=VARCHAR},
         region = #{region,jdbcType=BIGINT},
+        street = #{street,jdbcType=BIGINT},
+        gridcode = #{gridcode,jdbcType=BIGINT},
         household = #{household,jdbcType=VARCHAR},
         address = #{address,jdbcType=VARCHAR},
         sex = #{sex,jdbcType=VARCHAR},
@@ -489,8 +491,6 @@
         job = #{job,jdbcType=VARCHAR},
         birthplace = #{birthplace,jdbcType=VARCHAR},
         community = #{community,jdbcType=BIGINT},
-        lasttime = #{lasttime,jdbcType=TIMESTAMP},
-        createtime = #{createtime,jdbcType=TIMESTAMP},
         updatetime = #{updatetime,jdbcType=TIMESTAMP}
         where id = #{id,jdbcType=VARCHAR}
     </update>

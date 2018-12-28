@@ -1,32 +1,46 @@
 #!/bin/bash
+#set -x
 
 cd `dirname $0`
 BIN_DIR=`pwd`
-VARS_FILE=${BIN_DIR}/roles/vars/main.yml
-BIGDATADIR=$(grep 'BigdataDir:' ${VARS_FILE} | cut -d ' ' -f2)
-ENV_FILE=${BIN_DIR}/../env_bigdata.sh
-
-sed -i "s#AnsibleDir: .*#AnsibleDir: ${BIN_DIR}#g" ${VARS_FILE}
-sed -i "s#INSTALL_HOME=.*#INSTALL_HOME=${BIGDATADIR}#g" ${ENV_FILE}
 
 ###### 配置文件路径 ######
+env_bigdata=../env_bigdata.sh
 mainyml=./roles/vars/main.yml
 slave_spark_tem=./roles/templates/slaves.spark.j2
 slave_hadoop_tem=./roles/templates/slaves.hadoop.j2
+hdfs_j2=./roles/templates/hdfs-site.xml.j2
 zoo_cfg_j2=./roles/templates/zoo.cfg.j2
 es_tem=./roles/templates/elasticsearch.yml.j2
 sysctl_conf=/etc/sysctl.conf
 limits_conf=/etc/security/limits.conf
-###### 节点行数  ######
-mline=$(grep -n master hosts | tail -1 | cut -d : -f 1)
-fline=$(grep -n follower hosts | tail -1 | cut -d : -f 1)
-master=`sed -n "${mline}, ${fline}p" hosts| grep [0-9][0-9]`
-followers=`sed -n "${fline}, $(cat hosts| wc -l)p" hosts | grep [0-9][0-9]`
+###### 节点行数  #####
+tidbline=$(grep -n tidb_servers hosts | tail -1 | cut -d : -f 1)
 zkline=$(grep -n zk_servers hosts | tail -1 | cut -d : -f 1)
 esline=$(grep -n es_servers hosts | tail -1 | cut -d : -f 1)
-zkli=`sed -n "${zkline}, ${esline}p" hosts| grep [0-9][0-9] | awk '{print $1}'`
-zklist=${master}:2181
-bootstraplist=${master}:9092
+kibanaline=$(grep -n kibana_servers hosts | tail -1 | cut -d : -f 1)
+kafkaline=$(grep -n kafka_servers hosts | tail -1 | cut -d : -f 1)
+hadoopline=$(grep -n hadoop_servers hosts | tail -1 | cut -d : -f 1)
+sparkline=$(grep -n spark_servers hosts | tail -1 | cut -d : -f 1)
+azkabanline=$(grep -n azkaban_servers hosts | tail -1 | cut -d : -f 1)
+zkmaster=`sed -n "${zkline},${esline}p" hosts | grep master | awk '{print $1}'`
+zknodes=`sed -n "${zkline},${esline}p" hosts | grep [0-9][0-9] | awk -F " " '{print $1}'`
+kafkanodes=`sed -n "${kafkaline},${hadoopline}p" hosts | grep [0-9][0-9] | awk -F " " '{print $1}'`
+esnodes=`sed -n "${esline},${kibanaline}p" hosts | grep [0-9][0-9]`
+hadoopnodes=`sed -n "${hadoopline},${sparkline}p" hosts | grep [0-9][0-9] | awk -F " " '{print $1}'`
+sparknodes=`sed -n "${sparkline},${azkabanline}p" hosts | grep [0-9][0-9]`
+tidbmaster=`sed -n "${tidbline},${zkline}p" hosts | grep master | awk '{print $1}'`
+namenode1=`sed -n "${hadoopline},${sparkline}p" hosts | grep namenode_active=true | awk -F " " '{print $1}'`
+namenode2=`sed -n "${hadoopline},${sparkline}p" hosts | grep namenode_standby=true | awk -F " " '{print $1}'`
+BigDataDir=$1
+
+if [ ! -n "${BigDataDir}" ];then
+   BigDataDir=/opt/hzgc/bigdata
+else
+   sed -i "s#INSTALL_HOME=.*#INSTALL_HOME=${BigDataDir}#g" ${env_bigdata}
+fi
+
+sed -i "s#AnsibleDir: .*#AnsibleDir: ${BIN_DIR}#g" ${mainyml}
 
 function modify(){
 
@@ -56,88 +70,86 @@ if [ ! "$?" -eq "0" ]  ;then
    echo "* hard nproc 4096" >> $limits_conf
 fi
 
-k=1
 es=""
-master_01=${master}
-for f in ${followers[@]}
+bootstraplist=""
+for f in ${esnodes[@]}
 do
-    grep -q cluster_f$k $mainyml
-    if [ ! "$?" -eq "0" ]  ;then
-        num=$(grep -n cluster_master $mainyml | tail -1 | cut -d : -f 1)
-        sed -i "$[${num}+k]i cluster_f$k: \"$f\"" $mainyml
-        else
-        sed -i "s/cluster_f$k:.*/cluster_f$k: \"$f\"/g" $mainyml
-    fi
-    ((k++))
-    ###### es配置参数 #######
-    es=\"${f}\",${es}
-
-    master_01=${master_01},${f}
-    zklist=${zklist},${f}:2181
-    ###### bootstarp参数 ######
-    bootstraplist=${bootstraplist},${f}:9092
+ ###### es配置参数 #######
+  es=\"${f}\",${es}
 done
 
+es=\[${es%?}\]
+sed -i "s/discovery.zen.ping.unicast.hosts:.*/discovery.zen.ping.unicast.hosts: $es/g" $es_tem
+
+for j in ${kafkanodes[@]}
+do
+ ##### kafka配置参数 ########
+   bootstraplist=${j}:9092,${bootstraplist}
+done
+
+bootstraplist=${bootstraplist%?}
 sed -i "s/bootstrap_servers:.*/bootstrap_servers: $bootstraplist/g" $mainyml
 
-zk_hosts=""
+zklist=""
 zk_num=1
-for z in ${zkli[@]}
+for k in ${zknodes[@]}
 do
-    zk_hosts=${z}:2181,${zk_hosts}
-    grep "server.${zk_num}=${z}:2888:3888" ${zoo_cfg_j2}
-    if [ $? -eq 0 ]; then
-        sed -i "s#server.${zk_num}=${z}:2888:3888#server.${zk_num}=${z}:2888:3888#g" ${zoo_cfg_j2}
-    else
-        echo "server.${zk_num}=${z}:2888:3888" >>  ${zoo_cfg_j2}
-    fi
-    ((zk_num++))
+  #### zookeeper配置参数 ####
+  zklist=${k}:2181,${zklist}
+  grep "server.${zk_num}=${k}:2888:3888" ${zoo_cfg_j2}
+  if [ $? -eq 0 ]; then
+     sed -i "s#server.${zk_num}=${k}:2888:3888#server.${zk_num}=${k}:2888:3888#g" ${zoo_cfg_j2}
+  else
+     echo "server.${zk_num}=${k}:2888:3888" >>  ${zoo_cfg_j2}
+  fi 
+  ((zk_num++))
 done
 
-zk_hosts=${zk_hosts%?}
-sed -i "s/zk_cluster:.*/zk_cluster: $zk_hosts/g" $mainyml
-es=\[\"$master\",${es%?}\]
-sed -i "s/discovery.zen.ping.unicast.hosts:.*/discovery.zen.ping.unicast.hosts: $es/g" $es_tem
-nodelist=(${master_01//,/ })
-i=1
+zklist=${zklist%?}
+sed -i "s/zk_cluster:.*/zk_cluster: $zklist/g" $mainyml
 
-for n in ${nodelist[@]}
+hadoop_num=1
+hadooplist=""
+for a in ${hadoopnodes[@]}
 do
-    grep -q server${i}_hostname $mainyml
-    if [ "$?" -eq "0" ]  ;then
-        sed -i "s/server${i}_hostname:.*/server${i}_hostname: ${n}/g" $mainyml
-        else
-        sed -i "${i}i server${i}_hostname: ${n}" $mainyml
-    fi
-
-    grep -q server${i}_hostname $slave_spark_tem
-    if [ ! "$?" -eq "0" ]  ;then
-        sed -i "$(cat $slave_spark_tem| wc -l)i \{\{\server${i}_hostname\}\}" $slave_spark_tem
-    fi
-    
-    grep -q server${i}_hostname $slave_hadoop_tem
-    if [ ! "$?" -eq "0" ]  ;then
-        sed -i "$(cat $slave_hadoop_tem| wc -l)i \{\{\server${i}_hostname\}\}" $slave_hadoop_tem
-    fi
-    
-    ((i++))
+  hadooplist=${a}:8485\;${hadooplist}
+  #### hadoop 配置参数 ####
+  if [ "${hadoop_num}" -eq "1" ];then
+    echo "${a}" > $slave_spark_tem
+  else
+    echo "${a}" >> $slave_spark_tem
+  fi
+((hadoop_num++))
 done
-    
-    sed -i "s/master_ip:.*/master_ip: $master/g" $mainyml
+
+sed -i "s#qjournal:.*#qjournal://${hadooplist}/hzgc</value>#g" ${hdfs_j2}
+
+spark_num=1
+for b in ${sparknodes[@]}
+do
+  #### spark 配置参数 ####
+  if [ "${spark_num}" -eq "1"  ];then
+    echo "${b}" > $slave_hadoop_tem
+  else
+    echo "${b}" >> $slave_hadoop_tem
+  fi
+  ((spark_num++))
+done
+
+    sed -i "s/master_ip:.*/master_ip: $zkmaster/g" $mainyml
     sed -i "s/node_master:.*/node_master: `hostname`/g" $mainyml
-    sed -i "s/cluster_master:.*/cluster_master: \"$master\"/g" $mainyml
-    sed -i "s#BigdataDir:.*#BigdataDir: $1#g" $mainyml
-    sed -i "s/tidb_hostname:.*/tidb_hostname: $master/g" $mainyml
-    sed -i "s/namenode1_hostname:.*/namenode1_hostname: $master/g" $mainyml
-    sed -i "s/namenode2_hostname:.*/namenode2_hostname: ${nodelist[1]}/g" $mainyml
+    sed -i "s#BigdataDir:.*#BigdataDir: $BigDataDir#g" $mainyml
+    sed -i "s/tidb_hostname:.*/tidb_hostname: $tidbmaster/g" $mainyml
+    sed -i "s/namenode1_hostname:.*/namenode1_hostname: $namenode1/g" $mainyml
+    sed -i "s/namenode2_hostname:.*/namenode2_hostname: $namenode2/g" $mainyml
+
+
 }
 
-echo $#
-if [[ $# -lt 1 ]] ; then
-        echo "USAGE: $0 path "
-        echo " e.g.: $0 /opt/"
-        exit 1;
-else
-    echo $#
-    modify $1
-fi
+
+function main(){
+   modify
+}
+
+
+main

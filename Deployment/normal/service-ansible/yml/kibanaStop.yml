@@ -1,0 +1,10 @@
+- hosts: kibana
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: stop kibana
+    shell: cd {{GosunBigDataServiceDir}}/module; docker rm -f kibana
+    tags:
+    - stop kibana

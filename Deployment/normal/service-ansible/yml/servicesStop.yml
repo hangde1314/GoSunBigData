@@ -17,9 +17,21 @@
 
   tasks:
   - name: stop docker-compose redis
-    shell: cd {{GosunBigDataServiceDir}}/module; docker-compose down
+    shell: cd {{GosunBigDataServiceDir}}/module; docker rm -f redis
     tags:
      - stop redis
+
+
+- hosts: kibana
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: stop kibana
+    shell: cd {{GosunBigDataServiceDir}}/module; docker rm -f kibana
+    tags:
+     - stop kibana
 
 
 - hosts: dispatch

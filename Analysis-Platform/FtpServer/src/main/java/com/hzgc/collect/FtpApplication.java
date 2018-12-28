@@ -18,9 +18,11 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableKafka
 public class FtpApplication extends WebMvcConfigurerAdapter {
     public static void main(String[] args) {
+
         ConfigurableApplicationContext context =
                 new SpringApplicationBuilder(FtpApplication.class).bannerMode(Banner.Mode.LOG).run(args);
         context.getBean(FTP.class).startFtpServer();
+
     }
 
     @Override

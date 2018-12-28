@@ -1,0 +1,21 @@
+- hosts: ssh
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: copy /etc/sysctl.conf
+    template: src=/etc/sysctl.conf dest=/etc/sysctl.conf
+  - name: reload sysctl.conf
+    shell: sysctl -p /etc/sysctl.conf
+  - name: stop firewalld
+    shell: systemctl stop firewalld
+  - name: disable firewalld
+    shell: systemctl disable firewalld
+  - name: off selinux
+    shell: setenforce 0
+  - name: disable selinux
+    template: src={{AnsibleDir}}/roles/templates/config.j2  dest=/etc/selinux/config
+  - name: distribute the hosts
+    template: src={{AnsibleDir}}/roles/templates/hosts.j2  dest=/etc/hosts
+  

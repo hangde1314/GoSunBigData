@@ -109,6 +109,7 @@ sed -i "s/bootstrap_servers:.*/bootstrap_servers: $bootstraplist/g" $mainyml
 
 zklist=""
 zk_num=1
+sed -i "/server/d" ${zoo_cfg_j2}
 for k in ${zknodes[@]}
 do
   #### zookeeper配置参数 ####

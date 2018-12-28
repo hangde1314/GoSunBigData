@@ -5,9 +5,16 @@
 172.18.18.101 ansible_ssh_user=root ansible_ssh_pass=123456
 172.18.18.102 ansible_ssh_user=root ansible_ssh_pass=123456
 
-#zookeeper的节点配置，ip加上myid,如： ip myid=1  ps：myid是递增的
+#Tidb的节点配置，配置对应的ip ps: 主节点后面加上master
+[tidb_servers]
+172.18.18.203 master
+172.18.18.100
+172.18.18.101
+172.18.18.102
+
+#zookeeper的节点配置，ip加上myid,如： ip myid=1  ps：myid是递增的，在主节点后面加上master
 [zk_servers]
-172.18.18.203 myid=1
+172.18.18.203 myid=1 master
 172.18.18.100 myid=2
 172.18.18.101 myid=3
 
@@ -24,14 +31,14 @@
 172.18.18.101 broker_id=3
 172.18.18.102 broker_id=4
 
-#hadoop的节点配置，配置对应的ip加hadoop配置，如：ip namenode_active=true namenode_standby=false datanode=true
+#hadoop的节点配置，配置对应的ip加hadoop配置，如：ip namenode_active=true namenode_standby=false datanode=true（可暂时不安装）
 [hadoop_servers]
 172.18.18.203 namenode_active=true namenode_standby=false datanode=true
 172.18.18.100 namenode_active=false namenode_standby=true datanode=true
 172.18.18.101 namenode_active=false namenode_standby=false datanode=true
 172.18.18.102 namenode_active=false namenode_standby=false datanode=true
 
-#spark的节点配置，配置对应的ip
+#spark的节点配置，配置对应的ip(可暂时不安装)
 [spark_servers]
 
 #azkaban的节点配置，配置对应的ip
@@ -43,17 +50,3 @@
 #docker的cpu节点配置，配置对应的ip
 [docker_cpu_servers]
 
-#ftpserver的节点配置，配置对应的ip
-[ftpserver]
-
-#facecompare的节点配置，配置对应的ip
-[facecompare]
-
-#peoman的节点配置，配置对应的ip
-[peoman]
-
-#master的节点配置，配置主节点的ip
-[master]
-
-#follower的节点配置，配置从节点的ip
-[follower]

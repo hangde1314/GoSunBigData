@@ -5,18 +5,18 @@
 172.18.18.101 ansible_ssh_user=root ansible_ssh_pass=123456
 172.18.18.102 ansible_ssh_user=root ansible_ssh_pass=123456
 
-#Tidb的节点配置，配置对应的ip ps: 主节点后面加上master
+#Tidb的节点配置，配置对应的ip 加ntp状态
 [tidb_servers]
-172.18.18.203 master
-172.18.18.100
-172.18.18.101
-172.18.18.102
+172.18.18.203 ntp_server=true
+172.18.18.100 ntp_server=false
+172.18.18.101 ntp_server=false
+172.18.18.102 ntp_server=false
 
-#zookeeper的节点配置，ip加上myid,如： ip myid=1  ps：myid是递增的，在主节点后面加上master
+#zookeeper的节点配置，ip加上myid,如： ip myid=1 加zk是否是主节点  ps：myid是递增的
 [zk_servers]
-172.18.18.203 myid=1 master
-172.18.18.100 myid=2
-172.18.18.101 myid=3
+172.18.18.203 myid=1 zk_master=true
+172.18.18.100 myid=2 zk_master=false
+172.18.18.101 myid=3 zk_master=false
 
 #es的节点配置，配置对应的ip
 [es_servers]

@@ -9,6 +9,7 @@ env_bigdata=../env_bigdata.sh
 mainyml=./roles/vars/main.yml
 slave_spark_tem=./roles/templates/slaves.spark.j2
 slave_hadoop_tem=./roles/templates/slaves.hadoop.j2
+host_tem=./roles/templates/hosts.j2
 hdfs_j2=./roles/templates/hdfs-site.xml.j2
 zoo_cfg_j2=./roles/templates/zoo.cfg.j2
 es_tem=./roles/templates/elasticsearch.yml.j2
@@ -23,13 +24,14 @@ kafkaline=$(grep -n kafka_servers hosts | tail -1 | cut -d : -f 1)
 hadoopline=$(grep -n hadoop_servers hosts | tail -1 | cut -d : -f 1)
 sparkline=$(grep -n spark_servers hosts | tail -1 | cut -d : -f 1)
 azkabanline=$(grep -n azkaban_servers hosts | tail -1 | cut -d : -f 1)
-zkmaster=`sed -n "${zkline},${esline}p" hosts | grep master | awk '{print $1}'`
+zkmaster=`sed -n "${zkline},${esline}p" hosts | grep zk_master=true | awk '{print $1}'`
 zknodes=`sed -n "${zkline},${esline}p" hosts | grep [0-9][0-9] | awk -F " " '{print $1}'`
 kafkanodes=`sed -n "${kafkaline},${hadoopline}p" hosts | grep [0-9][0-9] | awk -F " " '{print $1}'`
 esnodes=`sed -n "${esline},${kibanaline}p" hosts | grep [0-9][0-9]`
 hadoopnodes=`sed -n "${hadoopline},${sparkline}p" hosts | grep [0-9][0-9] | awk -F " " '{print $1}'`
+sshnodes=`sed -n "2,${tidbline}p" hosts | grep [0-9][0-9] | awk -F " " '{print $1}'`
 sparknodes=`sed -n "${sparkline},${azkabanline}p" hosts | grep [0-9][0-9]`
-tidbmaster=`sed -n "${tidbline},${zkline}p" hosts | grep master | awk '{print $1}'`
+tidbmaster=`sed -n "${tidbline},${zkline}p" hosts | grep ntp_server=true | awk '{print $1}'`
 namenode1=`sed -n "${hadoopline},${sparkline}p" hosts | grep namenode_active=true | awk -F " " '{print $1}'`
 namenode2=`sed -n "${hadoopline},${sparkline}p" hosts | grep namenode_standby=true | awk -F " " '{print $1}'`
 BigDataDir=$1
@@ -49,7 +51,22 @@ grep -q vm.max_map_count* $sysctl_conf
 if [ ! "$?" -eq "0" ]  ;then
    echo "vm.max_map_count=655360" >> $sysctl_conf
 fi
-
+grep -q net.ipv4.tcp_syncookies* $sysctl_conf
+if [ ! "$?" -eq "0" ]  ;then
+   echo "net.ipv4.tcp_syncookies=1" >> $sysctl_conf
+fi
+grep -q net.ipv4.tcp_tw_reuse* $sysctl_conf
+if [ ! "$?" -eq "0" ]  ;then
+   echo "net.ipv4.tcp_tw_reuse=1" >> $sysctl_conf
+fi
+grep -q net.ipv4.tcp_tw_recycle* $sysctl_conf
+if [ ! "$?" -eq "0" ]  ;then
+   echo "net.ipv4.tcp_tw_recycle=1" >> $sysctl_conf
+fi
+grep -q net.ipv4.tcp_fin_timeout* $sysctl_conf
+if [ ! "$?" -eq "0" ]  ;then
+   echo "net.ipv4.tcp_fin_timeout=30" >> $sysctl_conf
+fi
 grep -q 65536 $limits_conf
 if [ ! "$?" -eq "0" ]  ;then
    echo "* soft nofile 65536" >> $limits_conf
@@ -146,9 +163,31 @@ done
 
 }
 
+function host(){
+
+hostname=""
+ssh_num=1
+for l in ${sshnodes[@]}
+do
+
+  if [ "${ssh_num}" -eq "1"  ];then
+     hostname=`ssh root@${l} "hostname"`
+     echo "127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4" > ${host_tem}
+     echo "::1         localhost localhost.localdomain localhost6 localhost6.localdomain6" >> ${host_tem}
+     echo "${l} ${hostname} hzgc" >> ${host_tem}
+  else
+    hostname=`ssh root@${l} "hostname"`
+    echo "${l} ${hostname}" >> ${host_tem}
+  fi
+  ((ssh_num++))
+done
+
+
+}
 
 function main(){
    modify
+   host
 }
 
 

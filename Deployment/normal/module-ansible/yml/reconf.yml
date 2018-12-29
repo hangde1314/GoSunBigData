@@ -1,0 +1,35 @@
+- hosts: ssh
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+  - name: distribute the zookeeper conf
+    template: src={{AnsibleDir}}/roles/templates/zoo.cfg.j2 dest={{BigdataDir}}/zookeeper/conf/zoo.cfg
+  - name: distribute the kafka server conf
+    template: src={{AnsibleDir}}/roles/templates/server.properties.j2 dest={{BigdataDir}}/kafka/config/server.properties
+  - name: distrubute the kafka producer conf
+    template: src={{AnsibleDir}}/roles/templates/producer.properties.j2 dest={{BigdataDir}}/kafka/config/producer.properties
+  - name: distribute the elsearch sh conf
+    template: src={{AnsibleDir}}/roles/templates/elasticsearch.in.sh.j2 dest={{BigdataDir}}/elastic/bin/elasticsearch.in.sh
+  - name: distribute the elsearch yml conf
+    template: src={{AnsibleDir}}/roles/templates/elasticsearch.yml.j2 dest={{BigdataDir}}/elastic/config/elasticsearch.yml
+  - name: distribute the azkaban web conf
+    template: src=/opt/ansible/roles/templates/azkaban.webserver.properties dest={{BigdataDir}}/azkaban/webserver/conf/azkaban.properties
+  - name: distribute the azkaban exe conf
+    template: src=/opt/ansible/roles/templates/azkaban.executor.properties dest={{BigdataDir}}/azkaban/executor/conf/azkaban.properties
+  - name: distribute the spark slaves conf
+    template: src={{AnsibleDir}}/roles/templates/slaves.spark.j2 dest={{BigdataDir}}/spark/conf/slaves
+  - name: distribute the spark env conf
+    template: src={{AnsibleDir}}/roles/templates/spark-env.sh.j2 dest={{BigdataDir}}/spark/conf/spark-env.sh
+  - name: distribute the hadoop env conf
+    template: src={{AnsibleDir}}/roles/templates/hadoop-env.sh.j2 dest={{BigdataDir}}/hadoop/etc/hadoop/hadoop-env.sh
+  - name: distribute the hadoop core conf
+    template: src={{AnsibleDir}}/roles/templates/core-site.xml.j2 dest={{BigdataDir}}/hadoop/etc/hadoop/core-site.xml
+  - name: distribute the hadoop hdfs conf
+    template: src={{AnsibleDir}}/roles/templates/hdfs-site.xml.j2 dest={{BigdataDir}}/hadoop/etc/hadoop/hdfs-site.xml
+  - name: distribute the hadoop slaves conf
+    template: src={{AnsibleDir}}/roles/templates/slaves.hadoop.j2 dest={{BigdataDir}}/hadoop/etc/hadoop/slaves
+  - name: distribute the hosts
+    template: src={{AnsibleDir}}/roles/templates/hosts.j2  dest=/etc/hosts
+

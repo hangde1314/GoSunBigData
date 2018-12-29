@@ -46,6 +46,22 @@ fi
 
 sed -i "s#AnsibleDir: .*#AnsibleDir: ${BIN_DIR}#g" ${mainyml}
 
+###### 安装ansible ######
+echo `ansible --version` >> /opt/test.txt
+grep "ansible 2.5.0" /opt/test.txt
+if [ ! "$?" -eq "0" ]; then
+   echo "准备安装ansible"
+   tar -xvf ./roles/files/ansible.tar.gz
+   sh ./roles/files/ansible/ansible-denpendency/install_ansible_system_rpms.sh
+   sh ./roles/files/ansible/ansible-install/install_ansible.sh
+   echo "安装ansible完成..."
+fi
+rm -rf /opt/test.txt
+
+###### 配置ssh免密 ######
+ansible-playbook -i hosts yml/sshKey.yml
+
+###### 安装ntp ######
 function ntp(){
 ###### 修改ntp-server配置文件 ######
 IP=$(grep ntp_master=true ./hosts)

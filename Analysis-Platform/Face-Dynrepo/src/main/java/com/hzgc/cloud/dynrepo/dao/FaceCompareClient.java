@@ -97,6 +97,9 @@ public class FaceCompareClient {
         long firstCompared  = System.currentTimeMillis();
         log.info("The size of first compare result is " + list.size());
         log.info("The Time first compare used is " + (firstCompared - start));
+        if(list.size() == 0){
+            return new com.hzgc.compare.SearchResult();
+        }
         //float特征值对比
         com.hzgc.compare.SearchResult.Record[] records = new com.hzgc.compare.SearchResult.Record[list.size()];
         int index = 0;
@@ -123,11 +126,11 @@ public class FaceCompareClient {
             searchResult.sort(sorts);
         }
         searchResult.sortBySim();
-        if(searchResult.getRecords()[0].getKey() < 100){
-            log.warn("100% 图片不存在");
-            log.info("BitFeature : " + FaceUtil.bitFeautre2Base64Str(bitFeature));
-            log.info("Feature : " + FaceUtil.floatFeature2Base64Str(feature));
-        }
+//        if(searchResult.getRecords()[0].getKey() < 100){
+//            log.warn("100% 图片不存在");
+//            log.info("BitFeature : " + FaceUtil.bitFeautre2Base64Str(bitFeature));
+//            log.info("Feature : " + FaceUtil.floatFeature2Base64Str(feature));
+//        }
         log.info("The size of sort result is " + searchResult.getRecords().length);
         log.info("The Time sort used is " + (System.currentTimeMillis() - secondCompared));
         return searchResult.take(param.getResultCount());
@@ -150,7 +153,9 @@ public class FaceCompareClient {
         long firstCompared  = System.currentTimeMillis();
         log.info("The size of first compare result is " + faceObjects.size());
         log.info("The Time first compare used is " + (firstCompared - start));
-
+        if(faceObjects.size() == 0){
+            return new com.hzgc.compare.SearchResult();
+        }
         //float特征值对比
         com.hzgc.compare.SearchResult.Record[] records = new com.hzgc.compare.SearchResult.Record[faceObjects.size()];
         int index = 0;

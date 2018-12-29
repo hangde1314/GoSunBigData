@@ -64,7 +64,7 @@ ansible-playbook -i hosts yml/sshKey.yml
 ###### 安装ntp ######
 function ntp(){
 ###### 修改ntp-server配置文件 ######
-IP=$(grep ntp_master=true ./hosts)
+IP=$(grep ntp_server=true ./hosts)
 LOCAL_IP=$(echo ${IP} | cut -d ' ' -f1)
 GATEWAY=$(echo ${IP} | cut -d ' ' -f1 | awk -F '.' '{print $1"."$2"."$3".0"}')
 grep "restrict ${GATEWAY} mask 255.255.255.0 nomodify notrap" ${ntp_conf_master_j2}

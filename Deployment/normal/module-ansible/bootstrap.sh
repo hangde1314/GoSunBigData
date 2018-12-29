@@ -15,6 +15,8 @@ zoo_cfg_j2=./roles/templates/zoo.cfg.j2
 es_tem=./roles/templates/elasticsearch.yml.j2
 sysctl_conf=/etc/sysctl.conf
 limits_conf=/etc/security/limits.conf
+ntp_conf_master_j2=./roles/templates/ntp.conf.master.j2
+ntp_conf_worker_j2=./roles/templates/ntp.conf.worker.j2
 ###### 节点行数  #####
 tidbline=$(grep -n tidb_servers hosts | tail -1 | cut -d : -f 1)
 zkline=$(grep -n zk_servers hosts | tail -1 | cut -d : -f 1)
@@ -43,6 +45,22 @@ else
 fi
 
 sed -i "s#AnsibleDir: .*#AnsibleDir: ${BIN_DIR}#g" ${mainyml}
+
+function ntp(){
+###### 修改ntp-server配置文件 ######
+IP=$(grep ntp_master=true ./hosts)
+LOCAL_IP=$(echo ${IP} | cut -d ' ' -f1)
+GATEWAY=$(echo ${IP} | cut -d ' ' -f1 | awk -F '.' '{print $1"."$2"."$3".0"}')
+grep "restrict ${GATEWAY} mask 255.255.255.0 nomodify notrap" ${ntp_conf_master_j2}
+if [ ! "$?" -eq "0" ]; then
+   sed -i -e "/restrict ::1/{s|$|\nrestrict ${GATEWAY} mask 255.255.255.0 nomodify notrap|}" ${ntp_conf_master_j2}
+fi
+###### 修改ntp-client端配置文件 ######
+grep "server ${LOCAL_IP} iburst" ${ntp_conf_worker_j2}
+if [ ! "$?" -eq "0" ]; then
+   sed -i -e "/#server 3.centos.pool.ntp.org iburst/{s|$|\nserver ${LOCAL_IP} iburst|}" ${ntp_conf_worker_j2}
+fi
+}
 
 function modify(){
 
@@ -109,6 +127,7 @@ sed -i "s/bootstrap_servers:.*/bootstrap_servers: $bootstraplist/g" $mainyml
 
 zklist=""
 zk_num=1
+sed -i "/server/d" ${zoo_cfg_j2}
 for k in ${zknodes[@]}
 do
   #### zookeeper配置参数 ####
@@ -186,6 +205,7 @@ done
 }
 
 function main(){
+   ntp
    modify
    host
 }

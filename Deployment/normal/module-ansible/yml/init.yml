@@ -19,3 +19,31 @@
   - name: distribute the hosts
     template: src={{AnsibleDir}}/roles/templates/hosts.j2  dest=/etc/hosts
   
+- hosts: tidb_servers
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+   - name: copy ntp-conf-master
+     template: src={{AnsibleDir}}/roles/templates/ntp.conf.master.j2 dest=/etc/ntp.conf
+     when: ntp_server == "true"
+   - name: copy ntp-conf-worker
+     template: src={{AnsibleDir}}/roles/templates/ntp.conf.worker.j2 dest=/etc/ntp.conf
+     when: ntp_server == "false"
+   - name: start ntp server
+     shell: systemctl start ntpd
+   - name: set ntp boot up
+     shell: systemctl enable ntpd
+     tags:
+      - start ntp
+
+
+- hosts: tidb_servers
+  remote_user: root
+  roles:
+  - roles
+
+  tasks:
+   - name: set system regulator mode
+     shell: cpupower frequency-set --governor performance

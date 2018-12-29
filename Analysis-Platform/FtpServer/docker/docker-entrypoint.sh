@@ -22,6 +22,7 @@ elif [ "proxy" = "${PROFILES_ACTIVE}" ]; then
     --zk.host=${ZOOKEEPER_HOST:-NULL} \
     --ftp.ip=${HOST_IP} \
     --ftp.hostname=${HOST_NAME} \
+    --seemmo.url=${SEEMMO_URL:-NULL} \
     --eureka.ip=${EUREKA_IP} \
     --eureka.port=${EUREKA_PORT}
 elif [ "local" = "${PROFILES_ACTIVE}" ]; then

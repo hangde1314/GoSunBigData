@@ -502,16 +502,6 @@ public class PeopleService {
     }
 
     /**
-     * 根据精神病手环ID查询peopleId(检测精神病手环ID是否绑定人口信息)
-     *
-     * @param imeiId 精神病手环ID
-     * @return peopleId
-     */
-    public String selectPeopleIdByImeiId(String imeiId) {
-        return imeiMapper.selectPeopleIdByImei(imeiId);
-    }
-
-    /**
      * 查询人员对象
      *
      * @param param 查询过滤字段封装
